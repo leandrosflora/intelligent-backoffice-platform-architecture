@@ -1,8 +1,8 @@
 # Contratos executáveis
 
-O P3 traduz lifecycle, regras e responsabilidades em contratos verificáveis antes da implementação dos serviços.
+Lifecycle, regras e responsabilidades são traduzidos em contratos verificáveis antes da implementação ou integração dos serviços.
 
-## Inventário P3
+## Inventário
 
 | Tipo | Quantidade | Fonte | Estado |
 |---|---:|---|---|
@@ -18,7 +18,7 @@ O P3 traduz lifecycle, regras e responsabilidades em contratos verificáveis ant
 - mutações exigem idempotência;
 - transições de caso exigem versão esperada;
 - eventos possuem envelope, versão e causalidade;
-- documents e payloads não carregam conteúdo sensível integral por padrão;
+- documentos e payloads não carregam conteúdo sensível integral por padrão;
 - cada operação, evento e policy referencia capacidades e regras de negócio;
 - policy usa `default deny` e segregação de funções.
 
