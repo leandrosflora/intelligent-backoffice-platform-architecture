@@ -66,6 +66,22 @@ nav:
       - Deployment alvo de produção: architecture/deployment-production-target.md
       - Trust boundaries: architecture/trust-boundaries.md
       - Sequências: architecture/sequence-diagrams.md
+  - Decisões arquiteturais:
+      - Visão geral: decisions/index.md
+      - ADR-001 — Monólito modular: decisions/adr-001-modular-monolith-reference-implementation.md
+      - ADR-002 — Target distribuído: decisions/adr-002-logical-distributed-target.md
+      - ADR-003 — Autoridade do workflow: decisions/adr-003-workflow-owns-process-state.md
+      - ADR-004 — Limites da IA: decisions/adr-004-ai-investigates-and-recommends.md
+      - ADR-005 — OPA como PDP: decisions/adr-005-opa-external-policy-decision-point.md
+      - ADR-006 — Aprovação humana: decisions/adr-006-human-approval-and-segregation.md
+      - ADR-007 — Execução governada: decisions/adr-007-governed-idempotent-execution.md
+      - ADR-008 — Outbox e inbox: decisions/adr-008-outbox-inbox-at-least-once.md
+      - ADR-009 — Evidência e auditoria: decisions/adr-009-evidence-and-append-only-audit.md
+      - ADR-010 — Identidade assinada: decisions/adr-010-signed-local-identity-to-corporate-workload-identity.md
+      - ADR-011 — Persistência: decisions/adr-011-local-sqlite-managed-storage-target.md
+      - ADR-012 — Observabilidade e evals: decisions/adr-012-observability-and-evals-as-gates.md
+      - ADR-013 — Arquitetura como código: decisions/adr-013-architecture-and-contracts-as-code.md
+      - Template: decisions/template.md
   - Contratos:
       - Visão geral: contracts/index.md
       - HTTP APIs: contracts/http-apis.md

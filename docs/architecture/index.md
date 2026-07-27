@@ -1,6 +1,6 @@
 # Arquitetura técnica
 
-A arquitetura técnica materializa o modelo funcional em visões C4, componentes, deployments, trust boundaries e sequências. As páginas separam explicitamente o que está confirmado na implementação de referência do que representa a evolução alvo.
+A arquitetura técnica materializa o modelo funcional em visões C4, componentes, deployments, trust boundaries, sequências e decisões arquiteturais. As páginas separam explicitamente o que está confirmado na implementação de referência do que representa a evolução alvo.
 
 ## Estado atual e alvo
 
@@ -11,6 +11,19 @@ A arquitetura técnica materializa o modelo funcional em visões C4, componentes
 | [Contexto alvo](c4-context-target.md) | Posicionar a plataforma no ecossistema corporativo futuro |
 | [Containers atuais](c4-container-current.md) | Inventariar os containers, profiles e ferramentas executáveis hoje |
 | [Containers alvo](c4-container-target.md) | Separar responsabilidades lógicas da futura plataforma |
+
+## Decisões arquiteturais
+
+Os [Architecture Decision Records](../decisions/index.md) registram por que as principais escolhas foram adotadas, quais alternativas foram rejeitadas e quais condições exigem revisão.
+
+As decisões cobrem:
+
+- monólito modular na implementação de referência;
+- decomposição lógica do target distribuído;
+- autoridade do workflow;
+- limites de autonomia da IA;
+- PDP externo, aprovação humana e execução governada;
+- eventing, evidências, identidade, persistência, observabilidade e architecture-as-code.
 
 ## Deployments executáveis e alvo
 

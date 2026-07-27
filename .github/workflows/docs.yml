@@ -35,6 +35,9 @@ jobs:
       - name: Validate repository structure
         run: python scripts/validate_structure.py
 
+      - name: Validate architecture decision records
+        run: python scripts/validate_adrs.py
+
       - name: Validate contracts and traceability
         run: python scripts/validate_contracts.py
 

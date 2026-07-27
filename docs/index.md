@@ -20,6 +20,8 @@ A plataforma organiza essa jornada como um processo governado, observável e aud
 4. **Toda decisão relevante produz evidência.** Eventos, versões, tool calls, aprovações e resultados permanecem rastreáveis.
 5. **Baseline e alvo são separados.** A implementação local demonstra padrões; a arquitetura-alvo descreve a evolução corporativa.
 
+Os trade-offs e limites desses princípios estão registrados nos [Architecture Decision Records](decisions/index.md).
+
 ## O que funciona hoje
 
 | Capacidade | Baseline executável | Limite declarado |
@@ -72,6 +74,7 @@ A documentação possui percursos específicos para executivos, arquitetos, dese
 | [Estado de implementação](architecture/implementation-status.md) | O que está demonstrado, contratado, planejado ou pendente para produção? |
 | [Contexto atual](architecture/c4-context-current.md) | Quem utiliza e valida a implementação de referência hoje? |
 | [Containers atuais](architecture/c4-container-current.md) | Quais processos, stores e ferramentas são executáveis nos profiles atuais? |
+| [Architecture Decision Records](decisions/index.md) | Por que as principais decisões foram tomadas e quando devem ser revistas? |
 | [Deployment observado](architecture/deployment-observed-baseline.md) | Como OPA, evals e observabilidade são executados localmente? |
 | [Deployment distribuído](architecture/deployment-distributed-baseline.md) | Como outbox, eventing, workers, timers, DLQ e replay funcionam? |
 | [Contexto alvo](architecture/c4-context-target.md) | Como a plataforma deve se posicionar no ecossistema corporativo? |
@@ -84,6 +87,7 @@ A documentação possui percursos específicos para executivos, arquitetos, dese
 - [Case aplicado](case-study/index.md)
 - [Arquitetura funcional](functional/index.md)
 - [Arquitetura técnica](architecture/index.md)
+- [Decisões arquiteturais](decisions/index.md)
 - [Contratos executáveis](contracts/index.md)
 - [Implementação de referência](implementation/index.md)
 - [Roadmap e histórico](roadmap.md)
