@@ -1,0 +1,7 @@
+.git
+.github
+site
+**/bin
+**/obj
+**/__pycache__
+*.pyc

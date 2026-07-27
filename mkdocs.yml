@@ -65,6 +65,8 @@ nav:
       - Eventos: contracts/events.md
       - Policies: contracts/policies.md
       - Versionamento: contracts/versioning.md
+  - Implementação:
+      - P4 — Vertical slice: implementation/vertical-slice.md
   - Case aplicado: case-study/index.md
   - Governança: governance/index.md
   - Operações: operations/index.md

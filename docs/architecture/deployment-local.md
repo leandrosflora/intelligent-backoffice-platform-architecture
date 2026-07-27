@@ -1,18 +1,31 @@
 # Deployment local
 
-O deployment local proposto para o futuro vertical slice usa Docker Compose e dados exclusivamente sintéticos.
+O deployment local do P4 usa Docker Compose e dados exclusivamente sintéticos.
 
 ![Deployment local](../assets/diagrams/c4-deployment-local.svg)
 
-## Zonas
+## Implementado no P4
 
-| Zona | Conteúdo |
-|---|---|
-| Application | APIs, workflow, agents, document intelligence, approval, execution e OPA |
-| Data and messaging | PostgreSQL, Kafka/Redpanda e object storage |
-| Observability | OpenTelemetry, Prometheus, Jaeger e Grafana |
-| External mocks | Core, notificações, modelo e malware scanner |
+| Serviço | Tecnologia | Estado |
+|---|---|---|
+| API | ASP.NET Core / .NET 10 | implementado |
+| PostgreSQL | PostgreSQL 17 | implementado |
+| Policy Decision Point | OPA | implementado |
+| Document Intelligence | módulo mock dentro da API | implementado |
+| Human Approval | módulo dentro da API | implementado |
+| Governed Execution | módulo mock dentro da API | implementado |
 
-Esse desenho orienta o P5. O P2 não cria os containers executáveis.
+## Ainda alvo
+
+- Kafka ou Redpanda;
+- object storage;
+- malware scanner;
+- modelo de IA real;
+- Core bancário mock separado;
+- OpenTelemetry Collector;
+- Prometheus, Jaeger e Grafana.
+
+O diagrama permanece mais amplo que a baseline P4 para orientar as próximas fases.
+A visão de containers atuais distingue o que já está executável.
 
 **Fonte PlantUML:** `C4/c4-deployment-local.puml`.

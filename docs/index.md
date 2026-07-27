@@ -17,9 +17,9 @@ O primeiro case aplicado é uma jornada bancária de contestação, desde a aber
 | P0 | Concluído | Estrutura, MkDocs e pipelines |
 | P1 | Concluído | Contexto, outcomes, capacidades, domínios, lifecycle, regras, risco e NFRs |
 | P2 | Concluído | C4, deployment, trust boundaries e sequências |
-| P3 | Concluído neste change set | OpenAPI, AsyncAPI, schemas, catálogo e policies executáveis |
-| P4 | Próximo | Vertical slice mínimo e enforcement em runtime |
-| P5 | Planejado | Evals, observabilidade, SLOs e runbooks |
+| P3 | Concluído | OpenAPI, AsyncAPI, schemas, catálogo e policies |
+| P4 | Concluído neste change set | Vertical slice executável, OPA em runtime e E2E |
+| P5 | Próximo | Evals, observabilidade, SLOs e runbooks |
 
 ## Princípios
 
@@ -30,7 +30,8 @@ O primeiro case aplicado é uma jornada bancária de contestação, desde a aber
 - operações mutáveis são idempotentes e reconciliáveis;
 - observabilidade não registra conteúdo sensível por padrão;
 - aprovação, execução e auditoria possuem responsabilidades separadas;
-- contratos e policies são validados antes da implementação.
+- contratos e policies são validados antes da implementação;
+- uma baseline executável não equivale a prontidão produtiva.
 
 ## Comece por aqui
 
@@ -38,5 +39,6 @@ O primeiro case aplicado é uma jornada bancária de contestação, desde a aber
 2. [Arquitetura funcional](functional/index.md)
 3. [Arquitetura técnica](architecture/index.md)
 4. [Contratos executáveis](contracts/index.md)
-5. [Case aplicado](case-study/index.md)
-6. [Governança](governance/index.md)
+5. [P4 — Vertical slice](implementation/vertical-slice.md)
+6. [Case aplicado](case-study/index.md)
+7. [Governança](governance/index.md)

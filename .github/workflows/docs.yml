@@ -38,6 +38,9 @@ jobs:
       - name: Validate contracts and traceability
         run: python scripts/validate_contracts.py
 
+      - name: Validate vertical slice structure
+        run: python scripts/validate_vertical_slice.py
+
       - name: Test authorization policies
         run: bash scripts/test-policies.sh
 

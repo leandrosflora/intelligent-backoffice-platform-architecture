@@ -12,6 +12,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,6 +24,13 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-docs.txt
 
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+          cache: true
+          cache-dependency-path: samples/vertical-slice/src/IntelligentBackoffice.Api/IntelligentBackoffice.Api.csproj
+
       - name: Install validation dependencies
         run: python -m pip install --upgrade pip -r requirements-docs.txt
 
@@ -31,6 +39,15 @@ jobs:
 
       - name: Validate contracts and traceability
         run: python scripts/validate_contracts.py
+
+      - name: Validate vertical slice structure
+        run: python scripts/validate_vertical_slice.py
+
+      - name: Restore .NET solution
+        run: dotnet restore IntelligentBackofficePlatformArchitecture.sln
+
+      - name: Build .NET solution
+        run: dotnet build IntelligentBackofficePlatformArchitecture.sln --configuration Release --no-restore
 
       - name: Test authorization policies
         run: bash scripts/test-policies.sh
@@ -49,3 +66,17 @@ jobs:
 
       - name: Validate Docker Compose
         run: docker compose config
+
+      - name: Start vertical slice
+        run: docker compose --profile vertical-slice up -d --build
+
+      - name: Run vertical slice E2E
+        run: bash samples/vertical-slice/tests/e2e.sh
+
+      - name: Collect vertical slice logs
+        if: failure()
+        run: docker compose --profile vertical-slice logs --no-color api opa postgres
+
+      - name: Stop vertical slice
+        if: always()
+        run: docker compose --profile vertical-slice down -v

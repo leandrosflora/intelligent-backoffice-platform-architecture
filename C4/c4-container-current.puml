@@ -1,34 +1,33 @@
 @startuml
 !include _theme.iuml
 
-title C4 Nível 2 — Containers atuais
+title C4 Nível 2 — Containers implementados no P4
 left to right direction
 
-C4Person(author, "Mantenedor", "Versiona a referência.")
-C4Person(reader, "Leitor", "Consome a documentação.")
+C4Person(operator, "Operador / Teste E2E", "Executa a jornada com identidades e roles sintéticas.")
+C4Person(reader, "Leitor", "Consome a documentação publicada.")
 
-package "Architecture Repository\n<<System Boundary>>" {
-  C4Container(docs, "Documentação", "MkDocs Material", "Contexto, arquitetura funcional, case, governança e operação.")
-  C4Container(c4, "C4 Sources", "PlantUML", "Fontes versionadas dos diagramas arquiteturais.")
-  C4Container(contracts, "Contratos iniciais", "OpenAPI / AsyncAPI / YAML", "Esqueletos de APIs, eventos e autorização.")
-  C4Container(policies, "Policies de exemplo", "OPA Rego", "Baseline default deny e obrigações.")
-  C4Container(scripts, "Validation Scripts", "Python / Bash", "Verifica estrutura, diagramas e documentação.")
-  C4Container(ci, "CI/CD", "GitHub Actions", "Valida e publica o site.")
+package "Intelligent Backoffice Platform\n<<System Boundary>>" {
+  C4Container(api, "Intelligent Backoffice API", "ASP.NET Core / .NET 10", "Modular monolith com Case Management, workflow, document mock, investigação, aprovação e execução governada.")
+  C4ContainerDb(postgres, "PostgreSQL", "PostgreSQL 17", "Aggregate JSONB, versionamento, idempotência, timeline e outbox.")
+  C4Container(opa, "Policy Decision Point", "OPA Rego", "Default deny, tenant isolation, segregação, alçada e obrigações.")
+  C4Container(docs, "Documentação", "MkDocs Material", "Arquitetura, contratos, implementação e operação.")
+  C4Container(ci, "Quality Pipeline", "GitHub Actions", "Compila, valida contracts/policies, sobe o ambiente e executa E2E.")
 }
 
 C4External(pages, "GitHub Pages", "Hospeda o site estático.")
 
-author --> docs : edita
-author --> c4 : modela
-author --> contracts : versiona
-author --> policies : versiona
-ci --> scripts : executa
-scripts --> c4 : valida e renderiza
+operator --> api : HTTP + JWT + tenant + correlação
+api --> opa : consulta decision document
+api --> postgres : transações SQL / JSONB
+ci --> api : build e E2E
+ci --> opa : testes Rego
 ci --> docs : gera site
 ci --> pages : publica
 reader --> pages : consulta
 
 note bottom
-Este diagrama representa apenas o estado já existente no repositório.
+P4 é baseline executável com dados sintéticos, mocks e identidade local.
+Kafka, modelos reais, observabilidade completa e integrações bancárias ainda não estão implementados.
 end note
 @enduml

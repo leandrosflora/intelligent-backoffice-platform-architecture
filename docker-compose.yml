@@ -12,6 +12,63 @@ services:
     profiles:
       - docs
 
+  postgres:
+    image: postgres:17.10-alpine3.24
+    environment:
+      POSTGRES_DB: backoffice
+      POSTGRES_USER: backoffice
+      POSTGRES_PASSWORD: backoffice
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backoffice -d backoffice"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - backoffice-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    profiles:
+      - vertical-slice
+
+  opa:
+    image: openpolicyagent/opa:1.18.2-static
+    command:
+      - run
+      - --server
+      - --addr=0.0.0.0:8181
+      - --log-format=json
+      - /policies/authorization.rego
+    volumes:
+      - ./policies:/policies:ro
+    ports:
+      - "${OPA_PORT:-8181}:8181"
+    profiles:
+      - vertical-slice
+
+  api:
+    build:
+      context: .
+      dockerfile: samples/vertical-slice/src/IntelligentBackoffice.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=backoffice;Username=backoffice;Password=backoffice
+      Opa__BaseUrl: http://opa:8181
+      DemoJwt__Issuer: intelligent-backoffice-demo
+      DemoJwt__Audience: backoffice-api
+      DemoJwt__Secret: ${DEMO_JWT_SECRET:-local-development-secret-change-me-1234567890}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      opa:
+        condition: service_started
+    ports:
+      - "${API_PORT:-8080}:8080"
+    profiles:
+      - vertical-slice
+
+volumes:
+  backoffice-postgres-data:
+
 networks:
   default:
     name: intelligent-backoffice-platform

@@ -25,20 +25,46 @@ O primeiro case é uma jornada bancária de contestação:
 | P0 | Concluído | Estrutura, MkDocs e pipelines |
 | P1 | Concluído | Arquitetura funcional, lifecycle, regras, risco e NFRs |
 | P2 | Concluído | C4, trust boundaries, deployment e sequências |
-| P3 | Implementado nesta branch | OpenAPI, AsyncAPI, schemas canônicos, catálogo e policies executáveis |
-| P4 | Próximo | Vertical slice mínimo e policy enforcement em runtime |
-| P5 | Planejado | Evals, observabilidade, SLOs e runbooks |
+| P3 | Concluído | OpenAPI, AsyncAPI, schemas canônicos, catálogo e policies |
+| P4 | Implementado nesta branch | Vertical slice ASP.NET Core, PostgreSQL, OPA e E2E |
+| P5 | Próximo | Evals, observabilidade, SLOs e runbooks |
 
-## Artefatos P3
+## Baseline executável P4
 
-- 14 operações HTTP rastreadas por `x-contract-id`;
-- 14 eventos de domínio versionados;
-- 13 actions de autorização;
-- 3 catálogos JSON Schema;
-- catálogo canônico com 41 contratos;
-- policy Rego com default deny, tenant isolation e segregação de funções;
-- testes positivos e negativos de policy;
-- validação de referências, idempotência, concorrência, rastreabilidade e compatibilidade no CI.
+O vertical slice implementa:
+
+- modular monolith em ASP.NET Core;
+- aggregate persistido em PostgreSQL;
+- lifecycle e versionamento otimista;
+- Document Intelligence mock;
+- investigação e recomendação determinísticas;
+- aprovação humana com segregação e alçada;
+- execução mock idempotente e reconciliável;
+- OPA em runtime com fail-closed;
+- JWT HS256 exclusivo para desenvolvimento;
+- timeline append-only;
+- outbox transacional;
+- teste E2E completo.
+
+## Executar o vertical slice
+
+Pré-requisitos: Docker, Docker Compose, Python 3 e `jq`.
+
+```bash
+export DEMO_JWT_SECRET="local-development-secret-change-me-1234567890"
+docker compose --profile vertical-slice up -d --build
+bash samples/vertical-slice/tests/e2e.sh
+```
+
+API: `http://localhost:8080`
+
+Encerrar:
+
+```bash
+docker compose --profile vertical-slice down -v
+```
+
+Detalhes: [`samples/vertical-slice/README.md`](samples/vertical-slice/README.md).
 
 ## Princípio de leitura
 
@@ -49,42 +75,33 @@ O repositório separa explicitamente:
 - **baseline executável:** controle demonstrado em CI ou ambiente de referência;
 - **produção:** integração real, operação e governança aprovadas.
 
-Um contrato alvo não é evidência de serviço implementado.
+O P4 é uma baseline executável com dados sintéticos e mocks. Não é produção bancária.
 
 ## Estrutura
 
 ```text
 .
 ├── .github/workflows/
-├── C4/                              # fontes PlantUML
+├── C4/
 ├── contracts/
-│   ├── catalog.yaml                 # inventário canônico
-│   ├── openapi/                     # operações HTTP
-│   ├── asyncapi/                    # eventos
-│   ├── schemas/                     # modelos compartilhados
-│   └── policy/                      # matriz declarativa
 ├── docs/
+│   ├── implementation/
 │   ├── contracts/
-│   ├── assets/diagrams/             # gerados em CI
-│   ├── context/
-│   ├── functional/
 │   ├── architecture/
-│   ├── case-study/
-│   ├── governance/
-│   ├── operations/
-│   ├── security/
-│   └── services/
-├── policies/                        # Rego e testes
-├── scripts/
+│   └── ...
+├── policies/
 ├── samples/
+│   └── vertical-slice/
+│       ├── src/IntelligentBackoffice.Api/
+│       ├── scripts/
+│       └── tests/
+├── scripts/
 ├── docker-compose.yml
 ├── mkdocs.yml
 └── IntelligentBackofficePlatformArchitecture.sln
 ```
 
 ## Documentação local
-
-Pré-requisitos: Python e Docker.
 
 ```bash
 python -m pip install -r requirements-docs.txt
@@ -101,16 +118,22 @@ Acesse `http://localhost:8000`.
 ## Validação completa
 
 ```bash
+dotnet restore IntelligentBackofficePlatformArchitecture.sln
+dotnet build IntelligentBackofficePlatformArchitecture.sln -c Release --no-restore
 python scripts/validate_structure.py
 python scripts/validate_contracts.py
+python scripts/validate_vertical_slice.py
 bash scripts/test-policies.sh
 python scripts/validate_diagrams.py
 bash scripts/render-diagrams.sh
 python scripts/validate_diagrams.py --require-generated
 mkdocs build --strict
 docker compose config
+docker compose --profile vertical-slice up -d --build
+bash samples/vertical-slice/tests/e2e.sh
+docker compose --profile vertical-slice down -v
 ```
 
 ## Estado
 
-O P3 adiciona contratos e policies executáveis em CI. Nenhum serviço produtivo, documento real de cliente, modelo real ou integração bancária foi adicionado.
+O P4 não usa documentos reais, modelos reais, Core bancário ou efeitos financeiros. O event backbone, observabilidade completa e identidade corporativa permanecem para as próximas fases.
