@@ -26,8 +26,8 @@ Os trade-offs e limites desses princípios estão registrados nos [Architecture 
 
 | Capacidade | Baseline executável | Limite declarado |
 |---|---|---|
-| Jornada de contestação | Vertical slice FastAPI com lifecycle persistido | Dados e integrações sintéticos |
-| Aprovação e execução | Aprovação humana, OPA e execução mock idempotente | Sem efeito financeiro real |
+| Jornada de contestação | Vertical slice FastAPI com lifecycle persistido e walkthrough automatizado | Dados e integrações sintéticos |
+| Aprovação e execução | Aprovação humana, OPA, execução mock idempotente e reconciliação | Sem efeito financeiro real |
 | Processamento assíncrono | Outbox, inbox, workers, timers, DLQ e replay | SQLite e broker single-node |
 | Observabilidade | Métricas, traces, dashboards, SLOs e alertas | Ambiente local sem operação 24x7 |
 | Identidade e supply chain | JWT EdDSA local, SBOM e proveniência | Sem IAM, KMS e admission corporativos |
@@ -44,12 +44,16 @@ Runtime mínimo:
 docker compose --profile runtime up --build
 ```
 
-Workflow distribuído:
+Walkthrough completo no profile distribuído:
 
 ```bash
-docker compose --profile distributed up --build
-python scripts/run_p6_distributed_e2e.py
+docker compose --profile distributed up -d --build
+python scripts/run_dispute_walkthrough.py
 ```
+
+O roteiro valida a jornada principal, uma execução ambígua, a reconciliação, a timeline, o outbox, as projeções e as métricas.
+
+[**Abrir o walkthrough executável**](tutorials/dispute-walkthrough.md)
 
 Profile com identidade assinada:
 
@@ -71,6 +75,7 @@ A documentação possui percursos específicos para executivos, arquitetos, dese
 
 | Visão | Pergunta respondida |
 |---|---|
+| [Walkthrough executável](tutorials/dispute-walkthrough.md) | Como a jornada e seus controles são comprovados ponta a ponta? |
 | [Estado de implementação](architecture/implementation-status.md) | O que está demonstrado, contratado, planejado ou pendente para produção? |
 | [Contexto atual](architecture/c4-context-current.md) | Quem utiliza e valida a implementação de referência hoje? |
 | [Containers atuais](architecture/c4-container-current.md) | Quais processos, stores e ferramentas são executáveis nos profiles atuais? |
@@ -83,6 +88,7 @@ A documentação possui percursos específicos para executivos, arquitetos, dese
 
 ## Próximos pontos de entrada
 
+- [Walkthrough executável](tutorials/dispute-walkthrough.md)
 - [Contexto de negócio](context/business-context.md)
 - [Case aplicado](case-study/index.md)
 - [Arquitetura funcional](functional/index.md)
