@@ -1,4 +1,4 @@
-# Deployment observado do P5
+# Deployment observado
 
 [![Baseline observada](../assets/diagrams/c4-deployment-observed-baseline.png)](../assets/diagrams/c4-deployment-observed-baseline.svg)
 
@@ -6,7 +6,7 @@
 
 ## Leitura
 
-Esta visão representa a **baseline executável confirmada** do P5:
+Esta visão representa a **baseline executável confirmada** com:
 
 - serviço FastAPI modular;
 - OPA externo ao processo;
@@ -17,7 +17,7 @@ Esta visão representa a **baseline executável confirmada** do P5:
 - eval runner com dataset e thresholds versionados;
 - evidence artifacts publicados no CI.
 
-Ela substitui interpretações de que o deployment alvo com PostgreSQL, Kafka, object store e serviços independentes já estaria implementado.
+Ela impede a interpretação de que o deployment alvo com PostgreSQL, Kafka multi-broker, object store e serviços independentes já estaria implementado.
 
 ## Limites
 
