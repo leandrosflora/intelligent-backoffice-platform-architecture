@@ -23,7 +23,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-    profiles: [runtime]
+    profiles: [runtime, observability]
 
   vertical-slice:
     build:
@@ -32,6 +32,11 @@ services:
       DATABASE_PATH: /data/vertical-slice.db
       POLICY_MODE: opa
       OPA_URL: http://opa:8181
+      SERVICE_NAME: intelligent-backoffice-vertical-slice
+      ENVIRONMENT: local
+      METRICS_ENABLED: "true"
+      TRACING_ENABLED: "${OTEL_TRACING_ENABLED:-false}"
+      OTLP_ENDPOINT: http://otel-collector:4317
     volumes:
       - vertical-slice-data:/data
     ports:
@@ -44,7 +49,62 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-    profiles: [runtime]
+    profiles: [runtime, observability]
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.68.0
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "${JAEGER_PORT:-16686}:16686"
+    profiles: [observability]
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.131.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./observability/otel/collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "${OTLP_GRPC_PORT:-4317}:4317"
+      - "${OTLP_HTTP_PORT:-4318}:4318"
+      - "${OTEL_HEALTH_PORT:-13133}:13133"
+    depends_on:
+      - jaeger
+    profiles: [observability]
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus/recording-rules.yml:/etc/prometheus/recording-rules.yml:ro
+      - ./observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    depends_on:
+      vertical-slice:
+        condition: service_healthy
+    profiles: [observability]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      - prometheus
+      - jaeger
+    profiles: [observability]
 
 networks:
   default:
@@ -52,3 +112,5 @@ networks:
 
 volumes:
   vertical-slice-data:
+  prometheus-data:
+  grafana-data:

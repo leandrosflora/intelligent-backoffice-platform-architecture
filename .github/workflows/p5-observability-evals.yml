@@ -1,0 +1,63 @@
+name: P5 Observability and Evals
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: samples/vertical-slice/requirements-dev.txt
+      - name: Install dependencies
+        working-directory: samples/vertical-slice
+        run: python -m pip install --upgrade pip -r requirements-dev.txt
+      - name: Run deterministic evals
+        env:
+          PYTHONPATH: samples/vertical-slice
+        run: python scripts/run_evals.py
+      - name: Validate observability artifacts
+        run: python scripts/validate_observability.py
+      - name: Validate Prometheus configuration
+        run: |
+          docker run --rm --entrypoint /bin/promtool \
+            -v "$PWD/observability/prometheus:/etc/prometheus:ro" \
+            prom/prometheus:v3.5.0 \
+            check config /etc/prometheus/prometheus.yml
+      - name: Validate Compose
+        env:
+          OTEL_TRACING_ENABLED: "true"
+        run: docker compose --profile observability config
+      - name: Start observed runtime
+        env:
+          OTEL_TRACING_ENABLED: "true"
+        run: docker compose --profile observability up -d --build
+      - name: Run runtime E2E
+        run: python scripts/run_vertical_slice_e2e.py
+      - name: Validate metrics, dashboards and traces
+        run: python scripts/validate_runtime_observability.py
+      - name: Upload P5 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p5-observability-evidence
+          path: |
+            evals/reports/latest.json
+            evals/reports/latest.md
+            e2e-output.jsonl
+          if-no-files-found: warn
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose --profile observability logs --no-color
+      - name: Stop observed runtime
+        if: always()
+        run: docker compose --profile observability down -v

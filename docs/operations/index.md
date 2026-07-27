@@ -1,14 +1,23 @@
 # Operações
 
-## Capacidades operacionais esperadas
+O P5 transforma os requisitos operacionais em uma baseline executável e versionada.
 
-- SLOs por jornada e capacidade;
-- tracing distribuído por `traceId`, `caseId` e `tenantId`;
-- filas, retries, DLQ e replay controlado;
-- timers e workflows de longa duração;
-- dashboards de backlog, tempo de ciclo e automação;
-- runbooks de indisponibilidade, reconciliação e acesso indevido;
-- budgets de custo e tokens;
-- backup, restore e continuidade.
+## Artefatos
 
-O MVP local deve produzir evidências suficientes para diagnosticar cada transição do caso sem registrar documentos integrais nos logs.
+- [Observabilidade](observability.md): métricas, traces, dashboard e stack local;
+- [SLOs e alertas](slos.md): indicadores, targets e regras Prometheus;
+- [Evals](../evaluation/index.md): dataset, thresholds e quality gates;
+- runbooks de erro HTTP, PDP, reconciliação, workflow, telemetria e regressão de eval.
+
+## Princípios
+
+- correlação ponta a ponta sem usar identificadores sensíveis como labels;
+- fail-closed quando o PDP está indisponível;
+- métricas de baixa cardinalidade;
+- traces sem documento integral ou payload financeiro;
+- alertas vinculados a owner, SLO e runbook;
+- evals executados antes de promover capacidades inteligentes.
+
+## Limites
+
+A stack local demonstra instrumentação e resposta operacional. Ela não substitui observabilidade gerenciada, retenção corporativa, plantão, capacidade, testes de carga ou operação 24x7.

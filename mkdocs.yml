@@ -56,7 +56,8 @@ nav:
       - C4 Containers alvo: architecture/c4-container-target.md
       - Componentes do Orchestrator: architecture/component-workflow-orchestrator.md
       - Componentes de Document Intelligence: architecture/component-document-intelligence.md
-      - Deployment local: architecture/deployment-local.md
+      - Deployment local alvo: architecture/deployment-local.md
+      - Deployment observado P5: architecture/deployment-observed-baseline.md
       - Trust boundaries: architecture/trust-boundaries.md
       - Sequências: architecture/sequence-diagrams.md
   - Contratos:
@@ -69,9 +70,21 @@ nav:
       - Visão geral P4: implementation/index.md
       - Cenários testados: implementation/test-scenarios.md
       - Runbook local: implementation/runbook.md
+  - Evals:
+      - Visão geral P5: evaluation/index.md
+  - Operações:
+      - Visão geral: operations/index.md
+      - Observabilidade: operations/observability.md
+      - SLOs e alertas: operations/slos.md
+      - Runbooks:
+          - Erros e latência: operations/runbooks/high-error-rate.md
+          - PDP indisponível: operations/runbooks/policy-decision-unavailable.md
+          - Execução ambígua: operations/runbooks/execution-ambiguous.md
+          - Workflow parado: operations/runbooks/workflow-stuck.md
+          - Telemetria indisponível: operations/runbooks/telemetry-pipeline-down.md
+          - Regressão de eval: operations/runbooks/eval-regression.md
   - Case aplicado: case-study/index.md
   - Governança: governance/index.md
-  - Operações: operations/index.md
   - Segurança: security/index.md
   - Serviços: services/index.md
 

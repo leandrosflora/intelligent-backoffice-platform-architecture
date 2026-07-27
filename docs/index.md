@@ -2,10 +2,6 @@
 
 Esta documentação descreve uma plataforma corporativa para automação de processos de backoffice regulados, documentais e de longa duração.
 
-## Primeiro case
-
-O primeiro case aplicado é uma jornada bancária de contestação, desde a abertura até a decisão e execução governada.
-
 ## Estado da evolução
 
 | Fase | Estado | Entrega |
@@ -15,26 +11,27 @@ O primeiro case aplicado é uma jornada bancária de contestação, desde a aber
 | P2 | Concluído | C4, trust boundaries e sequências |
 | P3 | Concluído | Contratos, schemas, catálogo e policies |
 | P4 | Baseline executável | Vertical slice, persistência local, OPA runtime e testes E2E |
-| P5 | Próximo | Evals, observabilidade, SLOs e operação |
+| P5 | Baseline executável | Evals, métricas, traces, SLOs, alertas e runbooks |
+| P6 | Planejado | Mensageria, outbox, workers e workflow distribuído |
 
-## O que o P4 prova
+## O que o P5 prova
 
-- jornada ponta a ponta com dados sintéticos;
-- separação entre recomendação, aprovação e execução;
-- policy enforcement em runtime;
-- versionamento otimista;
-- idempotência de execução;
-- reconciliação para resultado ambíguo;
-- timeline auditável;
-- testes automatizados em CI.
+- instrumentação OpenTelemetry sem registrar conteúdo integral de documentos;
+- métricas Prometheus de baixa cardinalidade;
+- dashboard Grafana provisionado;
+- traces consultáveis no Jaeger;
+- SLOs e alertas vinculados a runbooks;
+- dataset e thresholds de eval versionados;
+- abstention para entrada desconhecida ou sem grounding;
+- evidence artifacts publicados pelo CI.
 
-## O que o P4 não prova
+## O que ainda não prova
 
 - prontidão produtiva;
-- integração bancária real;
-- processamento documental real;
-- identidade criptográfica de workloads;
-- alta disponibilidade;
+- qualidade de OCR ou LLM real;
+- retenção e segurança corporativa de telemetria;
+- testes de carga e capacidade;
+- plantão, incident management e operação 24x7;
 - mensageria e execução distribuída.
 
 ## Comece por aqui
@@ -44,4 +41,5 @@ O primeiro case aplicado é uma jornada bancária de contestação, desde a aber
 3. [Arquitetura técnica](architecture/index.md)
 4. [Contratos](contracts/index.md)
 5. [Implementação P4](implementation/index.md)
-6. [Case aplicado](case-study/index.md)
+6. [Evals P5](evaluation/index.md)
+7. [Operações P5](operations/index.md)
