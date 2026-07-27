@@ -1,0 +1,45 @@
+@startuml
+!include _theme.iuml
+
+title C4 Deployment — Baseline executável observada (P5)
+left to right direction
+
+C4Person(operator, "Developer / operator", "Executa jornadas, consulta métricas, traces e evidências de CI.")
+
+node "Developer Workstation / GitHub Actions\n[Docker Compose]" as environment {
+  node "Runtime Zone" as runtime {
+    artifact "Vertical Slice\n[FastAPI modular service]" as api
+    artifact "OPA\n[Policy Decision Point]" as opa
+    database "SQLite volume\n[Synthetic case state]" as sqlite
+  }
+
+  node "Observability Zone" as observability {
+    artifact "OpenTelemetry Collector" as otel
+    artifact "Prometheus" as prometheus
+    artifact "Jaeger" as jaeger
+    artifact "Grafana" as grafana
+  }
+
+  artifact "Eval Runner\n[Versioned dataset + thresholds]" as evals
+  artifact "Evidence Artifacts\n[JSON, Markdown, E2E log]" as evidence
+}
+
+operator --> api : executa jornada sintética
+operator --> grafana : consulta dashboards
+operator --> jaeger : investiga traces
+api --> opa : autorização HTTP / fail-closed
+api --> sqlite : estado, timeline e idempotência
+api ..> otel : spans OTLP
+api ..> prometheus : endpoint /metrics
+otel --> jaeger : traces OTLP
+prometheus --> api : scrape
+prometheus --> grafana : métricas e alertas
+jaeger --> grafana : datasource de traces
+evals --> evidence : relatório e gate
+evals ..> api : compartilha funções determinísticas
+
+note bottom of environment
+Baseline local com dados sintéticos.
+Sem documento real, OCR real, LLM real ou efeito financeiro.
+end note
+@enduml

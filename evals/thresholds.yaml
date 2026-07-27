@@ -1,0 +1,14 @@
+version: 1
+overall_min_score: 1.0
+tasks:
+  document_classification:
+    min_score: 1.0
+  investigation:
+    min_score: 1.0
+  recommendation:
+    min_score: 1.0
+guardrails:
+  unknown_document_abstention_rate:
+    min: 1.0
+  ungrounded_recommendation_abstention_rate:
+    min: 1.0

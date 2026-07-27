@@ -1,12 +1,21 @@
+from __future__ import annotations
+
+import time
 from typing import Any
+
 import httpx
 from fastapi import HTTPException
+from opentelemetry import trace
+
 from .config import Settings
+from .observability import POLICY_DECISIONS, POLICY_DURATION
 from .security import RequestContext
+
 
 class PolicyClient:
     def __init__(self, settings: Settings):
         self.settings = settings
+        self.tracer = trace.get_tracer(settings.service_name)
 
     def authorize(self, ctx: RequestContext, action: str, resource: dict[str, Any], context: dict[str, Any] | None = None) -> None:
         data = {
@@ -17,20 +26,34 @@ class PolicyClient:
             "correlation_id": ctx.correlation_id,
             "context": context or {},
         }
-        if self.settings.policy_mode == "opa":
+        started = time.perf_counter()
+        with self.tracer.start_as_current_span("policy.authorize") as span:
+            span.set_attribute("backoffice.policy.action", action)
             try:
-                response = httpx.post(
-                    f"{self.settings.opa_url}/v1/data/intelligent_backoffice/authorization/decision",
-                    json={"input": data}, timeout=3.0,
-                )
-                response.raise_for_status()
-                decision = response.json().get("result", {})
+                if self.settings.policy_mode == "opa":
+                    response = httpx.post(
+                        f"{self.settings.opa_url}/v1/data/intelligent_backoffice/authorization/decision",
+                        json={"input": data},
+                        timeout=3.0,
+                    )
+                    response.raise_for_status()
+                    decision = response.json().get("result", {})
+                else:
+                    decision = embedded_decision(data)
             except Exception as exc:
+                POLICY_DECISIONS.labels(action, "unavailable").inc()
+                span.set_attribute("backoffice.policy.decision", "unavailable")
                 raise HTTPException(503, f"Policy decision unavailable: {exc}") from exc
-        else:
-            decision = embedded_decision(data)
-        if not decision.get("allow", False):
-            raise HTTPException(403, detail={"reason": decision.get("reason", "default-deny")})
+            finally:
+                POLICY_DURATION.labels(action).observe(time.perf_counter() - started)
+
+            allowed = bool(decision.get("allow", False))
+            outcome = "allow" if allowed else "deny"
+            POLICY_DECISIONS.labels(action, outcome).inc()
+            span.set_attribute("backoffice.policy.decision", outcome)
+            if not allowed:
+                raise HTTPException(403, detail={"reason": decision.get("reason", "default-deny")})
+
 
 def embedded_decision(i: dict[str, Any]) -> dict[str, Any]:
     subject, resource, context = i["subject"], i["resource"], i.get("context", {})

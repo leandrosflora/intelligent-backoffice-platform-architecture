@@ -1,0 +1,39 @@
+version: 1
+status: BASELINE_EXECUTABLE
+window: 30d
+slos:
+  - id: SLO-API-AVAILABILITY
+    service: intelligent-backoffice-vertical-slice
+    indicator: successful HTTP responses excluding expected 4xx responses
+    target: 0.999
+    metric: backoffice:http_success_ratio:5m
+    owner: Platform Operations
+    runbook: docs/operations/runbooks/high-error-rate.md
+  - id: SLO-API-LATENCY
+    service: intelligent-backoffice-vertical-slice
+    indicator: p95 latency for protected API operations
+    target_seconds: 0.5
+    metric: backoffice:http_latency_p95_seconds:5m
+    owner: Platform Operations
+    runbook: docs/operations/runbooks/high-error-rate.md
+  - id: SLO-POLICY-AVAILABILITY
+    service: policy-decision-point
+    indicator: authorization decisions returned without PDP unavailability
+    target: 0.9995
+    metric: backoffice:policy_availability_ratio:5m
+    owner: Security Platform
+    runbook: docs/operations/runbooks/policy-decision-unavailable.md
+  - id: SLO-EXECUTION-SAFETY
+    service: governed-execution
+    indicator: duplicate side effects caused by replay
+    target_duplicates: 0
+    metric: backoffice_executions_total
+    owner: Backoffice Platform
+    runbook: docs/operations/runbooks/execution-ambiguous.md
+  - id: SLO-EVAL-QUALITY
+    service: deterministic-intelligence-baseline
+    indicator: versioned eval dataset score
+    target: 1.0
+    metric: evals/reports/latest.json
+    owner: Agent Owner
+    runbook: docs/operations/runbooks/eval-regression.md

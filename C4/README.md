@@ -15,7 +15,8 @@ Esta pasta contém as fontes PlantUML canônicas da arquitetura.
 
 - `c4-component-workflow-orchestrator.puml`
 - `c4-component-document-intelligence.puml`
-- `c4-deployment-local.puml`
+- `c4-deployment-local.puml` — deployment alvo do futuro slice distribuído;
+- `c4-deployment-observed-baseline.puml` — baseline executável confirmada no P5;
 - `c4-trust-boundaries.puml`
 
 ### Sequências
@@ -38,6 +39,7 @@ O script gera SVG e PNG em `docs/assets/diagrams/`.
 
 - **atual:** confirmado no repositório;
 - **alvo:** responsabilidade ou integração planejada;
-- **futuro vertical slice:** baseline executável ainda não entregue.
+- **baseline executável:** comportamento demonstrado em CI e Docker Compose;
+- **produção:** operação e integrações reais aprovadas.
 
 A arquitetura não pode usar um diagrama alvo como evidência de implementação.
