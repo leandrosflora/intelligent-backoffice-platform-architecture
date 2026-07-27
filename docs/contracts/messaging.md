@@ -1,4 +1,4 @@
-# Topologia de mensageria P6
+# Topologia de mensageria
 
 O contrato operacional está em `contracts/messaging/topology.yaml`.
 
