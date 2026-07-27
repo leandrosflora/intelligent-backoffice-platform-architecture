@@ -1,0 +1,155 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://leandrosflora.github.io/intelligent-backoffice-platform-architecture/contracts/schemas/policy-contracts.yaml"
+title: Authorization Policy Contracts
+type: object
+$defs:
+  Subject:
+    type: object
+    additionalProperties: false
+    required: [id, type, tenantId, roles]
+    properties:
+      id:
+        type: string
+        minLength: 1
+        maxLength: 256
+      type:
+        type: string
+        enum: [HUMAN, WORKLOAD]
+      tenantId:
+        type: string
+        format: uuid
+      roles:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          enum:
+            - case-manager
+            - case-reader
+            - document-processor
+            - investigator
+            - decision-agent
+            - operations-analyst
+            - approver
+            - execution-service
+            - reconciler
+            - auditor
+  Resource:
+    type: object
+    additionalProperties: true
+    required: [type, id, tenantId]
+    properties:
+      type:
+        type: string
+        enum: [CASE, DOCUMENT, EVIDENCE, RECOMMENDATION, APPROVAL, EXECUTION, AUDIT]
+      id:
+        type: string
+        minLength: 1
+        maxLength: 256
+      tenantId:
+        type: string
+        format: uuid
+      state:
+        type: string
+      ownerId:
+        type: string
+  AuthorizationInput:
+    type: object
+    additionalProperties: false
+    required: [subject, action, resource, purpose, correlationId, context]
+    properties:
+      subject:
+        $ref: "#/$defs/Subject"
+      action:
+        type: string
+        enum:
+          - case.create
+          - case.read
+          - case.cancel
+          - document.register
+          - document.read
+          - evidence.read
+          - investigation.execute
+          - recommendation.create
+          - approval.decide
+          - execution.request
+          - execution.read
+          - reconciliation.resolve
+          - audit.read
+      resource:
+        $ref: "#/$defs/Resource"
+      purpose:
+        type: string
+        enum: [CASE_PROCESSING, APPROVAL, EXECUTION, RECONCILIATION, AUDIT]
+      correlationId:
+        type: string
+        format: uuid
+      context:
+        type: object
+        additionalProperties: true
+        properties:
+          caseVersion:
+            type: integer
+            minimum: 1
+          recommendationActorId:
+            type: string
+          recommendationVersion:
+            type: integer
+            minimum: 1
+          approvedRecommendationVersion:
+            type: integer
+            minimum: 1
+          approvalStatus:
+            type: string
+            enum: [APPROVED, REJECTED, MORE_EVIDENCE_REQUIRED]
+          approvalExpiresAt:
+            type: string
+            format: date-time
+          approvalValid:
+            type: boolean
+          amount:
+            type: number
+            minimum: 0
+          authorityLimit:
+            type: number
+            minimum: 0
+          idempotencyKey:
+            type: string
+            minLength: 8
+            maxLength: 128
+          commandHash:
+            type: string
+            pattern: "^[a-fA-F0-9]{64}$"
+          evidenceReferences:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+              format: uuid
+  AuthorizationDecision:
+    type: object
+    additionalProperties: false
+    required: [allow, reason, obligations]
+    properties:
+      allow:
+        type: boolean
+      reason:
+        type: string
+        minLength: 1
+        maxLength: 256
+      obligations:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          enum:
+            - audit-decision
+            - tenant-match
+            - redact-sensitive-data
+            - verify-case-version
+            - verify-segregation-of-duties
+            - verify-approval
+            - verify-idempotency
+            - verify-evidence
+            - reconcile-on-ambiguous-result

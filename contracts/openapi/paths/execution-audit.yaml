@@ -1,0 +1,177 @@
+/v1/cases/{caseId}/executions:
+  post:
+    tags:
+    - Executions
+    operationId: requestExecution
+    summary: Solicita execução governada após aprovação válida
+    description: Timeout após envio nunca autoriza retry cego; o resultado ambíguo
+      exige reconciliação.
+    x-contract-id: API-EXEC-001
+    x-capabilities:
+    - CAP-007
+    - PLT-005
+    - PLT-006
+    - PLT-008
+    x-business-rules:
+    - BR-016
+    - BR-017
+    - BR-018
+    - BR-019
+    - BR-020
+    x-policy-action: execution.request
+    x-idempotent: true
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
+    - $ref: ../platform-api.yaml#/components/parameters/IfMatch
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../../schemas/canonical-models.yaml#/$defs/ExecutionRequest
+    responses:
+      '202':
+        description: Execução aceita
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Execution
+      '200':
+        description: Repetição idempotente retorna o resultado anterior
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Execution
+      '400':
+        $ref: ../platform-api.yaml#/components/responses/BadRequest
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+      '409':
+        $ref: ../platform-api.yaml#/components/responses/Conflict
+      '422':
+        $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity
+/v1/cases/{caseId}/executions/{executionId}:
+  get:
+    tags:
+    - Executions
+    operationId: getExecution
+    summary: Consulta status da execução e necessidade de reconciliação
+    x-contract-id: API-EXEC-002
+    x-capabilities:
+    - CAP-007
+    - PLT-005
+    - PLT-011
+    x-business-rules:
+    - BR-018
+    - BR-020
+    - BR-021
+    x-policy-action: execution.read
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/ExecutionId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    responses:
+      '200':
+        description: Execução encontrada
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Execution
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+/v1/cases/{caseId}/reconciliations/{executionId}/resolve:
+  post:
+    tags:
+    - Reconciliation
+    operationId: resolveReconciliation
+    summary: Resolve manualmente ou por consulta determinística um resultado ambíguo
+    x-contract-id: API-RECON-001
+    x-capabilities:
+    - CAP-007
+    - PLT-001
+    - PLT-005
+    x-business-rules:
+    - BR-020
+    - BR-021
+    - BR-024
+    x-policy-action: reconciliation.resolve
+    x-idempotent: true
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/ExecutionId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
+    - $ref: ../platform-api.yaml#/components/parameters/IfMatch
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../../schemas/canonical-models.yaml#/$defs/ReconciliationResolutionRequest
+    responses:
+      '200':
+        description: Reconciliação resolvida
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Execution
+      '400':
+        $ref: ../platform-api.yaml#/components/responses/BadRequest
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+      '409':
+        $ref: ../platform-api.yaml#/components/responses/Conflict
+      '422':
+        $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity
+/v1/cases/{caseId}/timeline:
+  get:
+    tags:
+    - Audit
+    operationId: getCaseTimeline
+    summary: Consulta timeline auditável e minimizada do caso
+    x-contract-id: API-AUDIT-001
+    x-capabilities:
+    - CAP-009
+    - PLT-008
+    - PLT-012
+    x-business-rules:
+    - BR-021
+    - BR-022
+    - BR-023
+    x-policy-action: audit.read
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    responses:
+      '200':
+        description: Timeline do caso
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: ../../schemas/canonical-models.yaml#/$defs/TimelineEntry
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound

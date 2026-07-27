@@ -1,22 +1,138 @@
-version: "0.1"
+version: "0.3"
+policyPackage: intelligent_backoffice.authorization
 defaultDecision: DENY
+inputSchema: ../schemas/policy-contracts.yaml#/$defs/AuthorizationInput
+outputSchema: ../schemas/policy-contracts.yaml#/$defs/AuthorizationDecision
 requiredContext:
-  - subject
-  - tenantId
+  - subject.id
+  - subject.type
+  - subject.tenantId
+  - subject.roles
   - action
-  - resource
+  - resource.type
+  - resource.id
+  - resource.tenantId
+  - purpose
+  - correlationId
+principles:
+  - default-deny
+  - tenant-isolation
+  - least-privilege
+  - purpose-binding
+  - segregation-of-duties
+  - fail-closed
 rules:
-  - id: allow-case-read
-    description: Permite leitura de caso somente no tenant do solicitante.
+  - id: POL-CASE-001
+    action: case.create
+    allowedRoles: [case-manager]
+    subjectTypes: [HUMAN, WORKLOAD]
+    conditions: [tenant-match]
+    obligations: [audit-decision, tenant-match]
+    businessRules: [BR-001, BR-024]
+  - id: POL-CASE-002
     action: case.read
-    obligations:
+    allowedRoles: [case-reader, case-manager, operations-analyst, approver, auditor]
+    subjectTypes: [HUMAN, WORKLOAD]
+    conditions: [tenant-match]
+    obligations: [audit-decision, tenant-match, redact-sensitive-data]
+    businessRules: [BR-021, BR-022]
+  - id: POL-CASE-003
+    action: case.cancel
+    allowedRoles: [case-manager]
+    subjectTypes: [HUMAN]
+    conditions: [tenant-match, cancellable-state, expected-case-version]
+    obligations: [audit-decision, tenant-match, verify-case-version]
+    businessRules: [BR-021, BR-024, BR-025]
+  - id: POL-DOC-001
+    action: document.register
+    allowedRoles: [case-manager, document-processor]
+    subjectTypes: [HUMAN, WORKLOAD]
+    conditions: [tenant-match, document-intake-state, expected-case-version]
+    obligations: [audit-decision, tenant-match, verify-case-version]
+    businessRules: [BR-002, BR-003, BR-005]
+  - id: POL-DOC-002
+    action: document.read
+    allowedRoles: [document-processor, operations-analyst, approver, auditor]
+    subjectTypes: [HUMAN, WORKLOAD]
+    conditions: [tenant-match]
+    obligations: [audit-decision, tenant-match, redact-sensitive-data]
+    businessRules: [BR-004, BR-022]
+  - id: POL-EVIDENCE-001
+    action: evidence.read
+    allowedRoles: [operations-analyst, decision-agent, approver, auditor]
+    subjectTypes: [HUMAN, WORKLOAD]
+    conditions: [tenant-match]
+    obligations: [audit-decision, tenant-match, redact-sensitive-data]
+    businessRules: [BR-004, BR-007, BR-022]
+  - id: POL-INV-001
+    action: investigation.execute
+    allowedRoles: [investigator, operations-analyst]
+    subjectTypes: [HUMAN, WORKLOAD]
+    conditions: [tenant-match, investigation-state, expected-case-version]
+    obligations: [audit-decision, tenant-match, verify-case-version, verify-evidence]
+    businessRules: [BR-006, BR-007, BR-009]
+  - id: POL-REC-001
+    action: recommendation.create
+    allowedRoles: [decision-agent, operations-analyst]
+    subjectTypes: [HUMAN, WORKLOAD]
+    conditions: [tenant-match, recommendation-state, expected-case-version, evidence-present]
+    obligations: [audit-decision, tenant-match, verify-case-version, verify-evidence]
+    businessRules: [BR-008, BR-009, BR-010]
+  - id: POL-APPROVAL-001
+    action: approval.decide
+    allowedRoles: [approver]
+    subjectTypes: [HUMAN]
+    conditions:
       - tenant-match
-      - audit-decision
-  - id: require-human-approval
-    description: Operações financeiras exigem aprovação humana válida.
-    action: financial.execute
+      - approval-state
+      - expected-case-version
+      - recommendation-version-match
+      - recommender-is-not-approver
+      - authority-limit-sufficient
     obligations:
-      - approved-decision
-      - idempotency-key
-      - evidence-reference
       - audit-decision
+      - tenant-match
+      - verify-case-version
+      - verify-segregation-of-duties
+    businessRules: [BR-011, BR-012, BR-013, BR-014, BR-015]
+  - id: POL-EXEC-001
+    action: execution.request
+    allowedRoles: [execution-service]
+    subjectTypes: [WORKLOAD]
+    conditions:
+      - tenant-match
+      - approved-state
+      - approval-valid
+      - recommendation-version-match
+      - idempotency-present
+      - command-hash-present
+      - evidence-present
+    obligations:
+      - audit-decision
+      - tenant-match
+      - verify-approval
+      - verify-idempotency
+      - verify-evidence
+      - reconcile-on-ambiguous-result
+    businessRules: [BR-016, BR-017, BR-018, BR-019, BR-020]
+  - id: POL-EXEC-002
+    action: execution.read
+    allowedRoles: [execution-service, reconciler, case-manager, auditor]
+    subjectTypes: [HUMAN, WORKLOAD]
+    conditions: [tenant-match]
+    obligations: [audit-decision, tenant-match, redact-sensitive-data]
+    businessRules: [BR-018, BR-020, BR-021]
+  - id: POL-RECON-001
+    action: reconciliation.resolve
+    allowedRoles: [reconciler]
+    subjectTypes: [HUMAN, WORKLOAD]
+    conditions: [tenant-match, reconciliation-state, expected-case-version]
+    obligations: [audit-decision, tenant-match, verify-case-version, reconcile-on-ambiguous-result]
+    businessRules: [BR-020, BR-021, BR-024]
+  - id: POL-AUDIT-001
+    action: audit.read
+    allowedRoles: [auditor]
+    subjectTypes: [HUMAN]
+    conditions: [tenant-match, purpose-audit]
+    obligations: [audit-decision, tenant-match, redact-sensitive-data]
+    businessRules: [BR-021, BR-022, BR-023]

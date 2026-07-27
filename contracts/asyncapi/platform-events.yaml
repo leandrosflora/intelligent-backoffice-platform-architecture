@@ -1,44 +1,239 @@
 asyncapi: 3.0.0
 info:
   title: Intelligent Backoffice Platform Events
-  version: 0.1.0
-  description: Contrato inicial dos eventos compartilhados da plataforma.
+  version: 0.3.0
+  description: Eventos canônicos do lifecycle de contestação e execução governada.
 defaultContentType: application/json
+servers:
+  localKafka:
+    host: localhost:9092
+    protocol: kafka
+    description: Event backbone local planejado para o vertical slice.
 channels:
   caseCreated:
-    address: backoffice.case.created
+    address: backoffice.case.created.v1
     messages:
-      caseCreated:
-        $ref: "#/components/messages/CaseCreated"
+      CaseCreated: { $ref: "#/components/messages/CaseCreated" }
+  documentReceived:
+    address: backoffice.document.received.v1
+    messages:
+      DocumentReceived: { $ref: "#/components/messages/DocumentReceived" }
+  documentValidated:
+    address: backoffice.document.validated.v1
+    messages:
+      DocumentValidated: { $ref: "#/components/messages/DocumentValidated" }
+  evidenceMissing:
+    address: backoffice.evidence.missing.v1
+    messages:
+      EvidenceMissing: { $ref: "#/components/messages/EvidenceMissing" }
+  investigationCompleted:
+    address: backoffice.investigation.completed.v1
+    messages:
+      InvestigationCompleted: { $ref: "#/components/messages/InvestigationCompleted" }
+  decisionProposed:
+    address: backoffice.decision.proposed.v1
+    messages:
+      DecisionProposed: { $ref: "#/components/messages/DecisionProposed" }
+  approvalRequested:
+    address: backoffice.approval.requested.v1
+    messages:
+      ApprovalRequested: { $ref: "#/components/messages/ApprovalRequested" }
+  decisionApproved:
+    address: backoffice.decision.approved.v1
+    messages:
+      DecisionApproved: { $ref: "#/components/messages/DecisionApproved" }
+  decisionRejected:
+    address: backoffice.decision.rejected.v1
+    messages:
+      DecisionRejected: { $ref: "#/components/messages/DecisionRejected" }
+  executionRequested:
+    address: backoffice.execution.requested.v1
+    messages:
+      ExecutionRequested: { $ref: "#/components/messages/ExecutionRequested" }
+  executionCompleted:
+    address: backoffice.execution.completed.v1
+    messages:
+      ExecutionCompleted: { $ref: "#/components/messages/ExecutionCompleted" }
+  executionFailed:
+    address: backoffice.execution.failed.v1
+    messages:
+      ExecutionFailed: { $ref: "#/components/messages/ExecutionFailed" }
+  reconciliationRequired:
+    address: backoffice.reconciliation.required.v1
+    messages:
+      ReconciliationRequired: { $ref: "#/components/messages/ReconciliationRequired" }
+  caseClosed:
+    address: backoffice.case.closed.v1
+    messages:
+      CaseClosed: { $ref: "#/components/messages/CaseClosed" }
 operations:
-  receiveCaseCreated:
-    action: receive
-    channel:
-      $ref: "#/channels/caseCreated"
-    messages:
-      - $ref: "#/channels/caseCreated/messages/caseCreated"
+  sendCaseCreated:
+    action: send
+    channel: { $ref: "#/channels/caseCreated" }
+    messages: [{ $ref: "#/channels/caseCreated/messages/CaseCreated" }]
+  sendDocumentReceived:
+    action: send
+    channel: { $ref: "#/channels/documentReceived" }
+    messages: [{ $ref: "#/channels/documentReceived/messages/DocumentReceived" }]
+  sendDocumentValidated:
+    action: send
+    channel: { $ref: "#/channels/documentValidated" }
+    messages: [{ $ref: "#/channels/documentValidated/messages/DocumentValidated" }]
+  sendEvidenceMissing:
+    action: send
+    channel: { $ref: "#/channels/evidenceMissing" }
+    messages: [{ $ref: "#/channels/evidenceMissing/messages/EvidenceMissing" }]
+  sendInvestigationCompleted:
+    action: send
+    channel: { $ref: "#/channels/investigationCompleted" }
+    messages: [{ $ref: "#/channels/investigationCompleted/messages/InvestigationCompleted" }]
+  sendDecisionProposed:
+    action: send
+    channel: { $ref: "#/channels/decisionProposed" }
+    messages: [{ $ref: "#/channels/decisionProposed/messages/DecisionProposed" }]
+  sendApprovalRequested:
+    action: send
+    channel: { $ref: "#/channels/approvalRequested" }
+    messages: [{ $ref: "#/channels/approvalRequested/messages/ApprovalRequested" }]
+  sendDecisionApproved:
+    action: send
+    channel: { $ref: "#/channels/decisionApproved" }
+    messages: [{ $ref: "#/channels/decisionApproved/messages/DecisionApproved" }]
+  sendDecisionRejected:
+    action: send
+    channel: { $ref: "#/channels/decisionRejected" }
+    messages: [{ $ref: "#/channels/decisionRejected/messages/DecisionRejected" }]
+  sendExecutionRequested:
+    action: send
+    channel: { $ref: "#/channels/executionRequested" }
+    messages: [{ $ref: "#/channels/executionRequested/messages/ExecutionRequested" }]
+  sendExecutionCompleted:
+    action: send
+    channel: { $ref: "#/channels/executionCompleted" }
+    messages: [{ $ref: "#/channels/executionCompleted/messages/ExecutionCompleted" }]
+  sendExecutionFailed:
+    action: send
+    channel: { $ref: "#/channels/executionFailed" }
+    messages: [{ $ref: "#/channels/executionFailed/messages/ExecutionFailed" }]
+  sendReconciliationRequired:
+    action: send
+    channel: { $ref: "#/channels/reconciliationRequired" }
+    messages: [{ $ref: "#/channels/reconciliationRequired/messages/ReconciliationRequired" }]
+  sendCaseClosed:
+    action: send
+    channel: { $ref: "#/channels/caseClosed" }
+    messages: [{ $ref: "#/channels/caseClosed/messages/CaseClosed" }]
 components:
   messages:
     CaseCreated:
       name: CaseCreated
-      title: Caso de backoffice criado
-      payload:
-        type: object
-        required:
-          - eventId
-          - tenantId
-          - caseId
-          - occurredAt
-        properties:
-          eventId:
-            type: string
-            format: uuid
-          tenantId:
-            type: string
-            format: uuid
-          caseId:
-            type: string
-            format: uuid
-          occurredAt:
-            type: string
-            format: date-time
+      title: Caso criado
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-CASE-001
+      x-capabilities: [CAP-001, PLT-001, PLT-009]
+      x-business-rules: [BR-001, BR-024]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/CaseCreatedEvent" }
+    DocumentReceived:
+      name: DocumentReceived
+      title: Documento recebido e colocado em quarentena
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-DOC-001
+      x-capabilities: [CAP-002, PLT-003, PLT-009]
+      x-business-rules: [BR-002, BR-005]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/DocumentReceivedEvent" }
+    DocumentValidated:
+      name: DocumentValidated
+      title: Documento validado ou rejeitado
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-DOC-002
+      x-capabilities: [CAP-002, CAP-003, PLT-003, PLT-008]
+      x-business-rules: [BR-002, BR-003, BR-004]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/DocumentValidatedEvent" }
+    EvidenceMissing:
+      name: EvidenceMissing
+      title: Evidência obrigatória ausente
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-EVIDENCE-001
+      x-capabilities: [CAP-002, CAP-003, PLT-001]
+      x-business-rules: [BR-003, BR-009]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/EvidenceMissingEvent" }
+    InvestigationCompleted:
+      name: InvestigationCompleted
+      title: Investigação concluída
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-INV-001
+      x-capabilities: [CAP-004, PLT-002, PLT-005]
+      x-business-rules: [BR-006, BR-007]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/InvestigationCompletedEvent" }
+    DecisionProposed:
+      name: DecisionProposed
+      title: Recomendação versionada criada
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-REC-001
+      x-capabilities: [CAP-005, PLT-002, PLT-010]
+      x-business-rules: [BR-008, BR-009, BR-010]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/DecisionProposedEvent" }
+    ApprovalRequested:
+      name: ApprovalRequested
+      title: Aprovação humana solicitada
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-APPROVAL-001
+      x-capabilities: [CAP-006, PLT-007, PLT-009]
+      x-business-rules: [BR-011, BR-013]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/ApprovalRequestedEvent" }
+    DecisionApproved:
+      name: DecisionApproved
+      title: Decisão aprovada
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-APPROVAL-002
+      x-capabilities: [CAP-006, PLT-006, PLT-007]
+      x-business-rules: [BR-012, BR-013, BR-014, BR-015]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/DecisionApprovedEvent" }
+    DecisionRejected:
+      name: DecisionRejected
+      title: Decisão rejeitada
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-APPROVAL-003
+      x-capabilities: [CAP-006, PLT-006, PLT-007]
+      x-business-rules: [BR-012, BR-014]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/DecisionRejectedEvent" }
+    ExecutionRequested:
+      name: ExecutionRequested
+      title: Execução governada solicitada
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-EXEC-001
+      x-capabilities: [CAP-007, PLT-005, PLT-006, PLT-009]
+      x-business-rules: [BR-016, BR-017, BR-018, BR-019]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/ExecutionRequestedEvent" }
+    ExecutionCompleted:
+      name: ExecutionCompleted
+      title: Execução confirmada
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-EXEC-002
+      x-capabilities: [CAP-007, PLT-005, PLT-009]
+      x-business-rules: [BR-018, BR-021]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/ExecutionCompletedEvent" }
+    ExecutionFailed:
+      name: ExecutionFailed
+      title: Execução falhou de forma determinada
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-EXEC-003
+      x-capabilities: [CAP-007, PLT-005, PLT-011]
+      x-business-rules: [BR-020, BR-021]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/ExecutionFailedEvent" }
+    ReconciliationRequired:
+      name: ReconciliationRequired
+      title: Resultado ambíguo exige reconciliação
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-RECON-001
+      x-capabilities: [CAP-007, PLT-001, PLT-011]
+      x-business-rules: [BR-020, BR-021]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/ReconciliationRequiredEvent" }
+    CaseClosed:
+      name: CaseClosed
+      title: Caso encerrado
+      correlationId: { location: "$message.payload#/correlationId" }
+      x-contract-id: EVT-CASE-002
+      x-capabilities: [CAP-001, CAP-009, PLT-001, PLT-012]
+      x-business-rules: [BR-021, BR-023, BR-024]
+      payload: { $ref: "../schemas/event-envelope.yaml#/$defs/CaseClosedEvent" }

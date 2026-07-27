@@ -1,0 +1,26 @@
+/health:
+  get:
+    tags:
+    - Platform
+    operationId: getHealth
+    summary: Verifica a disponibilidade do serviço
+    security: []
+    x-contract-id: API-PLATFORM-001
+    x-capabilities:
+    - PLT-011
+    x-business-rules: []
+    x-policy-action: public.health
+    responses:
+      '200':
+        description: Serviço disponível
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - status
+              properties:
+                status:
+                  type: string
+                  const: ok

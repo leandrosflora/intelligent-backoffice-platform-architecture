@@ -1,0 +1,440 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://leandrosflora.github.io/intelligent-backoffice-platform-architecture/contracts/schemas/event-envelope.yaml
+title: Intelligent Backoffice Event Contracts
+type: object
+$defs:
+  EventEnvelope:
+    type: object
+    additionalProperties: false
+    required:
+    - eventId
+    - eventType
+    - eventVersion
+    - occurredAt
+    - tenantId
+    - caseId
+    - correlationId
+    - causationId
+    - traceId
+    - producer
+    - dataClassification
+    - payload
+    properties:
+      eventId:
+        type: string
+        format: uuid
+      eventType:
+        type: string
+        pattern: ^backoffice\.[a-z0-9.-]+$
+      eventVersion:
+        type: integer
+        minimum: 1
+      occurredAt:
+        type: string
+        format: date-time
+      tenantId:
+        type: string
+        format: uuid
+      caseId:
+        type: string
+        format: uuid
+      caseVersion:
+        type: integer
+        minimum: 1
+      correlationId:
+        type: string
+        format: uuid
+      causationId:
+        type: string
+        format: uuid
+      traceId:
+        type: string
+        minLength: 1
+        maxLength: 128
+      producer:
+        type: string
+        minLength: 1
+        maxLength: 128
+      dataClassification:
+        type: string
+        enum:
+        - INTERNAL
+        - CONFIDENTIAL
+        - RESTRICTED
+      payload:
+        type: object
+  CaseCreatedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.case.created
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - externalReference
+          - disputeType
+          - channel
+          - state
+          properties:
+            externalReference:
+              type: string
+              minLength: 1
+              maxLength: 512
+            disputeType:
+              type: string
+            channel:
+              type: string
+            state:
+              const: CREATED
+  DocumentReceivedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.document.received
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - documentId
+          - documentType
+          - checksum
+          - status
+          properties:
+            documentId:
+              type: string
+              format: uuid
+            documentType:
+              type: string
+            checksum:
+              type: string
+              pattern: ^[a-fA-F0-9]{64}$
+            status:
+              const: QUARANTINED
+  DocumentValidatedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.document.validated
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - documentId
+          - status
+          - evidenceReferences
+          properties:
+            documentId:
+              type: string
+              format: uuid
+            status:
+              enum:
+              - VALIDATED
+              - REJECTED
+            evidenceReferences:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
+                format: uuid
+            rejectionReasons:
+              type: array
+              items:
+                type: string
+                minLength: 1
+  EvidenceMissingEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.evidence.missing
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - missingEvidence
+          - dueAt
+          properties:
+            missingEvidence:
+              type: array
+              minItems: 1
+              items:
+                type: string
+                minLength: 1
+            dueAt:
+              type: string
+              format: date-time
+  InvestigationCompletedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.investigation.completed
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - investigationId
+          - findingCount
+          - evidenceReferences
+          properties:
+            investigationId:
+              type: string
+              format: uuid
+            findingCount:
+              type: integer
+              minimum: 0
+            evidenceReferences:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
+                format: uuid
+  DecisionProposedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.decision.proposed
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - recommendationId
+          - recommendationVersion
+          - outcome
+          - createdBy
+          properties:
+            recommendationId:
+              type: string
+              format: uuid
+            recommendationVersion:
+              type: integer
+              minimum: 1
+            outcome:
+              enum:
+              - APPROVE
+              - REJECT
+              - REQUEST_MORE_EVIDENCE
+              - ABSTAIN
+            createdBy:
+              type: string
+              minLength: 1
+  ApprovalRequestedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.approval.requested
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - approvalTaskId
+          - recommendationId
+          - recommendationVersion
+          - dueAt
+          properties:
+            approvalTaskId:
+              type: string
+              format: uuid
+            recommendationId:
+              type: string
+              format: uuid
+            recommendationVersion:
+              type: integer
+              minimum: 1
+            dueAt:
+              type: string
+              format: date-time
+  DecisionApprovedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.decision.approved
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - approvalId
+          - recommendationId
+          - recommendationVersion
+          - decidedBy
+          - expiresAt
+          properties:
+            approvalId:
+              type: string
+              format: uuid
+            recommendationId:
+              type: string
+              format: uuid
+            recommendationVersion:
+              type: integer
+              minimum: 1
+            decidedBy:
+              type: string
+              minLength: 1
+            expiresAt:
+              type: string
+              format: date-time
+  DecisionRejectedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.decision.rejected
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - approvalId
+          - recommendationId
+          - recommendationVersion
+          - decidedBy
+          - reason
+          properties:
+            approvalId:
+              type: string
+              format: uuid
+            recommendationId:
+              type: string
+              format: uuid
+            recommendationVersion:
+              type: integer
+              minimum: 1
+            decidedBy:
+              type: string
+              minLength: 1
+            reason:
+              type: string
+              minLength: 1
+  ExecutionRequestedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.execution.requested
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - executionId
+          - approvalId
+          - idempotencyKey
+          - commandHash
+          properties:
+            executionId:
+              type: string
+              format: uuid
+            approvalId:
+              type: string
+              format: uuid
+            idempotencyKey:
+              type: string
+              minLength: 8
+              maxLength: 128
+            commandHash:
+              type: string
+              pattern: ^[a-fA-F0-9]{64}$
+  ExecutionCompletedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.execution.completed
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - executionId
+          - status
+          - externalReference
+          properties:
+            executionId:
+              type: string
+              format: uuid
+            status:
+              const: SUCCEEDED
+            externalReference:
+              type: string
+              minLength: 1
+  ExecutionFailedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.execution.failed
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - executionId
+          - errorCode
+          - retryable
+          properties:
+            executionId:
+              type: string
+              format: uuid
+            errorCode:
+              type: string
+              minLength: 1
+            retryable:
+              type: boolean
+  ReconciliationRequiredEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.reconciliation.required
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - executionId
+          - reason
+          properties:
+            executionId:
+              type: string
+              format: uuid
+            reason:
+              type: string
+              minLength: 1
+  CaseClosedEvent:
+    allOf:
+    - $ref: '#/$defs/EventEnvelope'
+    - type: object
+      properties:
+        eventType:
+          const: backoffice.case.closed
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - finalState
+          - reason
+          properties:
+            finalState:
+              enum:
+              - CLOSED
+              - CANCELLED
+              - EXPIRED
+            reason:
+              type: string
+              minLength: 1

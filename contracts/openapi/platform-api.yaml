@@ -1,25 +1,159 @@
 openapi: 3.1.0
 info:
   title: Intelligent Backoffice Platform API
-  version: 0.1.0
-  description: Contrato inicial das APIs compartilhadas da plataforma.
+  version: 0.3.0
+  description: Contrato HTTP canônico do primeiro case de contestação bancária. O
+    contrato descreve responsabilidades lógicas; não afirma que os serviços alvo já
+    estão implementados.
+  license:
+    name: MIT
 servers:
-  - url: http://localhost:8080
+- url: http://localhost:8080
+  description: Vertical slice local planejado
+security:
+- bearerAuth: []
+tags:
+- name: Platform
+- name: Cases
+- name: Documents
+- name: Evidence
+- name: Investigation
+- name: Recommendations
+- name: Approvals
+- name: Executions
+- name: Reconciliation
+- name: Audit
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token curto de usuário ou workload; produção exige emissor corporativo
+        e audience específica.
+  parameters:
+    CaseId:
+      name: caseId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ExecutionId:
+      name: executionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TenantId:
+      name: X-Tenant-Id
+      in: header
+      required: true
+      description: Deve coincidir com o tenant assinado no token; não é fonte de confiança
+        isolada.
+      schema:
+        type: string
+        format: uuid
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: Versão esperada do caso para controle de concorrência otimista.
+      schema:
+        type: string
+        pattern: ^"?[0-9]+"?$
+  headers:
+    ETag:
+      description: Versão atual do caso.
+      schema:
+        type: string
+        pattern: ^"?[0-9]+"?$
+  responses:
+    BadRequest:
+      description: Requisição inválida
+      content:
+        application/problem+json:
+          schema:
+            $ref: ../schemas/canonical-models.yaml#/$defs/ProblemDetails
+    Unauthorized:
+      description: Identidade ausente ou inválida
+      content:
+        application/problem+json:
+          schema:
+            $ref: ../schemas/canonical-models.yaml#/$defs/ProblemDetails
+    Forbidden:
+      description: Policy negou a ação
+      content:
+        application/problem+json:
+          schema:
+            $ref: ../schemas/canonical-models.yaml#/$defs/ProblemDetails
+    NotFound:
+      description: Recurso inexistente ou não visível ao tenant
+      content:
+        application/problem+json:
+          schema:
+            $ref: ../schemas/canonical-models.yaml#/$defs/ProblemDetails
+    Conflict:
+      description: Conflito de versão, idempotência ou estado
+      content:
+        application/problem+json:
+          schema:
+            $ref: ../schemas/canonical-models.yaml#/$defs/ProblemDetails
+    UnprocessableEntity:
+      description: Regra de negócio impede a transição solicitada
+      content:
+        application/problem+json:
+          schema:
+            $ref: ../schemas/canonical-models.yaml#/$defs/ProblemDetails
 paths:
+  /v1/cases:
+    $ref: ./paths/cases.yaml#/~1v1~1cases
+  /v1/cases/{caseId}:
+    $ref: ./paths/cases.yaml#/~1v1~1cases~1{caseId}
+  /v1/cases/{caseId}/cancel:
+    $ref: ./paths/cases.yaml#/~1v1~1cases~1{caseId}~1cancel
+  /v1/cases/{caseId}/documents:
+    $ref: ./paths/documents-evidence.yaml#/~1v1~1cases~1{caseId}~1documents
+  /v1/cases/{caseId}/documents/{documentId}:
+    $ref: ./paths/documents-evidence.yaml#/~1v1~1cases~1{caseId}~1documents~1{documentId}
+  /v1/cases/{caseId}/evidence:
+    $ref: ./paths/documents-evidence.yaml#/~1v1~1cases~1{caseId}~1evidence
+  /v1/cases/{caseId}/investigations:
+    $ref: ./paths/analysis-approval.yaml#/~1v1~1cases~1{caseId}~1investigations
+  /v1/cases/{caseId}/recommendations:
+    $ref: ./paths/analysis-approval.yaml#/~1v1~1cases~1{caseId}~1recommendations
+  /v1/cases/{caseId}/approvals:
+    $ref: ./paths/analysis-approval.yaml#/~1v1~1cases~1{caseId}~1approvals
+  /v1/cases/{caseId}/executions:
+    $ref: ./paths/execution-audit.yaml#/~1v1~1cases~1{caseId}~1executions
+  /v1/cases/{caseId}/executions/{executionId}:
+    $ref: ./paths/execution-audit.yaml#/~1v1~1cases~1{caseId}~1executions~1{executionId}
+  /v1/cases/{caseId}/reconciliations/{executionId}/resolve:
+    $ref: ./paths/execution-audit.yaml#/~1v1~1cases~1{caseId}~1reconciliations~1{executionId}~1resolve
+  /v1/cases/{caseId}/timeline:
+    $ref: ./paths/execution-audit.yaml#/~1v1~1cases~1{caseId}~1timeline
   /health:
-    get:
-      operationId: getHealth
-      summary: Verifica a disponibilidade do serviço
-      responses:
-        "200":
-          description: Serviço disponível
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - status
-                properties:
-                  status:
-                    type: string
-                    const: ok
+    $ref: ./paths/platform.yaml#/~1health

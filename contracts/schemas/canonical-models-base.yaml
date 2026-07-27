@@ -1,0 +1,671 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://leandrosflora.github.io/intelligent-backoffice-platform-reference-architecture/contracts/schemas/canonical-models.yaml
+title: Intelligent Backoffice Canonical Models
+type: object
+$defs:
+  Case:
+    type: object
+    additionalProperties: false
+    required:
+    - caseId
+    - tenantId
+    - externalReference
+    - disputeType
+    - channel
+    - state
+    - caseVersion
+    - createdAt
+    - updatedAt
+    properties:
+      caseId:
+        $ref: '#/$defs/UUID'
+      tenantId:
+        $ref: '#/$defs/UUID'
+      externalReference:
+        $ref: '#/$defs/NonEmptyString'
+      disputeType:
+        type: string
+        enum:
+        - CARD_PURCHASE
+        - PIX
+        - TRANSFER
+        - CASH_WITHDRAWAL
+        - OTHER
+      channel:
+        type: string
+        enum:
+        - APP
+        - WEB
+        - CONTACT_CENTER
+        - BRANCH
+        - API
+      state:
+        $ref: '#/$defs/CaseState'
+      caseVersion:
+        type: integer
+        minimum: 1
+      priority:
+        type: string
+        enum:
+        - LOW
+        - NORMAL
+        - HIGH
+        - CRITICAL
+        default: NORMAL
+      disputedAmount:
+        $ref: '#/$defs/Money'
+      createdAt:
+        $ref: '#/$defs/Timestamp'
+      updatedAt:
+        $ref: '#/$defs/Timestamp'
+  CreateCaseRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - externalReference
+    - disputeType
+    - channel
+    - disputedAmount
+    properties:
+      externalReference:
+        $ref: '#/$defs/NonEmptyString'
+      disputeType:
+        type: string
+        enum:
+        - CARD_PURCHASE
+        - PIX
+        - TRANSFER
+        - CASH_WITHDRAWAL
+        - OTHER
+      channel:
+        type: string
+        enum:
+        - APP
+        - WEB
+        - CONTACT_CENTER
+        - BRANCH
+        - API
+      disputedAmount:
+        $ref: '#/$defs/Money'
+      customerReference:
+        type: string
+        minLength: 1
+        maxLength: 128
+        description: Referência tokenizada ou sintética; não usar CPF em texto claro.
+  CancelCaseRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - reason
+    properties:
+      reason:
+        $ref: '#/$defs/NonEmptyString'
+  TimelineEntry:
+    type: object
+    additionalProperties: false
+    required:
+    - entryId
+    - caseId
+    - caseVersion
+    - type
+    - actorId
+    - occurredAt
+    - correlationId
+    properties:
+      entryId:
+        $ref: '#/$defs/UUID'
+      caseId:
+        $ref: '#/$defs/UUID'
+      caseVersion:
+        type: integer
+        minimum: 1
+      type:
+        type: string
+        minLength: 1
+        maxLength: 128
+      actorId:
+        $ref: '#/$defs/NonEmptyString'
+      reason:
+        type: string
+        maxLength: 1024
+      occurredAt:
+        $ref: '#/$defs/Timestamp'
+      correlationId:
+        $ref: '#/$defs/UUID'
+  UUID:
+    type: string
+    format: uuid
+  NonEmptyString:
+    type: string
+    minLength: 1
+    maxLength: 512
+  Timestamp:
+    type: string
+    format: date-time
+  Money:
+    type: object
+    additionalProperties: false
+    required:
+    - currency
+    - amount
+    properties:
+      currency:
+        type: string
+        pattern: ^[A-Z]{3}$
+        examples:
+        - BRL
+      amount:
+        type: string
+        pattern: ^-?[0-9]+(\.[0-9]{1,2})?$
+        description: Decimal serializado como string para evitar perda de precisão.
+  CaseState:
+    type: string
+    enum:
+    - CREATED
+    - AWAITING_DOCUMENTS
+    - DOCUMENTS_RECEIVED
+    - DOCUMENTS_VALIDATED
+    - UNDER_INVESTIGATION
+    - DECISION_PROPOSED
+    - AWAITING_APPROVAL
+    - MORE_EVIDENCE_REQUIRED
+    - APPROVED
+    - REJECTED
+    - EXECUTION_PENDING
+    - EXECUTED
+    - RECONCILIATION_REQUIRED
+    - CLOSED
+    - CANCELLED
+    - EXPIRED
+    - FAILED
+  DataClassification:
+    type: string
+    enum:
+    - PUBLIC
+    - INTERNAL
+    - CONFIDENTIAL
+    - RESTRICTED
+  ProblemDetails:
+    type: object
+    additionalProperties: false
+    required:
+    - type
+    - title
+    - status
+    - traceId
+    properties:
+      type:
+        type: string
+        format: uri-reference
+      title:
+        $ref: '#/$defs/NonEmptyString'
+      status:
+        type: integer
+        minimum: 400
+        maximum: 599
+      detail:
+        type: string
+        maxLength: 2048
+      instance:
+        type: string
+        format: uri-reference
+      traceId:
+        type: string
+        minLength: 1
+        maxLength: 128
+      errors:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required:
+          - code
+          - message
+          properties:
+            code:
+              $ref: '#/$defs/NonEmptyString'
+            message:
+              $ref: '#/$defs/NonEmptyString'
+            field:
+              type: string
+              maxLength: 256
+  InvestigationRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - caseVersion
+    - requestedChecks
+    properties:
+      caseVersion:
+        type: integer
+        minimum: 1
+      requestedChecks:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          enum:
+          - TRANSACTION_LOOKUP
+          - FRAUD_SIGNAL_LOOKUP
+          - CUSTOMER_HISTORY
+          - DOCUMENT_CONSISTENCY
+  Investigation:
+    type: object
+    additionalProperties: false
+    required:
+    - investigationId
+    - caseId
+    - status
+    - findings
+    - createdAt
+    properties:
+      investigationId:
+        $ref: '#/$defs/UUID'
+      caseId:
+        $ref: '#/$defs/UUID'
+      status:
+        type: string
+        enum:
+        - PENDING
+        - RUNNING
+        - COMPLETED
+        - FAILED
+      findings:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required:
+          - kind
+          - summary
+          - evidenceReferences
+          properties:
+            kind:
+              type: string
+              enum:
+              - CONFIRMED_FACT
+              - INFERENCE
+              - DIVERGENCE
+              - MISSING_DATA
+            summary:
+              $ref: '#/$defs/NonEmptyString'
+            evidenceReferences:
+              type: array
+              items:
+                $ref: '#/$defs/UUID'
+      createdAt:
+        $ref: '#/$defs/Timestamp'
+      completedAt:
+        $ref: '#/$defs/Timestamp'
+  Recommendation:
+    type: object
+    additionalProperties: false
+    required:
+    - recommendationId
+    - caseId
+    - caseVersion
+    - recommendationVersion
+    - outcome
+    - confidence
+    - rationale
+    - evidenceReferences
+    - ruleReferences
+    - createdBy
+    - createdAt
+    properties:
+      recommendationId:
+        $ref: '#/$defs/UUID'
+      caseId:
+        $ref: '#/$defs/UUID'
+      caseVersion:
+        type: integer
+        minimum: 1
+      recommendationVersion:
+        type: integer
+        minimum: 1
+      outcome:
+        type: string
+        enum:
+        - APPROVE
+        - REJECT
+        - REQUEST_MORE_EVIDENCE
+        - ABSTAIN
+      confidence:
+        type: number
+        minimum: 0
+        maximum: 1
+      rationale:
+        $ref: '#/$defs/NonEmptyString'
+      evidenceReferences:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          $ref: '#/$defs/UUID'
+      ruleReferences:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          pattern: ^BR-[0-9]{3}$
+      createdBy:
+        $ref: '#/$defs/NonEmptyString'
+      createdAt:
+        $ref: '#/$defs/Timestamp'
+  CreateRecommendationRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - caseVersion
+    - investigationId
+    properties:
+      caseVersion:
+        type: integer
+        minimum: 1
+      investigationId:
+        $ref: '#/$defs/UUID'
+  ApprovalDecisionRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - caseVersion
+    - recommendationId
+    - recommendationVersion
+    - decision
+    - reason
+    properties:
+      caseVersion:
+        type: integer
+        minimum: 1
+      recommendationId:
+        $ref: '#/$defs/UUID'
+      recommendationVersion:
+        type: integer
+        minimum: 1
+      decision:
+        type: string
+        enum:
+        - APPROVE
+        - REJECT
+        - REQUEST_MORE_EVIDENCE
+      reason:
+        $ref: '#/$defs/NonEmptyString'
+      evidenceReferences:
+        type: array
+        uniqueItems: true
+        items:
+          $ref: '#/$defs/UUID'
+  Approval:
+    type: object
+    additionalProperties: false
+    required:
+    - approvalId
+    - caseId
+    - recommendationId
+    - recommendationVersion
+    - status
+    - decidedBy
+    - decidedAt
+    properties:
+      approvalId:
+        $ref: '#/$defs/UUID'
+      caseId:
+        $ref: '#/$defs/UUID'
+      recommendationId:
+        $ref: '#/$defs/UUID'
+      recommendationVersion:
+        type: integer
+        minimum: 1
+      status:
+        type: string
+        enum:
+        - APPROVED
+        - REJECTED
+        - MORE_EVIDENCE_REQUIRED
+      decidedBy:
+        $ref: '#/$defs/NonEmptyString'
+      reason:
+        $ref: '#/$defs/NonEmptyString'
+      decidedAt:
+        $ref: '#/$defs/Timestamp'
+      expiresAt:
+        $ref: '#/$defs/Timestamp'
+  DocumentStatus:
+    type: string
+    enum:
+    - RECEIVED
+    - QUARANTINED
+    - VALIDATING
+    - VALIDATED
+    - REJECTED
+  Document:
+    type: object
+    additionalProperties: false
+    required:
+    - documentId
+    - caseId
+    - tenantId
+    - documentType
+    - status
+    - checksum
+    - version
+    - createdAt
+    properties:
+      documentId:
+        $ref: '#/$defs/UUID'
+      caseId:
+        $ref: '#/$defs/UUID'
+      tenantId:
+        $ref: '#/$defs/UUID'
+      documentType:
+        type: string
+        enum:
+        - RECEIPT
+        - STATEMENT
+        - TRANSACTION_PROOF
+        - IDENTITY_PROOF
+        - OTHER
+      status:
+        $ref: '#/$defs/DocumentStatus'
+      mediaType:
+        type: string
+        enum:
+        - application/pdf
+        - image/png
+        - image/jpeg
+      checksum:
+        type: string
+        pattern: ^[a-fA-F0-9]{64}$
+      version:
+        type: integer
+        minimum: 1
+      storageReference:
+        type: string
+        minLength: 1
+        maxLength: 1024
+      rejectionReasons:
+        type: array
+        items:
+          $ref: '#/$defs/NonEmptyString'
+      createdAt:
+        $ref: '#/$defs/Timestamp'
+  RegisterDocumentRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - documentType
+    - mediaType
+    - checksum
+    - storageReference
+    properties:
+      documentType:
+        type: string
+        enum:
+        - RECEIPT
+        - STATEMENT
+        - TRANSACTION_PROOF
+        - IDENTITY_PROOF
+        - OTHER
+      mediaType:
+        type: string
+        enum:
+        - application/pdf
+        - image/png
+        - image/jpeg
+      checksum:
+        type: string
+        pattern: ^[a-fA-F0-9]{64}$
+      storageReference:
+        type: string
+        minLength: 1
+        maxLength: 1024
+  Evidence:
+    type: object
+    additionalProperties: false
+    required:
+    - evidenceId
+    - caseId
+    - tenantId
+    - evidenceType
+    - sourceType
+    - sourceReference
+    - sourceVersion
+    - confidence
+    - createdAt
+    properties:
+      evidenceId:
+        $ref: '#/$defs/UUID'
+      caseId:
+        $ref: '#/$defs/UUID'
+      tenantId:
+        $ref: '#/$defs/UUID'
+      evidenceType:
+        type: string
+        enum:
+        - EXTRACTED_FIELD
+        - SYSTEM_FACT
+        - ANALYST_NOTE
+        - POLICY_REFERENCE
+        - MODEL_FINDING
+      sourceType:
+        type: string
+        enum:
+        - DOCUMENT
+        - SYSTEM
+        - HUMAN
+        - KNOWLEDGE_BASE
+        - MODEL
+      sourceReference:
+        $ref: '#/$defs/NonEmptyString'
+      sourceVersion:
+        type: string
+        minLength: 1
+        maxLength: 128
+      value:
+        description: Valor minimizado; dados sensíveis devem ser tokenizados ou redigidos.
+      confidence:
+        type: number
+        minimum: 0
+        maximum: 1
+      page:
+        type: integer
+        minimum: 1
+      position:
+        type: string
+        maxLength: 256
+      checksum:
+        type: string
+        pattern: ^[a-fA-F0-9]{64}$
+      createdAt:
+        $ref: '#/$defs/Timestamp'
+  ExecutionRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - caseVersion
+    - approvalId
+    - recommendationVersion
+    - commandType
+    - commandHash
+    - evidenceReferences
+    properties:
+      caseVersion:
+        type: integer
+        minimum: 1
+      approvalId:
+        $ref: '#/$defs/UUID'
+      recommendationVersion:
+        type: integer
+        minimum: 1
+      commandType:
+        type: string
+        enum:
+        - MOCK_REFUND
+        - MOCK_REVERSAL
+      commandHash:
+        type: string
+        pattern: ^[a-fA-F0-9]{64}$
+      evidenceReferences:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          $ref: '#/$defs/UUID'
+  Execution:
+    type: object
+    additionalProperties: false
+    required:
+    - executionId
+    - caseId
+    - status
+    - idempotencyKey
+    - commandHash
+    - createdAt
+    properties:
+      executionId:
+        $ref: '#/$defs/UUID'
+      caseId:
+        $ref: '#/$defs/UUID'
+      status:
+        type: string
+        enum:
+        - PENDING
+        - SUCCEEDED
+        - FAILED
+        - RECONCILIATION_REQUIRED
+        - RECONCILED
+      idempotencyKey:
+        type: string
+        minLength: 8
+        maxLength: 128
+      commandHash:
+        type: string
+        pattern: ^[a-fA-F0-9]{64}$
+      externalReference:
+        type: string
+        maxLength: 256
+      createdAt:
+        $ref: '#/$defs/Timestamp'
+      completedAt:
+        $ref: '#/$defs/Timestamp'
+  ReconciliationResolutionRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - caseVersion
+    - resolution
+    - reason
+    properties:
+      caseVersion:
+        type: integer
+        minimum: 1
+      resolution:
+        type: string
+        enum:
+        - CONFIRMED_SUCCEEDED
+        - CONFIRMED_FAILED
+        - ESCALATED
+      reason:
+        $ref: '#/$defs/NonEmptyString'
