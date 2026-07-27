@@ -2,7 +2,9 @@
 
 O nível de containers atual representa os elementos já existentes no repositório.
 
-![C4 containers atuais](../assets/diagrams/c4-container-current.svg)
+[![C4 containers atuais](../assets/diagrams/c4-container-current.png)](../assets/diagrams/c4-container-current.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-container-current.svg)
 
 ## Containers existentes
 
