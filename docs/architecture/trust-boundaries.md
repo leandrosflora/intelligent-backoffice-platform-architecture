@@ -2,7 +2,9 @@
 
 As trust boundaries determinam onde autenticação, validação, redaction e policy enforcement devem ocorrer.
 
-![Trust boundaries](../assets/diagrams/c4-trust-boundaries.svg)
+[![Trust boundaries](../assets/diagrams/c4-trust-boundaries.png)](../assets/diagrams/c4-trust-boundaries.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-trust-boundaries.svg)
 
 ## Fronteiras
 
@@ -19,9 +21,9 @@ As trust boundaries determinam onde autenticação, validação, redaction e pol
 ## Regras transversais
 
 - documentos são entrada não confiável;
-- agentes recebem referências, não credenciais de sistema;
+- agentes recebem referências controladas;
 - tools exigem identidade, tenant, estágio e finalidade;
-- mutações exigem aprovação vigente e chave de idempotência;
+- operações mutáveis exigem aprovação vigente e idempotência;
 - telemetria não contém payload integral nem segredo.
 
 **Fonte PlantUML:** `C4/c4-trust-boundaries.puml`.

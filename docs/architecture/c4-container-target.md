@@ -2,7 +2,9 @@
 
 O modelo alvo separa interação, workflow, inteligência, governança, execução, dados e observabilidade.
 
-![C4 containers alvo](../assets/diagrams/c4-container-target.svg)
+[![C4 containers alvo](../assets/diagrams/c4-container-target.png)](../assets/diagrams/c4-container-target.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-container-target.svg)
 
 ## Decisões principais
 

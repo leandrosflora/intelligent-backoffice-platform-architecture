@@ -2,7 +2,9 @@
 
 O contexto alvo posiciona a plataforma entre canais, pessoas, fontes de conhecimento, identidade corporativa e sistemas de registro.
 
-![C4 contexto alvo](../assets/diagrams/c4-context-target.svg)
+[![C4 contexto alvo](../assets/diagrams/c4-context-target.png)](../assets/diagrams/c4-context-target.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-context-target.svg)
 
 ## Responsabilidade da plataforma
 

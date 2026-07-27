@@ -2,7 +2,9 @@
 
 Document Intelligence trata documentos como conteúdo não confiável e produz evidências rastreáveis, nunca autorização ou decisão final.
 
-![Componentes de Document Intelligence](../assets/diagrams/c4-component-document-intelligence.svg)
+[![Componentes de Document Intelligence](../assets/diagrams/c4-component-document-intelligence.png)](../assets/diagrams/c4-component-document-intelligence.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-component-document-intelligence.svg)
 
 ## Pipeline
 

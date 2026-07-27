@@ -1,6 +1,8 @@
 # Deployment alvo de produção
 
-![Deployment alvo de produção](../assets/diagrams/c4-deployment-production-target.svg)
+[![Deployment alvo de produção](../assets/diagrams/c4-deployment-production-target.png)](../assets/diagrams/c4-deployment-production-target.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-deployment-production-target.svg)
 
 ## Características
 
@@ -13,3 +15,5 @@
 - região de recuperação com dados e evidências replicados.
 
 Esta visão é **alvo**, não evidência de que esses serviços existem. Os manifestos em `deploy/kubernetes/` são contratos arquiteturais validados, não uma implantação produtiva executada pelo CI.
+
+**Fonte PlantUML:** `C4/c4-deployment-production-target.puml`.

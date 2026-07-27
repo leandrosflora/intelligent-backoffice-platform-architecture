@@ -2,7 +2,9 @@
 
 O estado atual é deliberadamente simples: o repositório publica uma referência arquitetural, contratos iniciais e policies de exemplo. Não existe runtime de backoffice implementado.
 
-![C4 contexto atual](../assets/diagrams/c4-context-current.svg)
+[![C4 contexto atual](../assets/diagrams/c4-context-current.png)](../assets/diagrams/c4-context-current.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-context-current.svg)
 
 ## Leitura
 

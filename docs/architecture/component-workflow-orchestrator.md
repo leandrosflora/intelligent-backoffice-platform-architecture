@@ -2,7 +2,9 @@
 
 O Orchestrator aplica o lifecycle definido no P1 e coordena efeitos sem acoplar a máquina de estados às integrações externas.
 
-![Componentes do Workflow Orchestrator](../assets/diagrams/c4-component-workflow-orchestrator.svg)
+[![Componentes do Workflow Orchestrator](../assets/diagrams/c4-component-workflow-orchestrator.png)](../assets/diagrams/c4-component-workflow-orchestrator.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-component-workflow-orchestrator.svg)
 
 ## Garantias
 

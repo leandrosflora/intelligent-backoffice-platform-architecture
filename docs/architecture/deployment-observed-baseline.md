@@ -1,6 +1,8 @@
 # Deployment observado do P5
 
-![Baseline observada](../assets/diagrams/c4-deployment-observed-baseline.svg)
+[![Baseline observada](../assets/diagrams/c4-deployment-observed-baseline.png)](../assets/diagrams/c4-deployment-observed-baseline.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-deployment-observed-baseline.svg)
 
 ## Leitura
 
@@ -20,3 +22,5 @@ Ela substitui interpretações de que o deployment alvo com PostgreSQL, Kafka, o
 ## Limites
 
 A observabilidade é local, sem autenticação corporativa, retenção, multi-região, SRE on-call ou dados reais.
+
+**Fonte PlantUML:** `C4/c4-deployment-observed-baseline.puml`.
