@@ -1,22 +1,22 @@
 @startuml
-!include _theme.iuml
+!include <C4/C4_Context>
 
 title C4 Nível 1 — Contexto atual
-left to right direction
+LAYOUT_LEFT_RIGHT()
 
-C4Person(author, "Arquiteto / mantenedor", "Evolui documentação, contratos e políticas.")
-C4Person(reader, "Leitor técnico", "Consulta a referência e os artefatos publicados.")
+Person(author, "Arquiteto / mantenedor", "Evolui documentação, contratos e políticas.")
+Person(reader, "Leitor técnico", "Consulta a referência e os artefatos publicados.")
 
-C4System(repo, "Architecture Repository", "Repositório documental com MkDocs, contratos iniciais, policies e scripts de validação.")
+System(repo, "Architecture Repository", "Repositório documental com MkDocs, contratos iniciais, policies e scripts de validação.")
 
-C4External(actions, "GitHub Actions", "Executa validação de estrutura, build do MkDocs e publicação.")
-C4External(pages, "GitHub Pages", "Publica a documentação estática.")
+System_Ext(actions, "GitHub Actions", "Executa validação de estrutura, build do MkDocs e publicação.")
+System_Ext(pages, "GitHub Pages", "Publica a documentação estática.")
 
-author --> repo : versiona documentação e decisões
-reader --> pages : consulta a documentação
-repo --> actions : dispara pipelines
-actions --> pages : publica site
-actions --> repo : valida estrutura e conteúdo
+Rel(author, repo, "Versiona documentação e decisões", "Git")
+Rel(repo, actions, "Dispara pipelines", "GitHub events")
+Rel(actions, repo, "Valida estrutura e conteúdo", "Checkout e scripts")
+Rel(actions, pages, "Publica o site", "GitHub Pages deployment")
+Rel(reader, pages, "Consulta a documentação", "HTTPS")
 
 note bottom of repo
 Estado atual honesto:
@@ -25,10 +25,5 @@ workflow executável, agentes,
 processamento documental ou integração bancária.
 end note
 
-legend right
-  |= Cor | Significado |
-  |<#1168BD>| Sistema sob responsabilidade |
-  |<#6B7280>| Sistema externo |
-  |<#08427B>| Pessoa |
-endlegend
+SHOW_LEGEND()
 @enduml
