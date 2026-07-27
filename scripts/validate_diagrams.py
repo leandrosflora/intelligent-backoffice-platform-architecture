@@ -24,6 +24,22 @@ EXPECTED_SOURCES = (
     "sequence-retry-dlq-replay.puml",
 )
 
+REQUIRED_C4_INCLUDES = {
+    "c4-context-current.puml": "!include <C4/C4_Context>",
+    "c4-context-target.puml": "!include <C4/C4_Context>",
+    "c4-container-current.puml": "!include <C4/C4_Container>",
+    "c4-container-target.puml": "!include <C4/C4_Container>",
+}
+
+LEGACY_C4_MACROS = (
+    "C4Person(",
+    "C4System(",
+    "C4External(",
+    "C4Container(",
+    "C4ContainerDb(",
+    "C4Queue(",
+)
+
 
 def validate_source(path: Path) -> list[str]:
     errors: list[str] = []
@@ -38,6 +54,16 @@ def validate_source(path: Path) -> list[str]:
         errors.append(f"{path}: remote includes are not allowed")
     if "http://" in content.lower() or "https://" in content.lower():
         errors.append(f"{path}: external URLs are not allowed in diagram sources")
+
+    required_include = REQUIRED_C4_INCLUDES.get(path.name)
+    if required_include and required_include not in content:
+        errors.append(f"{path}: missing required C4-PlantUML include: {required_include}")
+
+    if required_include:
+        for macro in LEGACY_C4_MACROS:
+            if macro in content:
+                errors.append(f"{path}: legacy macro is not allowed: {macro}")
+
     return errors
 
 
