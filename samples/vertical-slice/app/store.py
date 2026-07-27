@@ -22,6 +22,21 @@ CREATE TABLE IF NOT EXISTS idempotency (
   request_hash TEXT NOT NULL, response_json TEXT NOT NULL,
   PRIMARY KEY(key, tenant_id, action)
 );
+CREATE TABLE IF NOT EXISTS executions (
+  id TEXT PRIMARY KEY,
+  case_id TEXT NOT NULL,
+  tenant_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  idempotency_key TEXT NOT NULL,
+  request_hash TEXT NOT NULL,
+  result_mode TEXT NOT NULL,
+  resolution TEXT,
+  external_reference TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  completed_at TEXT,
+  UNIQUE(tenant_id, idempotency_key)
+);
+CREATE INDEX IF NOT EXISTS ix_executions_case ON executions(tenant_id, case_id, created_at);
 CREATE TABLE IF NOT EXISTS runtime_settings (
   key TEXT PRIMARY KEY, value TEXT NOT NULL
 );
@@ -159,4 +174,12 @@ class Store:
         data = dict(row)
         data["evidence_references"] = json.loads(data.pop("evidence_json"))
         data["case_id"] = data.pop("id")
+        return data
+
+    @staticmethod
+    def execution(row):
+        if not row:
+            return None
+        data = dict(row)
+        data["execution_id"] = data.pop("id")
         return data
