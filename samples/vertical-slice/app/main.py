@@ -7,7 +7,14 @@ from .eventing_metrics import refresh_eventing_metrics
 from .observability import install_http_observability, metrics_response
 from .operations import create_operations_router
 from .policy import PolicyClient
-from .schemas import ApprovalRequest, CreateCaseRequest, ExecutionRequest, RecommendationRequest, RegisterDocumentRequest
+from .schemas import (
+    ApprovalRequest,
+    CreateCaseRequest,
+    ExecutionRequest,
+    RecommendationRequest,
+    ReconciliationResolutionRequest,
+    RegisterDocumentRequest,
+)
 from .security import RequestContext, configure_security, request_context
 from .service import BackofficeService
 from .store import Store
@@ -19,7 +26,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     store = Store(settings.database_path, eventing_enabled=settings.eventing_enabled)
     policy = PolicyClient(settings)
     service = BackofficeService(store, policy, settings.service_name)
-    app = FastAPI(title="Intelligent Backoffice Vertical Slice", version="0.4.0")
+    app = FastAPI(title="Intelligent Backoffice Vertical Slice", version="0.5.0")
     app.state.store = store
     app.state.policy = policy
     install_http_observability(app, settings)
@@ -82,6 +89,23 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/v1/cases/{case_id}/executions")
     def execute(case_id: str, req: ExecutionRequest, idempotency_key: str = Header(..., alias="Idempotency-Key"), ctx: RequestContext = Depends(request_context)):
         return service.execute(ctx, case_id, idempotency_key, req)
+
+    @app.get("/v1/cases/{case_id}/executions/{execution_id}")
+    def execution(case_id: str, execution_id: str, ctx: RequestContext = Depends(request_context)):
+        return service.get_execution(ctx, case_id, execution_id)
+
+    @app.post("/v1/cases/{case_id}/reconciliations/{execution_id}/resolve")
+    def reconcile(
+        case_id: str,
+        execution_id: str,
+        req: ReconciliationResolutionRequest,
+        if_match: int = Header(..., alias="If-Match"),
+        idempotency_key: str = Header(..., alias="Idempotency-Key"),
+        ctx: RequestContext = Depends(request_context),
+    ):
+        if req.case_version != if_match:
+            raise HTTPException(400, detail={"reason": "case-version-header-body-mismatch"})
+        return service.reconcile(ctx, case_id, execution_id, idempotency_key, if_match, req)
 
     @app.get("/v1/cases/{case_id}/timeline")
     def timeline(case_id: str, ctx: RequestContext = Depends(request_context)):
