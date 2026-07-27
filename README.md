@@ -39,9 +39,9 @@ O primeiro case demonstra uma jornada bancária de contestação:
 - manifests Kubernetes alvo com HA e controles de rede;
 - matriz explícita de production readiness.
 
-## Arquitetura
+## Arquitetura atual
 
-[![C4 contexto alvo](docs/assets/diagrams/c4-context-target.png)](docs/assets/diagrams/c4-context-target.svg)
+[![C4 contexto atual](docs/assets/diagrams/c4-context-current.png)](docs/assets/diagrams/c4-context-current.svg)
 
 A documentação separa quatro conceitos:
 
@@ -49,6 +49,8 @@ A documentação separa quatro conceitos:
 - **baseline executável:** controle demonstrado localmente ou no CI;
 - **alvo:** responsabilidade ou topologia planejada;
 - **produção:** integração real, operação e governança aprovadas.
+
+Consulte a [matriz atual × alvo](docs/architecture/implementation-status.md) para os gaps de cada capacidade.
 
 ## Executar localmente
 
@@ -84,6 +86,7 @@ python scripts/run_p7_secure_e2e.py
 - [Documentação publicada](https://leandrosflora.github.io/intelligent-backoffice-platform-architecture/)
 - [Como ler esta arquitetura](docs/guide/how-to-read.md)
 - [Contexto de negócio](docs/context/business-context.md)
+- [Estado de implementação](docs/architecture/implementation-status.md)
 - [Arquitetura técnica](docs/architecture/index.md)
 - [Contratos executáveis](docs/contracts/index.md)
 - [Implementação de referência](docs/implementation/index.md)
