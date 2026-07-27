@@ -1,0 +1,44 @@
+asyncapi: 3.0.0
+info:
+  title: Intelligent Backoffice Platform Events
+  version: 0.1.0
+  description: Contrato inicial dos eventos compartilhados da plataforma.
+defaultContentType: application/json
+channels:
+  caseCreated:
+    address: backoffice.case.created
+    messages:
+      caseCreated:
+        $ref: "#/components/messages/CaseCreated"
+operations:
+  receiveCaseCreated:
+    action: receive
+    channel:
+      $ref: "#/channels/caseCreated"
+    messages:
+      - $ref: "#/channels/caseCreated/messages/caseCreated"
+components:
+  messages:
+    CaseCreated:
+      name: CaseCreated
+      title: Caso de backoffice criado
+      payload:
+        type: object
+        required:
+          - eventId
+          - tenantId
+          - caseId
+          - occurredAt
+        properties:
+          eventId:
+            type: string
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          caseId:
+            type: string
+            format: uuid
+          occurredAt:
+            type: string
+            format: date-time

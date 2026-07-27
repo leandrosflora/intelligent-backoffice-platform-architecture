@@ -1,0 +1,17 @@
+name: intelligent-backoffice-platform
+
+services:
+  docs:
+    image: squidfunk/mkdocs-material:9
+    working_dir: /docs
+    command: serve --dev-addr=0.0.0.0:8000
+    volumes:
+      - .:/docs
+    ports:
+      - "${DOCS_PORT:-8000}:8000"
+    profiles:
+      - docs
+
+networks:
+  default:
+    name: intelligent-backoffice-platform

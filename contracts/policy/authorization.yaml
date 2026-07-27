@@ -1,0 +1,22 @@
+version: "0.1"
+defaultDecision: DENY
+requiredContext:
+  - subject
+  - tenantId
+  - action
+  - resource
+rules:
+  - id: allow-case-read
+    description: Permite leitura de caso somente no tenant do solicitante.
+    action: case.read
+    obligations:
+      - tenant-match
+      - audit-decision
+  - id: require-human-approval
+    description: Operações financeiras exigem aprovação humana válida.
+    action: financial.execute
+    obligations:
+      - approved-decision
+      - idempotency-key
+      - evidence-reference
+      - audit-decision
