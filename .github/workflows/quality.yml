@@ -47,7 +47,21 @@ jobs:
         run: dotnet restore IntelligentBackofficePlatformArchitecture.sln
 
       - name: Build .NET solution
-        run: dotnet build IntelligentBackofficePlatformArchitecture.sln --configuration Release --no-restore
+        run: |
+          set -o pipefail
+          dotnet build IntelligentBackofficePlatformArchitecture.sln \
+            --configuration Release \
+            --no-restore \
+            2>&1 | tee build.log
+
+      - name: Upload build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-build-diagnostics
+          path: build.log
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Test authorization policies
         run: bash scripts/test-policies.sh
