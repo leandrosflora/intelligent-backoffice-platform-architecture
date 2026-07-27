@@ -34,6 +34,8 @@ jobs:
         run: docker compose --profile distributed up -d --build
       - name: Run distributed E2E
         run: python scripts/run_p6_distributed_e2e.py
+      - name: Run dispute walkthrough
+        run: python scripts/run_dispute_walkthrough.py
       - name: Inspect event topics
         run: docker compose exec -T redpanda rpk topic list --brokers=localhost:9092
       - name: Upload P6 evidence
@@ -41,7 +43,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: p6-eventing-evidence
-          path: p6-e2e-output.jsonl
+          path: |
+            p6-e2e-output.jsonl
+            artifacts/walkthrough/
           if-no-files-found: warn
       - name: Show logs on failure
         if: failure()
