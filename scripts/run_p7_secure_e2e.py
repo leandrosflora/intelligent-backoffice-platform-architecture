@@ -73,10 +73,13 @@ def wait_ready():
         if status == 200:
             return
         time.sleep(1)
+    record("readiness-timeout", last["status"], last["payload"])
     raise AssertionError(f"secure API did not become ready; last={last}")
 
 
+OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 OUTPUT.unlink(missing_ok=True)
+OUTPUT.touch()
 wait_ready()
 status, health = request("GET", "/health")
 record("health", status, health)
