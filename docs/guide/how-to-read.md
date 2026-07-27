@@ -1,6 +1,6 @@
 # Como ler esta arquitetura
 
-Este repositório combina especificação arquitetural, contratos executáveis, implementação de referência e evidências produzidas por CI. A ordem de leitura depende da decisão que você precisa tomar.
+Este repositório combina especificação arquitetural, contratos executáveis, implementação de referência, decisões arquiteturais e evidências produzidas por CI. A ordem de leitura depende da decisão que você precisa tomar.
 
 ## Conceitos de estado
 
@@ -19,11 +19,11 @@ Este repositório combina especificação arquitetural, contratos executáveis, 
 | Público | Comece por | Continue por | Decisão apoiada |
 |---|---|---|---|
 | Executivo ou gestor | [Contexto de negócio](../context/business-context.md) | [Outcome card](../functional/outcome-card.md) e [Production readiness](../governance/production-readiness.md) | Valor, risco e condições para evolução |
-| Arquiteto | [Arquitetura funcional](../functional/index.md) | [Arquitetura técnica](../architecture/index.md), [NFRs](../functional/non-functional-requirements.md) e [rastreabilidade](../functional/traceability-matrix.md) | Limites, responsabilidades e trade-offs |
-| Desenvolvedor | [Implementação de referência](../implementation/index.md) | [Contratos](../contracts/index.md), [cenários testados](../implementation/test-scenarios.md) e [runbook local](../implementation/runbook.md) | Como executar, alterar e validar o slice |
-| Segurança | [Trust boundaries](../architecture/trust-boundaries.md) | [Identidade de workload](../security/workload-identity.md), [policies](../contracts/policies.md) e [supply chain](../security/supply-chain.md) | Controles, confiança e riscos residuais |
+| Arquiteto | [Arquitetura funcional](../functional/index.md) | [Arquitetura técnica](../architecture/index.md), [ADRs](../decisions/index.md), [NFRs](../functional/non-functional-requirements.md) e [rastreabilidade](../functional/traceability-matrix.md) | Limites, responsabilidades e trade-offs |
+| Desenvolvedor | [Implementação de referência](../implementation/index.md) | [Contratos](../contracts/index.md), [ADRs](../decisions/index.md), [cenários testados](../implementation/test-scenarios.md) e [runbook local](../implementation/runbook.md) | Como executar, alterar e validar o slice |
+| Segurança | [Trust boundaries](../architecture/trust-boundaries.md) | [ADRs de controle](../decisions/index.md), [Identidade de workload](../security/workload-identity.md), [policies](../contracts/policies.md) e [supply chain](../security/supply-chain.md) | Controles, confiança e riscos residuais |
 | Operações ou SRE | [Deployment observado](../architecture/deployment-observed-baseline.md) | [Observabilidade](../operations/observability.md), [SLOs](../operations/slos.md), [event backbone](../operations/eventing.md) e [runbooks](../operations/index.md) | Operação, diagnóstico e recuperação |
-| Auditoria ou compliance | [Lifecycle](../functional/case-lifecycle.md) | [Papéis](../functional/roles-and-responsibilities.md), [rastreabilidade](../functional/traceability-matrix.md) e [evidências](../governance/production-readiness.md) | Segregação, decisões e cadeia de evidências |
+| Auditoria ou compliance | [Lifecycle](../functional/case-lifecycle.md) | [Papéis](../functional/roles-and-responsibilities.md), [ADRs](../decisions/index.md), [rastreabilidade](../functional/traceability-matrix.md) e [evidências](../governance/production-readiness.md) | Segregação, decisões e cadeia de evidências |
 
 ## Sequência recomendada para leitura completa
 
@@ -33,10 +33,11 @@ Este repositório combina especificação arquitetural, contratos executáveis, 
 4. [Mapa de capacidades](../functional/capability-map.md)
 5. [Lifecycle do caso](../functional/case-lifecycle.md)
 6. [Arquitetura técnica](../architecture/index.md)
-7. [Contratos executáveis](../contracts/index.md)
-8. [Implementação de referência](../implementation/index.md)
-9. [Segurança e operações](../security/index.md)
-10. [Production readiness](../governance/production-readiness.md)
+7. [Architecture Decision Records](../decisions/index.md)
+8. [Contratos executáveis](../contracts/index.md)
+9. [Implementação de referência](../implementation/index.md)
+10. [Segurança e operações](../security/index.md)
+11. [Production readiness](../governance/production-readiness.md)
 
 ## Como interpretar evidências
 
@@ -44,9 +45,10 @@ Uma afirmação arquitetural deve apontar para pelo menos um dos seguintes eleme
 
 - código ou configuração versionada;
 - contrato OpenAPI, AsyncAPI, JSON Schema ou policy;
+- ADR vigente;
 - teste positivo e negativo;
 - relatório ou artifact produzido pelo CI;
 - métrica, SLO ou runbook;
 - owner técnico e funcional.
 
-A [matriz de rastreabilidade](../functional/traceability-matrix.md) conecta necessidades, capacidades, regras, estados, contratos, eventos, policies e evidências.
+A [matriz de rastreabilidade](../functional/traceability-matrix.md) conecta necessidades, capacidades, regras, estados, contratos, eventos, policies e evidências. Os [ADRs](../decisions/index.md) registram os trade-offs e as condições que sustentam essas escolhas.
