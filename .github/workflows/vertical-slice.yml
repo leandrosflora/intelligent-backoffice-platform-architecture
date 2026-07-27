@@ -1,0 +1,47 @@
+name: Vertical Slice
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: samples/vertical-slice/requirements-dev.txt
+      - name: Install dependencies
+        working-directory: samples/vertical-slice
+        run: python -m pip install --upgrade pip -r requirements-dev.txt
+      - name: Run tests
+        working-directory: samples/vertical-slice
+        env:
+          PYTHONPATH: .
+        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=85 -q
+      - name: Validate Compose
+        run: docker compose --profile runtime config
+      - name: Start runtime
+        run: docker compose --profile runtime up -d --build
+      - name: Run runtime E2E with OPA
+        run: python scripts/run_vertical_slice_e2e.py
+      - name: Upload E2E diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vertical-slice-e2e
+          path: e2e-output.jsonl
+          if-no-files-found: warn
+      - name: Show runtime logs on failure
+        if: failure()
+        run: docker compose --profile runtime logs --no-color
+      - name: Stop runtime
+        if: always()
+        run: docker compose --profile runtime down -v

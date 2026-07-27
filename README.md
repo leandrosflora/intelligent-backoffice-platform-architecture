@@ -1,6 +1,7 @@
 # Intelligent Backoffice Platform Architecture
 
 [![Quality](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture/actions/workflows/quality.yml/badge.svg)](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture/actions/workflows/quality.yml)
+[![Vertical Slice](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture/actions/workflows/vertical-slice.yml/badge.svg)](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture/actions/workflows/vertical-slice.yml)
 [![Documentation](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture/actions/workflows/docs.yml/badge.svg)](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture/actions/workflows/docs.yml)
 
 Arquitetura de referência executável para automação inteligente de backoffice com agentes, processamento documental, workflows, human-in-the-loop, policies, auditoria e integração governada com sistemas corporativos.
@@ -9,14 +10,13 @@ Arquitetura de referência executável para automação inteligente de backoffic
 
 O primeiro case é uma jornada bancária de contestação:
 
-1. abertura e triagem do caso;
-2. recebimento e classificação de documentos;
-3. extração e validação de evidências;
-4. investigação com fontes autorizadas;
-5. recomendação explicável;
-6. aprovação humana conforme alçada;
-7. execução governada e idempotente;
-8. reconciliação, auditoria e encerramento.
+1. abertura e triagem;
+2. recebimento e validação documental;
+3. investigação;
+4. recomendação explicável;
+5. aprovação humana conforme alçada;
+6. execução governada e idempotente;
+7. reconciliação, auditoria e encerramento.
 
 ## Evolução
 
@@ -25,66 +25,54 @@ O primeiro case é uma jornada bancária de contestação:
 | P0 | Concluído | Estrutura, MkDocs e pipelines |
 | P1 | Concluído | Arquitetura funcional, lifecycle, regras, risco e NFRs |
 | P2 | Concluído | C4, trust boundaries, deployment e sequências |
-| P3 | Implementado nesta branch | OpenAPI, AsyncAPI, schemas canônicos, catálogo e policies executáveis |
-| P4 | Próximo | Vertical slice mínimo e policy enforcement em runtime |
-| P5 | Planejado | Evals, observabilidade, SLOs e runbooks |
+| P3 | Concluído | OpenAPI, AsyncAPI, schemas, catálogo e policies |
+| P4 | Implementado nesta branch | Vertical slice executável e OPA em runtime |
+| P5 | Próximo | Evals, observabilidade, SLOs e runbooks operacionais |
 
-## Artefatos P3
+## P4 — Vertical slice
 
-- 14 operações HTTP rastreadas por `x-contract-id`;
-- 14 eventos de domínio versionados;
-- 13 actions de autorização;
-- 3 catálogos JSON Schema;
-- catálogo canônico com 41 contratos;
-- policy Rego com default deny, tenant isolation e segregação de funções;
-- testes positivos e negativos de policy;
-- validação de referências, idempotência, concorrência, rastreabilidade e compatibilidade no CI.
+O primeiro slice executável inclui:
 
-## Princípio de leitura
+- API FastAPI modular;
+- persistência SQLite em volume;
+- workflow com versionamento otimista;
+- document intelligence e investigação mocks;
+- recomendação e aprovação segregadas;
+- execução mock com idempotência;
+- caminho `RECONCILIATION_REQUIRED` para resultado ambíguo;
+- OPA consultado por HTTP em runtime;
+- timeline auditável;
+- testes unitários e ponta a ponta em Docker Compose.
 
-O repositório separa explicitamente:
+As responsabilidades permanecem separadas no código, mas são empacotadas em um único serviço para reduzir complexidade do primeiro slice.
 
-- **atual:** artefato ou capacidade confirmada;
-- **alvo:** responsabilidade planejada;
-- **baseline executável:** controle demonstrado em CI ou ambiente de referência;
-- **produção:** integração real, operação e governança aprovadas.
+## Executar o runtime
 
-Um contrato alvo não é evidência de serviço implementado.
+Pré-requisitos: Docker e Docker Compose.
 
-## Estrutura
+```bash
+docker compose --profile runtime up --build
+```
 
-```text
-.
-├── .github/workflows/
-├── C4/                              # fontes PlantUML
-├── contracts/
-│   ├── catalog.yaml                 # inventário canônico
-│   ├── openapi/                     # operações HTTP
-│   ├── asyncapi/                    # eventos
-│   ├── schemas/                     # modelos compartilhados
-│   └── policy/                      # matriz declarativa
-├── docs/
-│   ├── contracts/
-│   ├── assets/diagrams/             # gerados em CI
-│   ├── context/
-│   ├── functional/
-│   ├── architecture/
-│   ├── case-study/
-│   ├── governance/
-│   ├── operations/
-│   ├── security/
-│   └── services/
-├── policies/                        # Rego e testes
-├── scripts/
-├── samples/
-├── docker-compose.yml
-├── mkdocs.yml
-└── IntelligentBackofficePlatformArchitecture.sln
+- API: `http://localhost:8080`
+- Swagger: `http://localhost:8080/docs`
+- OPA: `http://localhost:8181`
+
+Para remover dados e volumes:
+
+```bash
+docker compose --profile runtime down -v
+```
+
+## Executar testes
+
+```bash
+cd samples/vertical-slice
+python -m pip install -r requirements-dev.txt
+PYTHONPATH=. pytest --cov=app --cov-fail-under=85
 ```
 
 ## Documentação local
-
-Pré-requisitos: Python e Docker.
 
 ```bash
 python -m pip install -r requirements-docs.txt
@@ -98,19 +86,11 @@ mkdocs serve
 
 Acesse `http://localhost:8000`.
 
-## Validação completa
+## Princípio de leitura
 
-```bash
-python scripts/validate_structure.py
-python scripts/validate_contracts.py
-bash scripts/test-policies.sh
-python scripts/validate_diagrams.py
-bash scripts/render-diagrams.sh
-python scripts/validate_diagrams.py --require-generated
-mkdocs build --strict
-docker compose config
-```
+- **atual:** capacidade confirmada;
+- **alvo:** responsabilidade planejada;
+- **baseline executável:** controle demonstrado em CI ou no ambiente de referência;
+- **produção:** integração real, operação e governança aprovadas.
 
-## Estado
-
-O P3 adiciona contratos e policies executáveis em CI. Nenhum serviço produtivo, documento real de cliente, modelo real ou integração bancária foi adicionado.
+O P4 é uma baseline executável. Não utiliza dados reais, modelo real, OCR real ou integração bancária produtiva.

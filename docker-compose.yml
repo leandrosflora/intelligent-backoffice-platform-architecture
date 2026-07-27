@@ -9,9 +9,46 @@ services:
       - .:/docs
     ports:
       - "${DOCS_PORT:-8000}:8000"
-    profiles:
-      - docs
+    profiles: [docs]
+
+  opa:
+    image: openpolicyagent/opa:1.18.2-static
+    command: ["run", "--server", "--addr=0.0.0.0:8181", "/policies"]
+    volumes:
+      - ./policies:/policies:ro
+    ports:
+      - "${OPA_PORT:-8181}:8181"
+    healthcheck:
+      test: ["CMD", "/opa", "eval", "1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    profiles: [runtime]
+
+  vertical-slice:
+    build:
+      context: ./samples/vertical-slice
+    environment:
+      DATABASE_PATH: /data/vertical-slice.db
+      POLICY_MODE: opa
+      OPA_URL: http://opa:8181
+    volumes:
+      - vertical-slice-data:/data
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      opa:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    profiles: [runtime]
 
 networks:
   default:
     name: intelligent-backoffice-platform
+
+volumes:
+  vertical-slice-data:

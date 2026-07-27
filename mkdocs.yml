@@ -65,6 +65,10 @@ nav:
       - Eventos: contracts/events.md
       - Policies: contracts/policies.md
       - Versionamento: contracts/versioning.md
+  - Implementação:
+      - Visão geral P4: implementation/index.md
+      - Cenários testados: implementation/test-scenarios.md
+      - Runbook local: implementation/runbook.md
   - Case aplicado: case-study/index.md
   - Governança: governance/index.md
   - Operações: operations/index.md
