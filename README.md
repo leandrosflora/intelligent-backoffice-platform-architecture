@@ -18,6 +18,29 @@ O primeiro case é uma jornada bancária de contestação:
 7. execução governada;
 8. auditoria e encerramento.
 
+## Evolução
+
+| Fase | Estado | Conteúdo |
+|---|---|---|
+| P0 | Concluído | Estrutura do repositório, MkDocs e pipelines |
+| P1 | Implementado nesta branch | Arquitetura funcional e lifecycle do case |
+| P2 | Próximo | C4, trust boundaries e sequências |
+| P3 | Planejado | OpenAPI, AsyncAPI e policies completas |
+| P4 | Planejado | Vertical slice executável |
+
+## Artefatos P1
+
+- contexto de negócio;
+- outcome card e métricas;
+- mapa de capacidades;
+- mapa de domínios;
+- lifecycle com estados, transições e invariantes;
+- regras de negócio versionadas;
+- papéis, RACI e segregação de funções;
+- classificação de risco;
+- requisitos não funcionais;
+- matriz de rastreabilidade.
+
 ## Objetivos
 
 - demonstrar workflows agentic assíncronos e de longa duração;
@@ -30,22 +53,21 @@ O primeiro case é uma jornada bancária de contestação:
 
 ```text
 .
-├── .github/workflows/                 # qualidade e publicação da documentação
-├── C4/                               # modelos arquiteturais
+├── .github/workflows/
+├── C4/
 ├── contracts/
-│   ├── openapi/                      # contratos HTTP
-│   ├── asyncapi/                     # contratos de eventos
-│   └── policy/                       # contratos declarativos de autorização
 ├── docs/
+│   ├── context/
+│   ├── functional/
 │   ├── architecture/
 │   ├── case-study/
 │   ├── governance/
 │   ├── operations/
 │   ├── security/
 │   └── services/
-├── policies/                         # policies executáveis
-├── scripts/                          # validações e automações
-├── samples/                          # vertical slices e exemplos
+├── policies/
+├── scripts/
+├── samples/
 ├── docker-compose.yml
 ├── mkdocs.yml
 └── IntelligentBackofficePlatformArchitecture.sln
@@ -53,10 +75,8 @@ O primeiro case é uma jornada bancária de contestação:
 
 ## Documentação local
 
-Com Python instalado:
-
 ```bash
-python -m pip install mkdocs-material pyyaml
+python -m pip install -r requirements-docs.txt
 mkdocs serve
 ```
 
@@ -78,4 +98,4 @@ docker compose config
 
 ## Estado
 
-Este repositório inicia como referência documental e arquitetural. Serviços executáveis, contratos completos, políticas de produção e vertical slices serão adicionados de forma incremental.
+O repositório continua sendo uma referência documental e arquitetural. O P1 não adiciona serviços produtivos, modelos reais ou integração com sistemas bancários.
