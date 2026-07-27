@@ -2,7 +2,9 @@
 
 O deployment local proposto para o futuro vertical slice usa Docker Compose e dados exclusivamente sintéticos.
 
-![Deployment local](../assets/diagrams/c4-deployment-local.svg)
+[![Deployment local](../assets/diagrams/c4-deployment-local.png)](../assets/diagrams/c4-deployment-local.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/c4-deployment-local.svg)
 
 ## Zonas
 
