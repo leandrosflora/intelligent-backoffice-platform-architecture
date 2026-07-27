@@ -53,6 +53,7 @@ nav:
       - Rastreabilidade: functional/traceability-matrix.md
   - Arquitetura técnica:
       - Visão geral: architecture/index.md
+      - Estado de implementação: architecture/implementation-status.md
       - C4 Contexto atual: architecture/c4-context-current.md
       - C4 Contexto alvo: architecture/c4-context-target.md
       - C4 Containers atuais: architecture/c4-container-current.md

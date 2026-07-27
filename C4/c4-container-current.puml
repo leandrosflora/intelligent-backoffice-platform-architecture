@@ -1,37 +1,79 @@
 @startuml
 !include <C4/C4_Container>
 
-title C4 Nível 2 — Containers atuais
-LAYOUT_LEFT_RIGHT()
+title C4 Nível 2 — Containers atuais da implementação de referência
+LAYOUT_TOP_DOWN()
 
-Person(author, "Mantenedor", "Versiona a referência arquitetural.")
-Person(reader, "Leitor técnico", "Consome a documentação publicada.")
+Person(analyst, "Analista de operações", "Opera a jornada sintética de contestação.")
+Person(approver, "Aprovador", "Registra decisões humanas conforme alçada.")
+Person(operator, "Operador da plataforma", "Observa, reconcilia e opera eventing, replay e drills.")
+Person(maintainer, "Arquiteto / mantenedor", "Evolui a implementação e suas evidências.")
 
-System_Boundary(repositoryBoundary, "Architecture Repository") {
-  Container(docs, "Documentação", "MkDocs Material", "Contexto, arquitetura funcional, case, governança e operação.")
-  Container(c4, "Fontes C4", "PlantUML", "Modelos versionados dos diagramas arquiteturais.")
-  Container(contracts, "Contratos iniciais", "OpenAPI / AsyncAPI / YAML", "Baselines de APIs, eventos e autorização.")
-  Container(policies, "Policies de exemplo", "OPA Rego", "Baseline default deny e obrigações.")
-  Container(scripts, "Toolchain de validação", "Python / Bash", "Verifica estrutura, diagramas, contratos e documentação.")
-  Container(ci, "Pipelines de CI/CD", "GitHub Actions", "Executa validações, renderiza diagramas e publica o site.")
+System_Boundary(reference, "Intelligent Backoffice Reference Environment") {
+  Boundary(apiProfiles, "Profiles executáveis alternativos") {
+    Container(runtimeApi, "Reference API", "FastAPI / Python", "Executa lifecycle, document intelligence determinística, investigação, recomendação, aprovação, execução mock e timeline nos profiles runtime e observability.")
+    Container(secureApi, "Secure API", "FastAPI / JWT EdDSA", "Executa o mesmo domínio com identidade assinada, validação de issuer, audience, TTL, tenant, papéis e finalidade.")
+    Container(distributedApi, "Distributed API", "FastAPI / Transactional Outbox", "Executa o domínio com eventing habilitado e operações administrativas para DLQ e replay.")
+  }
+
+  Boundary(policyAndState, "Policy e estado") {
+    Container(opa, "Policy Decision Point", "OPA / Rego", "Aplica default deny, segregação de funções, alçada, purpose binding e autorização operacional.")
+    ContainerDb(sqlite, "Profile-local State Stores", "SQLite / volumes Docker", "Mantém casos, timeline, idempotência, outbox, inbox, timers e dead letters em bancos separados por profile.")
+  }
+
+  Boundary(distributedProfile, "Profile distribuído") {
+    Container(outboxPublisher, "Outbox Publisher", "Python worker", "Publica eventos pendentes e só confirma após aceite durável do broker.")
+    Container(workflowWorker, "Workflow Worker", "Python worker", "Consome eventos com inbox idempotente, retry e registro durável de falhas.")
+    Container(timerWorker, "Timer Worker", "Python worker", "Dispara timers persistidos e eventos vencidos.")
+    ContainerQueue(redpanda, "Event Backbone", "Redpanda / Kafka API", "Broker single-node para eventos de domínio e referências de dead letter.")
+  }
+
+  Boundary(observabilityProfile, "Profile de observabilidade") {
+    Container(otel, "OpenTelemetry Collector", "OTLP", "Recebe e encaminha traces da API de referência.")
+    Container(prometheus, "Prometheus", "Metrics", "Coleta métricas e avalia recording rules e alertas.")
+    Container(grafana, "Grafana", "Dashboards", "Exibe indicadores operacionais da baseline.")
+    Container(jaeger, "Jaeger", "Distributed tracing", "Armazena e consulta traces locais.")
+  }
+
+  Container(toolchain, "Evaluation and Evidence Toolchain", "Python / Bash", "Executa E2E, evals, validações, capacidade, backup/restore, SBOM e proveniência e gera evidências versionadas.")
 }
 
-System_Ext(pages, "GitHub Pages", "Hospeda a documentação estática.")
+System_Ext(actions, "GitHub Actions", "Executa a toolchain e os profiles em ambientes efêmeros de CI.")
 
-Rel(author, docs, "Edita conteúdo", "Markdown")
-Rel(author, c4, "Modela arquitetura", "PlantUML")
-Rel(author, contracts, "Versiona contratos", "YAML / JSON")
-Rel(author, policies, "Versiona policies", "Rego")
-Rel(ci, scripts, "Executa validações", "Python / Bash")
-Rel(scripts, c4, "Valida e renderiza diagramas", "PlantUML")
-Rel(ci, docs, "Gera o site", "MkDocs")
-Rel(ci, pages, "Publica a documentação", "GitHub Pages deployment")
-Rel(reader, pages, "Consulta a documentação", "HTTPS")
+Rel(analyst, runtimeApi, "Opera casos sintéticos", "REST / Swagger")
+Rel(approver, runtimeApi, "Aprova ou rejeita", "REST / Swagger")
+Rel(operator, distributedApi, "Opera replay, DLQ e reconciliação", "REST")
+Rel(operator, grafana, "Consulta métricas e dashboards", "HTTPS")
+Rel(operator, jaeger, "Consulta traces", "HTTPS")
+Rel(maintainer, actions, "Dispara validações", "GitHub")
 
-note bottom of repositoryBoundary
-Este diagrama representa apenas os elementos
-já existentes no repositório.
-Não há runtime do domínio de contestação em operação.
+Rel(runtimeApi, opa, "Solicita decisões", "HTTP / JSON")
+Rel(runtimeApi, sqlite, "Persiste estado e evidências", "SQL")
+Rel(secureApi, opa, "Solicita decisões com claims assinadas", "HTTP / JSON")
+Rel(secureApi, sqlite, "Persiste estado seguro local", "SQL")
+Rel(distributedApi, opa, "Solicita decisões", "HTTP / JSON")
+Rel(distributedApi, sqlite, "Persiste estado e outbox", "SQL")
+
+Rel(outboxPublisher, sqlite, "Lê e confirma outbox", "SQL")
+Rel(outboxPublisher, redpanda, "Publica eventos", "Kafka protocol")
+Rel(workflowWorker, redpanda, "Consome eventos", "Kafka protocol")
+Rel(workflowWorker, sqlite, "Mantém inbox, estado e DLQ", "SQL")
+Rel(timerWorker, sqlite, "Consulta e atualiza timers", "SQL")
+Rel(timerWorker, redpanda, "Publica eventos de timer", "Kafka protocol")
+
+Rel(runtimeApi, otel, "Exporta traces", "OTLP")
+Rel(prometheus, runtimeApi, "Coleta métricas", "HTTP")
+Rel(otel, jaeger, "Encaminha traces", "OTLP")
+Rel(grafana, prometheus, "Consulta séries temporais", "PromQL")
+
+Rel(actions, toolchain, "Executa validações e gera evidências", "Python / Bash")
+Rel(toolchain, runtimeApi, "Executa E2E e evals", "HTTP")
+Rel(toolchain, secureApi, "Valida identidade assinada", "HTTP")
+Rel(toolchain, distributedApi, "Valida eventing e operações", "HTTP")
+
+note bottom of apiProfiles
+Os três containers representam profiles alternativos do mesmo código-base.
+Não são uma topologia produtiva simultânea.
 end note
 
 SHOW_LEGEND()

@@ -2,9 +2,9 @@
 
 Arquitetura de referência executável para processos de backoffice regulados, documentais e de longa duração. A proposta combina workflow persistente, capacidades inteligentes, aprovação humana, policies, evidências e execução governada sem transferir decisões sensíveis para agentes.
 
-[![Contexto alvo da plataforma](assets/diagrams/c4-context-target.png)](assets/diagrams/c4-context-target.svg)
+[![Contexto atual da implementação de referência](assets/diagrams/c4-context-current.png)](assets/diagrams/c4-context-current.svg)
 
-[**Abrir diagrama de contexto em SVG**](assets/diagrams/c4-context-target.svg)
+[**Abrir diagrama de contexto atual em SVG**](assets/diagrams/c4-context-current.svg)
 
 ## Problema que a arquitetura resolve
 
@@ -69,14 +69,14 @@ A documentação possui percursos específicos para executivos, arquitetos, dese
 
 | Visão | Pergunta respondida |
 |---|---|
-| [Deployment observado](architecture/deployment-observed-baseline.md) | Qual runtime modular está confirmado com OPA, evals e observabilidade? |
-| [Deployment distribuído](architecture/deployment-distributed-baseline.md) | Quais capacidades assíncronas estão demonstradas? |
-| [Contexto alvo](architecture/c4-context-target.md) | Como a plataforma se posiciona no ecossistema corporativo? |
+| [Estado de implementação](architecture/implementation-status.md) | O que está demonstrado, contratado, planejado ou pendente para produção? |
+| [Contexto atual](architecture/c4-context-current.md) | Quem utiliza e valida a implementação de referência hoje? |
+| [Containers atuais](architecture/c4-container-current.md) | Quais processos, stores e ferramentas são executáveis nos profiles atuais? |
+| [Deployment observado](architecture/deployment-observed-baseline.md) | Como OPA, evals e observabilidade são executados localmente? |
+| [Deployment distribuído](architecture/deployment-distributed-baseline.md) | Como outbox, eventing, workers, timers, DLQ e replay funcionam? |
+| [Contexto alvo](architecture/c4-context-target.md) | Como a plataforma deve se posicionar no ecossistema corporativo? |
 | [Containers alvo](architecture/c4-container-target.md) | Como as responsabilidades devem ser separadas na evolução da plataforma? |
 | [Production readiness](governance/production-readiness.md) | Quais gates impedem a classificação como produção? |
-
-!!! info "Visões C4 atuais"
-    Os diagramas C4 chamados de atuais ainda registram o estado documental inicial do repositório. Os deployments observado e distribuído são a fonte de leitura da baseline executável até a atualização semântica desses diagramas.
 
 ## Próximos pontos de entrada
 

@@ -1,28 +1,34 @@
 @startuml
 !include <C4/C4_Context>
 
-title C4 Nível 1 — Contexto atual
+title C4 Nível 1 — Contexto atual da implementação de referência
 LAYOUT_LEFT_RIGHT()
 
-Person(author, "Arquiteto / mantenedor", "Evolui documentação, contratos e políticas.")
-Person(reader, "Leitor técnico", "Consulta a referência e os artefatos publicados.")
+Person(analyst, "Analista de operações", "Cria, investiga e acompanha casos sintéticos.")
+Person(approver, "Aprovador", "Aprova ou rejeita recomendações conforme alçada demonstrada.")
+Person(operator, "Operador da plataforma", "Executa profiles, observa telemetria e opera replay, reconciliação e drills.")
+Person(maintainer, "Arquiteto / mantenedor", "Evolui código, contratos, policies, diagramas e evidências.")
 
-System(repo, "Architecture Repository", "Repositório documental com MkDocs, contratos iniciais, policies e scripts de validação.")
+System(platform, "Intelligent Backoffice Reference Environment", "Implementação local executável da jornada de contestação com workflow persistente, capacidades inteligentes determinísticas, aprovação humana, OPA, execução mock, eventing e observabilidade.")
 
-System_Ext(actions, "GitHub Actions", "Executa validação de estrutura, build do MkDocs e publicação.")
-System_Ext(pages, "GitHub Pages", "Publica a documentação estática.")
+System_Ext(actions, "GitHub Actions", "Constrói, testa e valida os profiles, contratos, policies, diagramas, evals e controles de readiness.")
+System_Ext(pages, "GitHub Pages", "Publica a documentação arquitetural e os runbooks.")
 
-Rel(author, repo, "Versiona documentação e decisões", "Git")
-Rel(repo, actions, "Dispara pipelines", "GitHub events")
-Rel(actions, repo, "Valida estrutura e conteúdo", "Checkout e scripts")
-Rel(actions, pages, "Publica o site", "GitHub Pages deployment")
-Rel(reader, pages, "Consulta a documentação", "HTTPS")
+Rel(analyst, platform, "Cria casos, registra documentos, investiga e consulta timeline", "REST / Swagger")
+Rel(approver, platform, "Registra aprovação ou rejeição", "REST / Swagger")
+Rel(operator, platform, "Executa e opera a baseline local", "Docker Compose / REST")
+Rel(maintainer, platform, "Versiona implementação e artefatos", "Git")
+Rel(maintainer, actions, "Envia commits e pull requests", "GitHub")
+Rel(actions, platform, "Constrói e valida ambientes efêmeros", "Docker Compose / Python")
+Rel(actions, pages, "Publica o site após validação", "GitHub Pages deployment")
+Rel(operator, pages, "Consulta arquitetura, status e runbooks", "HTTPS")
 
-note bottom of repo
-Estado atual honesto:
-não há runtime de backoffice,
-workflow executável, agentes,
-processamento documental ou integração bancária.
+note bottom of platform
+Estado atual confirmado:
+- ambiente local com dados e integrações sintéticos;
+- profiles runtime, observability, distributed e secure;
+- nenhuma operação financeira ou integração corporativa real;
+- status oficial NOT_PRODUCTION_READY.
 end note
 
 SHOW_LEGEND()
