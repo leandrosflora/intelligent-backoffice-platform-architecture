@@ -1,0 +1,55 @@
+@startuml
+title Sequência 2 — Investigação, recomendação e aprovação
+autonumber
+hide footbox
+
+participant "Workflow Orchestrator" as Workflow
+participant "Policy Decision Point" as PDP
+participant "Investigation Agent" as Investigation
+participant "Tool Gateway" as Tools
+participant "Systems Mock" as Systems
+participant "Evidence Service" as Evidence
+participant "Decision Support Agent" as Decision
+participant "Knowledge Service" as Knowledge
+participant "Human Approval Service" as Human
+actor "Aprovador" as Approver
+database "Case Store" as CaseDb
+
+Workflow -> CaseDb: transition UNDER_INVESTIGATION
+Workflow -> Investigation: investigate(caseId, evidenceRefs)
+Investigation -> Tools: structured tool call
+Tools -> PDP: authorize(tool.execute)
+PDP --> Tools: allow + obligations
+Tools -> Systems: governed query
+Systems --> Tools: result
+Tools --> Investigation: normalized result
+Investigation -> Evidence: store findings
+Evidence --> Investigation: findingRefs
+Investigation --> Workflow: investigation completed
+
+Workflow -> Decision: recommend(caseId, findingRefs)
+Decision -> Knowledge: retrieve approved rules
+Knowledge --> Decision: rules + citations
+Decision -> Evidence: read evidence
+Evidence --> Decision: evidence set
+Decision -> Decision: recommend or abstain
+Decision -> Evidence: store recommendation version
+Decision --> Workflow: recommendationRef + confidence
+Workflow -> CaseDb: transition DECISION_PROPOSED
+
+alt evidência suficiente
+  Workflow -> Human: create approval task
+  Workflow -> CaseDb: transition AWAITING_APPROVAL
+  Approver -> Human: approve or reject
+  Human -> PDP: authorize(approval.decide)\ncheck role, limit and segregation
+  PDP --> Human: decision
+  Human --> Workflow: approval result + recommendation version
+  alt aprovado
+    Workflow -> CaseDb: transition APPROVED
+  else rejeitado
+    Workflow -> CaseDb: transition REJECTED
+  end
+else abstention ou evidência insuficiente
+  Workflow -> CaseDb: transition MORE_EVIDENCE_REQUIRED
+end
+@enduml

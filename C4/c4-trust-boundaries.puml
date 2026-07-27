@@ -1,0 +1,70 @@
+@startuml
+!include _theme.iuml
+
+title Trust Boundaries — Plataforma alvo
+left to right direction
+
+package "TB-01 External Channels\nUntrusted input" {
+  C4External(channel, "Corporate Channels", "Mensagens, metadados e documentos.")
+}
+
+package "TB-02 Edge and Intake\nAuthenticated boundary" {
+  C4Container(edge, "Case Intake API", "REST / Events", "Autentica canal, valida tenant, rate limit e idempotência.")
+}
+
+package "TB-03 Document Quarantine\nUntrusted content boundary" {
+  C4Container(quarantine, "Quarantine Pipeline", "Object storage / workers", "Scanner, validação, classificação e redaction.")
+}
+
+package "TB-04 Application Plane\nWorkload identity required" {
+  C4Container(orchestrator, "Workflow Orchestrator", "Workflow engine", "Estado e coordenação.")
+  C4Container(agents, "Agent Runtimes", "Sandboxed runtime", "Investigação e recomendação.")
+  C4Container(human, "Human Approval", "Task service", "Decisão humana.")
+}
+
+package "TB-05 Control Plane\nFail-closed" {
+  C4Container(pdp, "Policy Decision Point", "OPA / IAM", "Autorização, alçada, tenant e segregação.")
+  C4Container(modelGateway, "Model Gateway", "Gateway", "Routing, quotas, redaction e logging controlado.")
+  C4Container(toolGateway, "Tool Gateway", "MCP / REST", "Allowlist, schema validation e policy proof.")
+}
+
+package "TB-06 Data Plane\nEncrypted and classified" {
+  C4ContainerDb(caseStore, "Case Store", "PostgreSQL", "Estado e timeline.")
+  C4ContainerDb(evidenceStore, "Evidence Store", "PostgreSQL / Object storage", "Documentos e cadeia de custódia.")
+  C4Container(audit, "Audit Service", "Append-only", "Decisões e acessos.")
+}
+
+package "TB-07 Systems of Record\nExternal high impact" {
+  C4External(record, "Systems of Record", "Core, transações, fraude e CRM.")
+}
+
+channel --> edge : payload + tenant context
+edge --> quarantine : documento por referência temporária
+edge --> orchestrator : comando normalizado
+quarantine --> evidenceStore : artefato validado + checksum
+orchestrator --> pdp : authorize transition
+orchestrator --> agents : stage + evidence references
+agents --> modelGateway : prompt delimitado
+agents --> toolGateway : tool call estruturada
+toolGateway --> pdp : authorize action
+toolGateway --> record : consulta autorizada
+human --> pdp : authorize approval
+orchestrator --> caseStore
+orchestrator --> audit
+agents --> evidenceStore : findings / recommendation
+record --> toolGateway : resposta
+orchestrator --> toolGateway : execution request with approval proof
+toolGateway --> record : mutação idempotente
+
+note top of quarantine
+Controle obrigatório:
+conteúdo de documento nunca é tratado
+como instrução confiável.
+end note
+
+note bottom of toolGateway
+Somente Governed Execution pode
+realizar operação mutável e deve portar
+aprovação, policy proof e idempotency key.
+end note
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+title Sequência 4 — Evidência ausente e retomada do caso
+autonumber
+hide footbox
+
+participant "Document Intelligence" as DocAI
+queue "Event Backbone" as Events
+participant "Workflow Orchestrator" as Workflow
+database "Case Store" as CaseDb
+participant "Notification Service" as Notify
+actor "Canal / cliente" as Channel
+participant "Case Intake API" as Intake
+participant "Evidence Service" as Evidence
+
+DocAI -> Events: backoffice.evidence.missing\nmissingTypes + deadline
+Events -> Workflow: evidence.missing
+Workflow -> CaseDb: transition MORE_EVIDENCE_REQUIRED
+Workflow -> Notify: request missing evidence notification
+Notify --> Channel: solicita documentos faltantes
+
+Channel -> Intake: upload complement
+Intake -> Evidence: register source and checksum
+Intake -> Events: document.received
+Events -> DocAI: process complement
+DocAI -> Evidence: create new evidence version
+DocAI -> Events: document.validated
+Events -> Workflow: document.validated
+Workflow -> CaseDb: invalidate pending recommendation
+Workflow -> CaseDb: transition DOCUMENTS_VALIDATED
+Workflow -> Workflow: resume investigation from checkpoint
+
+note right of Workflow
+Mudança relevante em evidência
+invalida recomendação ainda não executada.
+end note
+@enduml

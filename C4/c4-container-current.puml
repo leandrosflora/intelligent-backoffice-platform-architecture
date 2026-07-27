@@ -1,0 +1,34 @@
+@startuml
+!include _theme.iuml
+
+title C4 Nível 2 — Containers atuais
+left to right direction
+
+C4Person(author, "Mantenedor", "Versiona a referência.")
+C4Person(reader, "Leitor", "Consome a documentação.")
+
+package "Architecture Repository\n<<System Boundary>>" {
+  C4Container(docs, "Documentação", "MkDocs Material", "Contexto, arquitetura funcional, case, governança e operação.")
+  C4Container(c4, "C4 Sources", "PlantUML", "Fontes versionadas dos diagramas arquiteturais.")
+  C4Container(contracts, "Contratos iniciais", "OpenAPI / AsyncAPI / YAML", "Esqueletos de APIs, eventos e autorização.")
+  C4Container(policies, "Policies de exemplo", "OPA Rego", "Baseline default deny e obrigações.")
+  C4Container(scripts, "Validation Scripts", "Python / Bash", "Verifica estrutura, diagramas e documentação.")
+  C4Container(ci, "CI/CD", "GitHub Actions", "Valida e publica o site.")
+}
+
+C4External(pages, "GitHub Pages", "Hospeda o site estático.")
+
+author --> docs : edita
+author --> c4 : modela
+author --> contracts : versiona
+author --> policies : versiona
+ci --> scripts : executa
+scripts --> c4 : valida e renderiza
+ci --> docs : gera site
+ci --> pages : publica
+reader --> pages : consulta
+
+note bottom
+Este diagrama representa apenas o estado já existente no repositório.
+end note
+@enduml

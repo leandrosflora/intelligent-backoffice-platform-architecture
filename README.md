@@ -23,40 +23,44 @@ O primeiro case é uma jornada bancária de contestação:
 | Fase | Estado | Conteúdo |
 |---|---|---|
 | P0 | Concluído | Estrutura do repositório, MkDocs e pipelines |
-| P1 | Implementado nesta branch | Arquitetura funcional e lifecycle do case |
-| P2 | Próximo | C4, trust boundaries e sequências |
-| P3 | Planejado | OpenAPI, AsyncAPI e policies completas |
-| P4 | Planejado | Vertical slice executável |
+| P1 | Concluído | Arquitetura funcional e lifecycle do case |
+| P2 | Implementado nesta branch | C4, componentes, deployment, trust boundaries e sequências |
+| P3 | Próximo | OpenAPI, AsyncAPI e policies completas |
+| P4 | Planejado | Policy Enforcement executável |
+| P5 | Planejado | Vertical slice mínimo |
 
-## Artefatos P1
+## Artefatos P2
 
-- contexto de negócio;
-- outcome card e métricas;
-- mapa de capacidades;
-- mapa de domínios;
-- lifecycle com estados, transições e invariantes;
-- regras de negócio versionadas;
-- papéis, RACI e segregação de funções;
-- classificação de risco;
-- requisitos não funcionais;
-- matriz de rastreabilidade.
+- contexto atual e alvo;
+- containers atuais e alvo;
+- componentes do Workflow Orchestrator;
+- componentes de Document Intelligence;
+- deployment local do futuro vertical slice;
+- sete trust boundaries;
+- quatro sequências críticas;
+- renderização PlantUML em SVG e PNG;
+- validação de diagramas no CI.
 
-## Objetivos
+## Princípio de leitura
 
-- demonstrar workflows agentic assíncronos e de longa duração;
-- separar análise, aprovação, execução e auditoria;
-- aplicar default deny, segregação por tenant e políticas por ação;
-- versionar contratos, eventos, evidências e decisões;
-- permitir evolução do case para fraude, chargeback, onboarding, compliance e jurídico.
+O repositório separa explicitamente:
+
+- **atual:** artefato ou capacidade confirmada;
+- **alvo:** responsabilidade planejada;
+- **baseline executável:** controle demonstrado em ambiente de referência;
+- **produção:** integração real, operação e governança aprovadas.
+
+Um diagrama alvo não é evidência de implementação.
 
 ## Estrutura
 
 ```text
 .
 ├── .github/workflows/
-├── C4/
+├── C4/                         # fontes PlantUML
 ├── contracts/
 ├── docs/
+│   ├── assets/diagrams/        # gerados em CI
 │   ├── context/
 │   ├── functional/
 │   ├── architecture/
@@ -75,12 +79,16 @@ O primeiro case é uma jornada bancária de contestação:
 
 ## Documentação local
 
+Pré-requisitos: Python e Docker.
+
 ```bash
 python -m pip install -r requirements-docs.txt
+python scripts/validate_diagrams.py
+bash scripts/render-diagrams.sh
 mkdocs serve
 ```
 
-Ou com Docker Compose:
+Ou, após gerar os diagramas:
 
 ```bash
 docker compose --profile docs up
@@ -92,10 +100,13 @@ Acesse `http://localhost:8000`.
 
 ```bash
 python scripts/validate_structure.py
+python scripts/validate_diagrams.py
+bash scripts/render-diagrams.sh
+python scripts/validate_diagrams.py --require-generated
 mkdocs build --strict
 docker compose config
 ```
 
 ## Estado
 
-O repositório continua sendo uma referência documental e arquitetural. O P1 não adiciona serviços produtivos, modelos reais ou integração com sistemas bancários.
+O P2 continua documental e arquitetural. Nenhum serviço produtivo, modelo real, documento de cliente ou integração bancária foi adicionado.

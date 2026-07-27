@@ -48,7 +48,17 @@ nav:
       - Classificação de risco: functional/risk-classification.md
       - Requisitos não funcionais: functional/non-functional-requirements.md
       - Rastreabilidade: functional/traceability-matrix.md
-  - Arquitetura técnica: architecture/index.md
+  - Arquitetura técnica:
+      - Visão geral: architecture/index.md
+      - C4 Contexto atual: architecture/c4-context-current.md
+      - C4 Contexto alvo: architecture/c4-context-target.md
+      - C4 Containers atuais: architecture/c4-container-current.md
+      - C4 Containers alvo: architecture/c4-container-target.md
+      - Componentes do Orchestrator: architecture/component-workflow-orchestrator.md
+      - Componentes de Document Intelligence: architecture/component-document-intelligence.md
+      - Deployment local: architecture/deployment-local.md
+      - Trust boundaries: architecture/trust-boundaries.md
+      - Sequências: architecture/sequence-diagrams.md
   - Case aplicado: case-study/index.md
   - Governança: governance/index.md
   - Operações: operations/index.md

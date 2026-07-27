@@ -1,0 +1,48 @@
+@startuml
+!include _theme.iuml
+
+title C4 Nível 3 — Workflow Orchestrator
+left to right direction
+
+package "Workflow Orchestrator\n<<Container>>" {
+  C4Component(api, "Command API", "HTTP / Events", "Recebe comandos idempotentes e valida envelope.")
+  C4Component(handler, "Command Handler", "Application layer", "Carrega caso, valida versão e coordena a transição.")
+  C4Component(machine, "Case State Machine", "Domain model", "Aplica estados, transições e invariantes do lifecycle.")
+  C4Component(policyClient, "Policy Client", "HTTP client", "Consulta autorização e obrigações fail-closed.")
+  C4Component(taskAdapter, "Human Task Adapter", "Port", "Cria e atualiza tarefas humanas.")
+  C4Component(timer, "Timer and Retry Scheduler", "Worker", "Dispara prazos, retries permitidos e expiração.")
+  C4Component(inbox, "Inbox Processor", "Persistence pattern", "Deduplica comandos e eventos recebidos.")
+  C4Component(outbox, "Outbox Writer", "Persistence pattern", "Grava efeitos na mesma transação do estado.")
+  C4Component(dispatcher, "Outbox Dispatcher", "Worker", "Publica efeitos em ordem e com retry controlado.")
+  C4Component(repo, "Case Repository", "Persistence adapter", "Persiste caso, versão, estado e timeline.")
+}
+
+C4ContainerDb(caseDb, "Case Store", "PostgreSQL", "Estado, Inbox, Outbox e timers.")
+C4Queue(events, "Event Backbone", "Kafka / Redpanda", "Comandos e eventos assíncronos.")
+C4External(pdp, "Policy Decision Point", "Decisão de autorização.")
+C4External(human, "Human Approval Service", "Tarefas e decisões humanas.")
+C4External(capabilities, "Platform Capabilities", "Document AI, agents, execution e notification.")
+
+api --> inbox : registra comando
+inbox --> handler : entrega comando novo
+handler --> repo : carrega caso e versão
+handler --> policyClient : solicita autorização
+policyClient --> pdp
+handler --> machine : tenta transição
+machine --> repo : atualiza agregado
+handler --> outbox : registra efeitos
+repo --> caseDb
+inbox --> caseDb
+outbox --> caseDb
+dispatcher --> caseDb : claim de efeitos
+dispatcher --> events : publica eventos
+dispatcher --> human : cria tarefa
+dispatcher --> capabilities : aciona capacidade
+timer --> caseDb : consulta deadlines
+timer --> handler : emite comando temporal
+
+note bottom of handler
+A transação confirma estado,
+timeline, Inbox e Outbox juntos.
+end note
+@enduml
