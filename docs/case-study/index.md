@@ -4,7 +4,7 @@
 
 Processos de contestação dependem de documentos, consultas, regras, aprovações e registros manuais. Isso aumenta tempo de ciclo, retrabalho e risco operacional.
 
-## Jornada inicial
+## Jornada de referência
 
 ```text
 Caso criado
@@ -26,7 +26,7 @@ Execução governada
 Auditoria e encerramento
 ```
 
-## Guardrails do MVP
+## Guardrails
 
 - dados e integrações sintéticos;
 - nenhuma decisão financeira autônoma;
@@ -37,7 +37,7 @@ Auditoria e encerramento
 
 ## Especificação funcional
 
-O P1 detalha o case nos seguintes artefatos:
+O case é detalhado pelos seguintes artefatos:
 
 - [contexto de negócio](../context/business-context.md);
 - [mapa de capacidades](../functional/capability-map.md);
@@ -50,6 +50,15 @@ O P1 detalha o case nos seguintes artefatos:
 - [requisitos não funcionais](../functional/non-functional-requirements.md);
 - [rastreabilidade](../functional/traceability-matrix.md).
 
-## Próxima evolução
+## Materialização técnica
 
-O P2 deve materializar esta especificação em diagramas C4 de contexto, containers, componentes, trust boundaries e sequências principais.
+A jornada é representada por:
+
+- [diagramas C4](../architecture/index.md);
+- [diagramas de sequência](../architecture/sequence-diagrams.md);
+- [contratos executáveis](../contracts/index.md);
+- [implementação de referência](../implementation/index.md);
+- [avaliações versionadas](../evaluation/index.md);
+- [controles de produção](../governance/production-readiness.md).
+
+A implementação local comprova o fluxo e os controles com dados sintéticos. Ela não representa uma operação bancária produtiva.

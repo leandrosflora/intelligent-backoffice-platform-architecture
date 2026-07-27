@@ -2,7 +2,7 @@
 
 ## Garantias demonstradas
 
-| Capacidade | Baseline P6 |
+| Capacidade | Baseline executável |
 |---|---|
 | Publicação atômica | Estado, timeline e outbox no mesmo commit SQLite |
 | Entrega | At least once |
@@ -13,7 +13,7 @@
 | Replay | Novo `eventId`, referência `replayOf`, motivo e ator auditados |
 | Timers | Agenda durável e worker dedicado |
 
-## Profiles
+## Profile distribuído
 
 ```bash
 docker compose --profile distributed up --build

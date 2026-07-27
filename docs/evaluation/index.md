@@ -1,6 +1,6 @@
-# Evals do P5
+# Avaliação das capacidades inteligentes
 
-O P5 adiciona uma baseline de avaliação versionada para as capacidades inteligentes do vertical slice. Os componentes continuam determinísticos; o objetivo é estabelecer o contrato de qualidade antes da adoção de OCR ou modelos reais.
+O repositório mantém uma baseline de avaliação versionada para as capacidades inteligentes da implementação de referência. Os componentes continuam determinísticos; o objetivo é estabelecer o contrato de qualidade antes da adoção de OCR ou modelos reais.
 
 ## Dataset
 

@@ -1,10 +1,10 @@
-# Deployment distribuído da baseline P6
+# Deployment distribuído
 
 [![Deployment distribuído](../assets/diagrams/c4-deployment-distributed-baseline.png)](../assets/diagrams/c4-deployment-distributed-baseline.svg)
 
 [**Abrir diagrama em SVG**](../assets/diagrams/c4-deployment-distributed-baseline.svg)
 
-O P6 adiciona uma baseline executável assíncrona sem substituir os profiles mínimos do P4 e P5.
+Esta visão adiciona uma baseline executável assíncrona sem substituir os profiles mínimo, observado ou seguro.
 
 ## Componentes implementados
 
