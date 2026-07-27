@@ -1,0 +1,75 @@
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam linetype ortho
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #475569
+skinparam ArrowThickness 1
+skinparam packageStyle rectangle
+skinparam package {
+  BorderColor #64748B
+  FontColor #0F172A
+  BackgroundColor #F8FAFC
+}
+skinparam rectangle {
+  BorderColor #334155
+  FontColor #0F172A
+}
+skinparam component {
+  BorderColor #334155
+  FontColor #0F172A
+  BackgroundColor #E2E8F0
+}
+skinparam database {
+  BorderColor #334155
+  FontColor #0F172A
+  BackgroundColor #FEF3C7
+}
+skinparam queue {
+  BorderColor #334155
+  FontColor #0F172A
+  BackgroundColor #FCE7F3
+}
+skinparam node {
+  BorderColor #334155
+  FontColor #0F172A
+  BackgroundColor #F8FAFC
+}
+skinparam note {
+  BorderColor #94A3B8
+  BackgroundColor #F8FAFC
+  FontColor #334155
+}
+
+!procedure C4Person($alias, $label, $description)
+rectangle "<color:white><b>$label</b></color>\n<color:white><size:10>$description</size></color>" as $alias #08427B
+!endprocedure
+
+!procedure C4System($alias, $label, $description)
+rectangle "<color:white><b>$label</b></color>\n<color:white><size:10>$description</size></color>" as $alias #1168BD
+!endprocedure
+
+!procedure C4External($alias, $label, $description)
+rectangle "<color:white><b>$label</b></color>\n<color:white><size:10>$description</size></color>" as $alias #6B7280
+!endprocedure
+
+!procedure C4Container($alias, $label, $technology, $description)
+rectangle "<color:white><b>$label</b></color>\n<color:white><size:10>[$technology]</size></color>\n<color:white><size:10>$description</size></color>" as $alias #438DD5
+!endprocedure
+
+!procedure C4ContainerDb($alias, $label, $technology, $description)
+database "<b>$label</b>\n<size:10>[$technology]</size>\n<size:10>$description</size>" as $alias #FDE68A
+!endprocedure
+
+!procedure C4Queue($alias, $label, $technology, $description)
+queue "<b>$label</b>\n<size:10>[$technology]</size>\n<size:10>$description</size>" as $alias #FBCFE8
+!endprocedure
+
+!procedure C4Component($alias, $label, $technology, $description)
+component "<b>$label</b>\n<size:10>[$technology]</size>\n<size:10>$description</size>" as $alias #BFDBFE
+!endprocedure
+
+!procedure C4Node($alias, $label, $technology)
+node "<b>$label</b>\n<size:10>[$technology]</size>" as $alias
+!endprocedure

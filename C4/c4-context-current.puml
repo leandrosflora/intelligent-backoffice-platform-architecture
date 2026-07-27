@@ -1,0 +1,34 @@
+@startuml
+!include _theme.iuml
+
+title C4 Nível 1 — Contexto atual
+left to right direction
+
+C4Person(author, "Arquiteto / mantenedor", "Evolui documentação, contratos e políticas.")
+C4Person(reader, "Leitor técnico", "Consulta a referência e os artefatos publicados.")
+
+C4System(repo, "Architecture Repository", "Repositório documental com MkDocs, contratos iniciais, policies e scripts de validação.")
+
+C4External(actions, "GitHub Actions", "Executa validação de estrutura, build do MkDocs e publicação.")
+C4External(pages, "GitHub Pages", "Publica a documentação estática.")
+
+author --> repo : versiona documentação e decisões
+reader --> pages : consulta a documentação
+repo --> actions : dispara pipelines
+actions --> pages : publica site
+actions --> repo : valida estrutura e conteúdo
+
+note bottom of repo
+Estado atual honesto:
+não há runtime de backoffice,
+workflow executável, agentes,
+processamento documental ou integração bancária.
+end note
+
+legend right
+  |= Cor | Significado |
+  |<#1168BD>| Sistema sob responsabilidade |
+  |<#6B7280>| Sistema externo |
+  |<#08427B>| Pessoa |
+endlegend
+@enduml

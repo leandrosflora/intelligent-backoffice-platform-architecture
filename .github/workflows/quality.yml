@@ -29,6 +29,15 @@ jobs:
       - name: Validate repository structure
         run: python scripts/validate_structure.py
 
+      - name: Validate diagram sources
+        run: python scripts/validate_diagrams.py
+
+      - name: Render PlantUML diagrams
+        run: bash scripts/render-diagrams.sh
+
+      - name: Validate generated diagrams
+        run: python scripts/validate_diagrams.py --require-generated
+
       - name: Build documentation
         run: mkdocs build --strict
 

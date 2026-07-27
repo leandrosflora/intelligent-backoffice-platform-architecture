@@ -1,0 +1,49 @@
+@startuml
+!include _theme.iuml
+
+title C4 Nível 3 — Document Intelligence
+left to right direction
+
+package "Document Intelligence\n<<Container>>" {
+  C4Component(api, "Processing API", "HTTP / Events", "Aceita solicitação com referência do documento.")
+  C4Component(coordinator, "Processing Coordinator", "Application service", "Executa pipeline e controla status.")
+  C4Component(validator, "File Validator", "Deterministic checks", "Valida formato, tamanho, checksum e conteúdo ativo.")
+  C4Component(scanner, "Malware Scanner Adapter", "Port", "Submete arquivo ao scanner aprovado.")
+  C4Component(classifier, "Document Classifier", "Rules / Model", "Classifica tipo e aplica threshold.")
+  C4Component(extractor, "Field Extractor", "OCR / Model", "Extrai campos e confiança.")
+  C4Component(mapper, "Evidence Mapper", "Domain component", "Transforma extrações em evidências rastreáveis.")
+  C4Component(promptGuard, "Document Prompt Guard", "Security component", "Delimita conteúdo e bloqueia instruções maliciosas.")
+  C4Component(outbox, "Result Outbox", "Persistence pattern", "Publica resultado de forma idempotente.")
+  C4Component(repo, "Processing Repository", "Persistence adapter", "Registra versão, status e metadados.")
+}
+
+C4ContainerDb(meta, "Document Metadata", "PostgreSQL", "Status, versão, checksum, classificação e confiança.")
+C4External(store, "Document Store", "Objeto em quarentena.")
+C4External(scannerSvc, "Malware Scanner", "Scanner corporativo ou mock.")
+C4External(model, "Model Gateway", "OCR, classificação e extração.")
+C4External(evidence, "Evidence Service", "Cadeia de custódia.")
+C4Queue(events, "Event Backbone", "Kafka / Redpanda", "Resultados e falhas.")
+
+api --> coordinator
+coordinator --> repo
+repo --> meta
+coordinator --> store : obtém referência temporária
+coordinator --> validator
+validator --> scanner
+scanner --> scannerSvc
+validator --> promptGuard
+coordinator --> classifier
+classifier --> model
+coordinator --> extractor
+extractor --> model
+extractor --> mapper
+mapper --> evidence
+coordinator --> outbox
+outbox --> events
+
+note bottom of promptGuard
+Documento é dado não confiável.
+Seu conteúdo nunca vira instrução
+de sistema ou autorização de tool.
+end note
+@enduml

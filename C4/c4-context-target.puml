@@ -1,0 +1,38 @@
+@startuml
+!include _theme.iuml
+
+title C4 Nível 1 — Contexto alvo
+left to right direction
+
+C4Person(customer, "Cliente / canal de origem", "Abre contestação e fornece documentos.")
+C4Person(analyst, "Analista de operações", "Investiga e complementa evidências.")
+C4Person(approver, "Aprovador", "Decide conforme alçada e segregação.")
+C4Person(auditor, "Auditoria / compliance", "Consulta timeline, evidências e decisões.")
+
+C4System(platform, "Intelligent Backoffice Platform", "Orquestra casos, documentos, agentes, aprovação humana e execução governada.")
+
+C4External(channels, "Canais corporativos", "Portal, atendimento, CRM ou integrações de intake.")
+C4External(record, "Sistemas de registro", "Transações, cadastro, fraude, CRM e execução financeira.")
+C4External(iam, "IAM / Workload Identity", "Identidade, autenticação, tenant e credenciais.")
+C4External(knowledge, "Fontes de conhecimento", "Políticas, procedimentos e regras aprovadas.")
+C4External(notify, "Plataforma de notificações", "Comunica pendências, andamento e resultado.")
+
+customer --> channels : solicita contestação
+channels --> platform : cria caso e envia documentos
+analyst --> platform : investiga e complementa
+approver --> platform : aprova ou rejeita
+auditor --> platform : consulta evidências e auditoria
+
+platform --> record : consulta e executa por portas governadas
+platform --> iam : valida identidade e autorização
+platform --> knowledge : recupera conteúdo autorizado
+platform --> notify : solicita comunicação
+platform --> channels : devolve status e resultado
+
+note bottom of platform
+Arquitetura-alvo.
+Nenhum container deste diagrama
+deve ser tratado como implementado
+sem código, teste, evidência e operação.
+end note
+@enduml

@@ -1,15 +1,35 @@
-# Arquitetura
+# Arquitetura técnica
 
-## Camadas iniciais
+O P2 materializa a arquitetura funcional do case em C4, componentes, deployment, trust boundaries e sequências.
 
-1. **Canais e intake:** recebem solicitações, documentos e eventos.
-2. **Workflow orchestration:** mantém estado, timers, retries e compensações.
-3. **Agent runtime:** executa análise, investigação e recomendação.
-4. **Document intelligence:** classifica, extrai e valida documentos.
-5. **Knowledge:** recupera regras, políticas e procedimentos autorizados.
-6. **Policy enforcement:** decide acesso, ação e obrigações.
-7. **Human approval:** registra decisões humanas e segregação de funções.
-8. **Execution:** integra sistemas corporativos por portas e adapters.
-9. **Evidence, audit e observability:** preservam rastreabilidade operacional.
+## Estado atual e alvo
 
-Os desenhos C4 serão mantidos na pasta `C4/` e publicados nesta seção conforme evoluírem.
+| Visão | Objetivo |
+|---|---|
+| [Contexto atual](c4-context-current.md) | Mostrar honestamente o repositório documental já existente |
+| [Contexto alvo](c4-context-target.md) | Posicionar a futura plataforma no ecossistema corporativo |
+| [Containers atuais](c4-container-current.md) | Inventariar artefatos e pipelines já implementados |
+| [Containers alvo](c4-container-target.md) | Separar responsabilidades da futura plataforma |
+
+## Detalhamento
+
+- [Workflow Orchestrator](component-workflow-orchestrator.md)
+- [Document Intelligence](component-document-intelligence.md)
+- [Deployment local](deployment-local.md)
+- [Trust boundaries](trust-boundaries.md)
+- [Diagramas de sequência](sequence-diagrams.md)
+
+## Camadas da arquitetura-alvo
+
+1. canais e intake;
+2. workflow orchestration;
+3. agent runtime;
+4. document intelligence;
+5. knowledge;
+6. policy enforcement;
+7. human approval;
+8. governed execution;
+9. evidence, audit e observability.
+
+!!! warning "Leitura obrigatória"
+    Diagramas marcados como alvo não representam software implementado. Uma capacidade só muda de estado quando possui código, teste, evidência, owner, monitoramento e documentação.

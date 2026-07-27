@@ -1,0 +1,45 @@
+@startuml
+title Sequência 3 — Execução governada e reconciliação
+autonumber
+hide footbox
+
+participant "Workflow Orchestrator" as Workflow
+database "Case Store" as CaseDb
+participant "Policy Decision Point" as PDP
+participant "Governed Execution" as Execution
+database "Execution Idempotency Store" as Idem
+participant "System of Record Mock" as Core
+participant "Audit Service" as Audit
+queue "Event Backbone" as Events
+
+Workflow -> CaseDb: validate APPROVED and recommendation version
+Workflow -> Execution: execute(command, approvalRef,\npolicyContext, Idempotency-Key)
+Execution -> PDP: authorize(financial.execute)
+PDP --> Execution: allow + obligations
+Execution -> Idem: reserve(key, commandHash)
+
+alt chave nova
+  Execution -> Core: execute mock command
+  alt sucesso confirmado
+    Core --> Execution: confirmed result
+    Execution -> Idem: complete(result)
+    Execution -> Events: execution.completed
+    Events -> Workflow: execution.completed
+    Workflow -> CaseDb: EXECUTED -> CLOSED
+  else timeout ou resposta ambígua
+    Core --> Execution: timeout / unknown
+    Execution -> Idem: mark ambiguous
+    Execution -> Events: execution.reconciliation_required
+    Events -> Workflow: reconciliation required
+    Workflow -> CaseDb: RECONCILIATION_REQUIRED
+  end
+else replay com mesmo hash
+  Idem --> Execution: previous result
+  Execution --> Workflow: replay previous result
+else mesma chave com hash diferente
+  Idem --> Execution: conflict
+  Execution --> Workflow: 409 non-retryable
+end
+
+Execution -> Audit: append decision and execution evidence
+@enduml

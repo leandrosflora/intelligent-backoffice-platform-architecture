@@ -1,0 +1,72 @@
+@startuml
+!include _theme.iuml
+
+title C4 Deployment — Ambiente local de referência
+left to right direction
+
+C4Person(dev, "Developer / architect", "Executa o vertical slice e valida evidências.")
+
+node "Developer Workstation\n[Docker Compose]" as workstation {
+  node "Application Zone" as app {
+    artifact "Case Intake API" as intake
+    artifact "Workflow Orchestrator" as orchestrator
+    artifact "Document Intelligence Mock" as docai
+    artifact "Investigation / Decision Agent Mock" as agents
+    artifact "Human Approval API" as human
+    artifact "Governed Execution Mock" as execution
+    artifact "OPA" as opa
+  }
+
+  node "Data and Messaging Zone" as data {
+    database "PostgreSQL" as pg
+    queue "Redpanda / Kafka" as kafka
+    database "MinIO / Object Store" as minio
+  }
+
+  node "Observability Zone" as obs {
+    artifact "OpenTelemetry Collector" as otel
+    artifact "Prometheus" as prometheus
+    artifact "Jaeger" as jaeger
+    artifact "Grafana" as grafana
+  }
+
+  node "External Mocks" as mocks {
+    artifact "Core / Transaction Mock" as core
+    artifact "Notification Mock" as notify
+    artifact "Model Mock" as model
+    artifact "Malware Scanner Mock" as scanner
+  }
+}
+
+dev --> intake : REST / sample requests
+dev --> human : aprova manualmente
+intake --> orchestrator
+orchestrator --> pg
+orchestrator --> kafka
+orchestrator --> docai
+orchestrator --> agents
+orchestrator --> human
+orchestrator --> execution
+docai --> minio
+docai --> model
+docai --> scanner
+agents --> model
+execution --> core
+execution --> opa
+orchestrator --> opa
+kafka --> notify
+
+intake ..> otel
+orchestrator ..> otel
+docai ..> otel
+execution ..> otel
+otel --> prometheus
+otel --> jaeger
+prometheus --> grafana
+jaeger --> grafana
+
+note bottom of workstation
+Somente dados sintéticos.
+Nenhum efeito financeiro real.
+end note
+@enduml

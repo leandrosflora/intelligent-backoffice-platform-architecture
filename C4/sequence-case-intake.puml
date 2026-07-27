@@ -1,0 +1,45 @@
+@startuml
+title Sequência 1 — Intake e processamento documental
+autonumber
+hide footbox
+
+actor "Canal" as Channel
+participant "Case Intake API" as Intake
+participant "Policy Decision Point" as PDP
+database "Case Store" as CaseDb
+database "Document Store" as DocStore
+queue "Event Backbone" as Events
+participant "Document Intelligence" as DocAI
+participant "Evidence Service" as Evidence
+participant "Workflow Orchestrator" as Workflow
+
+Channel -> Intake: POST /cases\nIdempotency-Key + tenant
+Intake -> PDP: authorize(case.create)
+PDP --> Intake: allow + obligations
+Intake -> CaseDb: reserve external key and create CREATED
+CaseDb --> Intake: caseId + caseVersion
+Intake -> Events: backoffice.case.created
+Intake --> Channel: 201 Created
+
+Channel -> Intake: POST /cases/{id}/documents
+Intake -> PDP: authorize(document.upload)
+PDP --> Intake: allow
+Intake -> DocStore: store in quarantine + checksum
+Intake -> Events: backoffice.document.received
+Intake --> Channel: 202 Accepted
+
+Events -> DocAI: document.received
+DocAI -> DocAI: format + integrity + malware checks
+alt documento válido
+  DocAI -> DocAI: classify and extract
+  DocAI -> Evidence: create versioned evidence
+  Evidence --> DocAI: evidence references
+  DocAI -> Events: document.validated
+  Events -> Workflow: document.validated
+  Workflow -> CaseDb: transition to DOCUMENTS_VALIDATED
+else documento inválido ou incompleto
+  DocAI -> Events: document.rejected / evidence.missing
+  Events -> Workflow: document outcome
+  Workflow -> CaseDb: transition to AWAITING_DOCUMENTS
+end
+@enduml
