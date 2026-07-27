@@ -35,8 +35,11 @@ markdown_extensions:
 
 nav:
   - Início: index.md
+  - Como ler: guide/how-to-read.md
   - Contexto:
       - Contexto de negócio: context/business-context.md
+      - Case aplicado: case-study/index.md
+      - Roadmap e histórico: roadmap.md
   - Arquitetura funcional:
       - Visão geral: functional/index.md
       - Mapa de capacidades: functional/capability-map.md
@@ -57,24 +60,24 @@ nav:
       - Componentes do Orchestrator: architecture/component-workflow-orchestrator.md
       - Componentes de Document Intelligence: architecture/component-document-intelligence.md
       - Deployment local alvo: architecture/deployment-local.md
-      - Deployment observado P5: architecture/deployment-observed-baseline.md
-      - Deployment distribuído P6: architecture/deployment-distributed-baseline.md
-      - Deployment alvo de produção P7: architecture/deployment-production-target.md
+      - Deployment observado: architecture/deployment-observed-baseline.md
+      - Deployment distribuído: architecture/deployment-distributed-baseline.md
+      - Deployment alvo de produção: architecture/deployment-production-target.md
       - Trust boundaries: architecture/trust-boundaries.md
       - Sequências: architecture/sequence-diagrams.md
   - Contratos:
       - Visão geral: contracts/index.md
       - HTTP APIs: contracts/http-apis.md
       - Eventos: contracts/events.md
-      - Mensageria P6: contracts/messaging.md
+      - Mensageria: contracts/messaging.md
       - Policies: contracts/policies.md
       - Versionamento: contracts/versioning.md
   - Implementação:
-      - Visão geral P4: implementation/index.md
+      - Visão geral: implementation/index.md
       - Cenários testados: implementation/test-scenarios.md
       - Runbook local: implementation/runbook.md
-  - Evals:
-      - Visão geral P5: evaluation/index.md
+  - Avaliação:
+      - Visão geral: evaluation/index.md
   - Segurança:
       - Visão geral: security/index.md
       - Identidade de workload: security/workload-identity.md
@@ -83,7 +86,7 @@ nav:
   - Operações:
       - Visão geral: operations/index.md
       - Observabilidade: operations/observability.md
-      - Event backbone P6: operations/eventing.md
+      - Event backbone: operations/eventing.md
       - Alta disponibilidade e DR: operations/ha-dr.md
       - Capacidade: operations/capacity.md
       - SLOs e alertas: operations/slos.md
@@ -100,7 +103,6 @@ nav:
   - Governança:
       - Visão geral: governance/index.md
       - Production readiness: governance/production-readiness.md
-  - Case aplicado: case-study/index.md
-  - Serviços: services/index.md
+  - Catálogo de serviços: services/index.md
 
 copyright: Copyright &copy; 2026 Leandro Flora
