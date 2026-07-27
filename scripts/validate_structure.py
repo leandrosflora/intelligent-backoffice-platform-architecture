@@ -4,6 +4,7 @@ import sys
 REQUIRED_PATHS = (
     Path(".github/workflows/quality.yml"),
     Path(".github/workflows/docs.yml"),
+    Path(".github/workflows/vertical-slice.yml"),
     Path("C4/_theme.iuml"),
     Path("C4/c4-context-current.puml"),
     Path("C4/c4-context-target.puml"),
@@ -29,32 +30,13 @@ REQUIRED_PATHS = (
     Path("policies/authorization_test.rego"),
     Path("docs/assets/diagrams/README.md"),
     Path("docs/architecture/index.md"),
-    Path("docs/architecture/c4-context-current.md"),
-    Path("docs/architecture/c4-context-target.md"),
-    Path("docs/architecture/c4-container-current.md"),
-    Path("docs/architecture/c4-container-target.md"),
-    Path("docs/architecture/component-workflow-orchestrator.md"),
-    Path("docs/architecture/component-document-intelligence.md"),
-    Path("docs/architecture/deployment-local.md"),
-    Path("docs/architecture/trust-boundaries.md"),
-    Path("docs/architecture/sequence-diagrams.md"),
     Path("docs/contracts/index.md"),
-    Path("docs/contracts/http-apis.md"),
-    Path("docs/contracts/events.md"),
-    Path("docs/contracts/policies.md"),
-    Path("docs/contracts/versioning.md"),
+    Path("docs/implementation/index.md"),
+    Path("docs/implementation/test-scenarios.md"),
+    Path("docs/implementation/runbook.md"),
     Path("docs/case-study/index.md"),
     Path("docs/context/business-context.md"),
     Path("docs/functional/index.md"),
-    Path("docs/functional/capability-map.md"),
-    Path("docs/functional/domain-map.md"),
-    Path("docs/functional/case-lifecycle.md"),
-    Path("docs/functional/business-rules.md"),
-    Path("docs/functional/roles-and-responsibilities.md"),
-    Path("docs/functional/outcome-card.md"),
-    Path("docs/functional/risk-classification.md"),
-    Path("docs/functional/non-functional-requirements.md"),
-    Path("docs/functional/traceability-matrix.md"),
     Path("docs/governance/index.md"),
     Path("docs/operations/index.md"),
     Path("docs/security/index.md"),
@@ -63,7 +45,13 @@ REQUIRED_PATHS = (
     Path("scripts/validate_diagrams.py"),
     Path("scripts/validate_contracts.py"),
     Path("scripts/test-policies.sh"),
-    Path("samples/README.md"),
+    Path("scripts/run_vertical_slice_e2e.py"),
+    Path("samples/vertical-slice/Dockerfile"),
+    Path("samples/vertical-slice/README.md"),
+    Path("samples/vertical-slice/app/main.py"),
+    Path("samples/vertical-slice/tests/test_e2e.py"),
+    Path("samples/vertical-slice/requirements.txt"),
+    Path("samples/vertical-slice/requirements-dev.txt"),
     Path("requirements-docs.txt"),
     Path("mkdocs.yml"),
     Path("docker-compose.yml"),
@@ -72,11 +60,9 @@ REQUIRED_PATHS = (
 )
 
 missing = [str(path) for path in REQUIRED_PATHS if not path.exists()]
-
 if missing:
     print("Required repository paths are missing:")
     for path in missing:
         print(f"- {path}")
     sys.exit(1)
-
 print(f"Repository structure is valid: {len(REQUIRED_PATHS)} required paths found.")

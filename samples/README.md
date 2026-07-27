@@ -1,14 +1,20 @@
 # Samples
 
-Esta pasta receberá vertical slices executáveis e massas sintéticas.
+## Vertical slice
 
-O primeiro sample deverá demonstrar:
+O diretório `vertical-slice/` contém a primeira implementação executável da plataforma:
 
-- criação de caso;
-- ingestão de documentos sintéticos;
-- classificação e extração;
-- transições de workflow;
-- recomendação de decisão;
+- FastAPI modular;
+- SQLite persistido;
+- OPA em runtime;
+- document intelligence e investigação mocks;
 - aprovação humana;
-- execução mock idempotente;
-- eventos, auditoria e traces.
+- execução governada e idempotente;
+- timeline;
+- testes E2E.
+
+Execute a partir da raiz:
+
+```bash
+docker compose --profile runtime up --build
+```
