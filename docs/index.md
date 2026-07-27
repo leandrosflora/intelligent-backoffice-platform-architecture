@@ -1,36 +1,86 @@
 # Intelligent Backoffice Platform Architecture
 
-Arquitetura de referência executável para processos de backoffice regulados, documentais e de longa duração.
+Arquitetura de referência executável para processos de backoffice regulados, documentais e de longa duração. A proposta combina workflow persistente, capacidades inteligentes, aprovação humana, policies, evidências e execução governada sem transferir decisões sensíveis para agentes.
 
-## Estado da evolução
+[![Contexto alvo da plataforma](assets/diagrams/c4-context-target.png)](assets/diagrams/c4-context-target.svg)
 
-| Fase | Estado | Entrega |
+[**Abrir diagrama de contexto em SVG**](assets/diagrams/c4-context-target.svg)
+
+## Problema que a arquitetura resolve
+
+Processos de backoffice costumam atravessar documentos, múltiplos sistemas, regras operacionais, investigação, aprovação por alçada e execução financeira. Quando essas etapas ficam fragmentadas, aumentam o tempo de ciclo, o retrabalho, a inconsistência das decisões e o risco de perda de evidências.
+
+A plataforma organiza essa jornada como um processo governado, observável e auditável.
+
+## Princípios arquiteturais
+
+1. **O workflow controla o processo.** Estado, timers, retries, compensações e transições não pertencem ao agente.
+2. **A IA investiga e recomenda.** Agentes não aprovam nem executam operações mutáveis.
+3. **Policies falham fechadas.** Alçada, segregação de funções, finalidade e autorização são verificadas antes da ação.
+4. **Toda decisão relevante produz evidência.** Eventos, versões, tool calls, aprovações e resultados permanecem rastreáveis.
+5. **Atual e alvo são separados.** A implementação local demonstra padrões; a arquitetura-alvo descreve a evolução corporativa.
+
+## O que funciona hoje
+
+| Capacidade | Baseline executável | Limite declarado |
 |---|---|---|
-| P0 | Concluído | Estrutura, MkDocs e pipelines |
-| P1 | Concluído | Contexto, outcomes, lifecycle, regras, risco e NFRs |
-| P2 | Concluído | C4, trust boundaries e sequências |
-| P3 | Concluído | Contratos, schemas, catálogo e policies |
-| P4 | Concluído | Vertical slice, persistência local e OPA |
-| P5 | Concluído | Evals, observabilidade, SLOs e runbooks |
-| P6 | Concluído | Event backbone, outbox, inbox, workers, timers, DLQ e replay |
-| P7 | Baseline executável | Identidade assinada, KMS policy, SBOM, proveniência, HA/DR, capacidade e readiness gates |
+| Jornada de contestação | Vertical slice FastAPI com lifecycle persistido | Dados e integrações sintéticos |
+| Aprovação e execução | Aprovação humana, OPA e execução mock idempotente | Sem efeito financeiro real |
+| Processamento assíncrono | Outbox, inbox, workers, timers, DLQ e replay | SQLite e broker single-node |
+| Observabilidade | Métricas, traces, dashboards, SLOs e alertas | Ambiente local sem operação 24x7 |
+| Identidade e supply chain | JWT EdDSA local, SBOM e proveniência | Sem IAM, KMS e admission corporativos |
+| Resiliência | Backup criptografado, restore e critérios de DR | Sem exercício regional real |
 
-## O que o P7 prova
+!!! danger "Status de produção"
+    O estado oficial permanece **`NOT_PRODUCTION_READY`**. Controles demonstrados localmente não equivalem a implantação corporativa aprovada.
 
-- JWT EdDSA de curta duração é validado e headers não elevam privilégios;
-- finalidade é ligada à ação pelo OPA;
-- imagem local executa sem root;
-- backup sintético é criptografado e restaurado com integridade;
-- SBOM e proveniência são gerados na pipeline;
-- manifests de HA e segurança passam por validação estrutural;
-- regressão de capacidade possui threshold;
-- o status permanece `NOT_PRODUCTION_READY` com blockers explícitos.
+## Execute a implementação de referência
 
-## Comece por aqui
+Runtime mínimo:
 
-1. [Contexto de negócio](context/business-context.md)
-2. [Arquitetura funcional](functional/index.md)
-3. [Deployment alvo de produção](architecture/deployment-production-target.md)
-4. [Identidade de workload](security/workload-identity.md)
-5. [Alta disponibilidade e DR](operations/ha-dr.md)
-6. [Production readiness](governance/production-readiness.md)
+```bash
+docker compose --profile runtime up --build
+```
+
+Workflow distribuído:
+
+```bash
+docker compose --profile distributed up --build
+python scripts/run_p6_distributed_e2e.py
+```
+
+Profile com identidade assinada:
+
+```bash
+python scripts/generate_dev_identity.py --force
+docker compose --profile secure up --build
+python scripts/run_p7_secure_e2e.py
+```
+
+Consulte o [runbook local](implementation/runbook.md) para testes, health checks e reset do ambiente.
+
+## Escolha sua trilha de leitura
+
+A documentação possui percursos específicos para executivos, arquitetos, desenvolvedores, segurança, operações e auditoria.
+
+[**Abrir o guia de leitura**](guide/how-to-read.md)
+
+## Current versus target
+
+| Visão | Pergunta respondida |
+|---|---|
+| [Contexto atual](architecture/c4-context-current.md) | O que está confirmado no repositório e no ambiente de referência? |
+| [Contexto alvo](architecture/c4-context-target.md) | Como a plataforma se posiciona no ecossistema corporativo? |
+| [Containers atuais](architecture/c4-container-current.md) | Quais responsabilidades e componentes estão demonstrados? |
+| [Containers alvo](architecture/c4-container-target.md) | Como as responsabilidades devem ser separadas na evolução da plataforma? |
+| [Production readiness](governance/production-readiness.md) | Quais gates impedem a classificação como produção? |
+
+## Próximos pontos de entrada
+
+- [Contexto de negócio](context/business-context.md)
+- [Case aplicado](case-study/index.md)
+- [Arquitetura funcional](functional/index.md)
+- [Arquitetura técnica](architecture/index.md)
+- [Contratos executáveis](contracts/index.md)
+- [Implementação de referência](implementation/index.md)
+- [Roadmap e histórico](roadmap.md)
