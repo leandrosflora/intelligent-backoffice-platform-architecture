@@ -1,26 +1,36 @@
 # Diagramas de sequência
 
-Os fluxos abaixo conectam o lifecycle funcional a responsabilidades técnicas.
+Os fluxos abaixo conectam o lifecycle funcional a responsabilidades técnicas. Cada PNG pode ser clicado para abrir a versão vetorial em SVG.
 
 ## Intake e processamento documental
 
-![Intake e processamento documental](../assets/diagrams/sequence-case-intake.svg)
+[![Intake e processamento documental](../assets/diagrams/sequence-case-intake.png)](../assets/diagrams/sequence-case-intake.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/sequence-case-intake.svg)
 
 ## Investigação, recomendação e aprovação
 
-![Investigação e aprovação](../assets/diagrams/sequence-investigation-approval.svg)
+[![Investigação e aprovação](../assets/diagrams/sequence-investigation-approval.png)](../assets/diagrams/sequence-investigation-approval.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/sequence-investigation-approval.svg)
 
 ## Execução governada e reconciliação
 
-![Execução governada](../assets/diagrams/sequence-governed-execution.svg)
+[![Execução governada](../assets/diagrams/sequence-governed-execution.png)](../assets/diagrams/sequence-governed-execution.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/sequence-governed-execution.svg)
 
 ## Evidência ausente e retomada
 
-![Evidência ausente](../assets/diagrams/sequence-missing-evidence.svg)
+[![Evidência ausente](../assets/diagrams/sequence-missing-evidence.png)](../assets/diagrams/sequence-missing-evidence.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/sequence-missing-evidence.svg)
 
 ## Transactional outbox e inbox idempotente
 
-![Outbox e inbox](../assets/diagrams/sequence-outbox-delivery.svg)
+[![Outbox e inbox](../assets/diagrams/sequence-outbox-delivery.png)](../assets/diagrams/sequence-outbox-delivery.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/sequence-outbox-delivery.svg)
 
 Garantias:
 
@@ -32,7 +42,9 @@ Garantias:
 
 ## Retry, DLQ e replay controlado
 
-![Retry, DLQ e replay](../assets/diagrams/sequence-retry-dlq-replay.svg)
+[![Retry, DLQ e replay](../assets/diagrams/sequence-retry-dlq-replay.png)](../assets/diagrams/sequence-retry-dlq-replay.svg)
+
+[**Abrir diagrama em SVG**](../assets/diagrams/sequence-retry-dlq-replay.svg)
 
 Garantias:
 
