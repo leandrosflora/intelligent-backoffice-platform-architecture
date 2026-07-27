@@ -59,6 +59,12 @@ nav:
       - Deployment local: architecture/deployment-local.md
       - Trust boundaries: architecture/trust-boundaries.md
       - Sequências: architecture/sequence-diagrams.md
+  - Contratos:
+      - Visão geral: contracts/index.md
+      - HTTP APIs: contracts/http-apis.md
+      - Eventos: contracts/events.md
+      - Policies: contracts/policies.md
+      - Versionamento: contracts/versioning.md
   - Case aplicado: case-study/index.md
   - Governança: governance/index.md
   - Operações: operations/index.md

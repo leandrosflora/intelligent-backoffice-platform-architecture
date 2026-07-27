@@ -1,2 +1,4 @@
 mkdocs-material>=9.5,<10
 PyYAML>=6,<7
+jsonschema>=4.23,<5
+openapi-spec-validator>=0.9,<1

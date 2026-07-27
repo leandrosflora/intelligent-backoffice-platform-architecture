@@ -1,0 +1,119 @@
+/v1/cases/{caseId}/documents:
+  post:
+    tags:
+    - Documents
+    operationId: registerDocument
+    summary: Registra um documento previamente armazenado em área de quarentena
+    x-contract-id: API-DOC-001
+    x-capabilities:
+    - CAP-002
+    - CAP-003
+    - PLT-003
+    - PLT-008
+    x-business-rules:
+    - BR-002
+    - BR-003
+    - BR-004
+    - BR-005
+    x-policy-action: document.register
+    x-idempotent: true
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
+    - $ref: ../platform-api.yaml#/components/parameters/IfMatch
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../../schemas/canonical-models.yaml#/$defs/RegisterDocumentRequest
+    responses:
+      '202':
+        description: Documento aceito para processamento assíncrono
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Document
+      '400':
+        $ref: ../platform-api.yaml#/components/responses/BadRequest
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+      '409':
+        $ref: ../platform-api.yaml#/components/responses/Conflict
+      '422':
+        $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity
+/v1/cases/{caseId}/documents/{documentId}:
+  get:
+    tags:
+    - Documents
+    operationId: getDocument
+    summary: Consulta metadados e status do documento sem retornar o conteúdo integral
+    x-contract-id: API-DOC-002
+    x-capabilities:
+    - CAP-002
+    - CAP-003
+    - PLT-003
+    x-business-rules:
+    - BR-002
+    - BR-004
+    - BR-022
+    x-policy-action: document.read
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/DocumentId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    responses:
+      '200':
+        description: Documento encontrado
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Document
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+/v1/cases/{caseId}/evidence:
+  get:
+    tags:
+    - Evidence
+    operationId: listEvidence
+    summary: Lista evidências minimizadas e versionadas do caso
+    x-contract-id: API-EVIDENCE-001
+    x-capabilities:
+    - CAP-003
+    - PLT-008
+    x-business-rules:
+    - BR-004
+    - BR-007
+    - BR-021
+    - BR-022
+    x-policy-action: evidence.read
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    responses:
+      '200':
+        description: Evidências do caso
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: ../../schemas/canonical-models.yaml#/$defs/Evidence
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound

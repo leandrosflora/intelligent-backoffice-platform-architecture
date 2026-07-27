@@ -1,19 +1,154 @@
 package intelligent_backoffice.authorization
 
-default allow = false
+import rego.v1
 
-allow {
-  input.subject != ""
-  input.tenant_id != ""
-  input.action == "case.read"
-  input.subject_tenant_id == input.tenant_id
+default allow := false
+
+decision := {
+    "allow": allow,
+    "reason": reason,
+    "obligations": [item | obligation[item]],
 }
 
-allow {
-  input.subject != ""
-  input.tenant_id != ""
-  input.action == "financial.execute"
-  input.approval.status == "APPROVED"
-  input.approval.evidence_reference != ""
-  input.idempotency_key != ""
+reason := "allowed" if allow
+reason := "default-deny" if not allow
+
+valid_common_context if {
+    input.subject.id != ""
+    input.subject.type in {"HUMAN", "WORKLOAD"}
+    count(input.subject.roles) > 0
+    input.subject.tenant_id != ""
+    input.resource.tenant_id != ""
+    input.subject.tenant_id == input.resource.tenant_id
+    input.action != ""
+    input.purpose != ""
+    input.correlation_id != ""
 }
+
+has_role(role) if role in input.subject.roles
+
+has_any_role(roles) if {
+    some role in roles
+    has_role(role)
+}
+
+case_version_present if input.context.case_version > 0
+
+evidence_present if count(input.context.evidence_references) > 0
+
+allow if {
+    valid_common_context
+    input.action == "case.create"
+    has_role("case-manager")
+}
+
+allow if {
+    valid_common_context
+    input.action == "case.read"
+    has_any_role({"case-reader", "case-manager", "operations-analyst", "approver", "auditor"})
+}
+
+allow if {
+    valid_common_context
+    input.action == "case.cancel"
+    input.subject.type == "HUMAN"
+    has_role("case-manager")
+    input.resource.state in {"CREATED", "AWAITING_DOCUMENTS", "DOCUMENTS_RECEIVED", "DOCUMENTS_VALIDATED"}
+    case_version_present
+}
+
+allow if {
+    valid_common_context
+    input.action == "document.register"
+    has_any_role({"case-manager", "document-processor"})
+    input.resource.state in {"CREATED", "AWAITING_DOCUMENTS", "DOCUMENTS_RECEIVED"}
+    case_version_present
+}
+
+allow if {
+    valid_common_context
+    input.action == "document.read"
+    has_any_role({"document-processor", "operations-analyst", "approver", "auditor"})
+}
+
+allow if {
+    valid_common_context
+    input.action == "evidence.read"
+    has_any_role({"operations-analyst", "decision-agent", "approver", "auditor"})
+}
+
+allow if {
+    valid_common_context
+    input.action == "investigation.execute"
+    has_any_role({"investigator", "operations-analyst"})
+    input.resource.state == "DOCUMENTS_VALIDATED"
+    case_version_present
+    evidence_present
+}
+
+allow if {
+    valid_common_context
+    input.action == "recommendation.create"
+    has_any_role({"decision-agent", "operations-analyst"})
+    input.resource.state == "UNDER_INVESTIGATION"
+    case_version_present
+    evidence_present
+}
+
+allow if {
+    valid_common_context
+    input.action == "approval.decide"
+    input.subject.type == "HUMAN"
+    has_role("approver")
+    input.resource.state == "AWAITING_APPROVAL"
+    case_version_present
+    input.context.recommendation_actor_id != input.subject.id
+    input.context.recommendation_version == input.context.approved_recommendation_version
+    input.context.authority_limit >= input.context.amount
+}
+
+allow if {
+    valid_common_context
+    input.action == "execution.request"
+    input.subject.type == "WORKLOAD"
+    has_role("execution-service")
+    input.resource.state == "APPROVED"
+    input.context.approval_status == "APPROVED"
+    input.context.approval_valid == true
+    input.context.recommendation_version == input.context.approved_recommendation_version
+    input.context.idempotency_key != ""
+    input.context.command_hash != ""
+    evidence_present
+}
+
+allow if {
+    valid_common_context
+    input.action == "execution.read"
+    has_any_role({"execution-service", "reconciler", "case-manager", "auditor"})
+}
+
+allow if {
+    valid_common_context
+    input.action == "reconciliation.resolve"
+    has_role("reconciler")
+    input.resource.state == "RECONCILIATION_REQUIRED"
+    case_version_present
+}
+
+allow if {
+    valid_common_context
+    input.action == "audit.read"
+    input.subject.type == "HUMAN"
+    has_role("auditor")
+    input.purpose == "AUDIT"
+}
+
+obligation["audit-decision"] if valid_common_context
+obligation["tenant-match"] if valid_common_context
+obligation["redact-sensitive-data"] if input.action in {"case.read", "document.read", "evidence.read", "execution.read", "audit.read"}
+obligation["verify-case-version"] if input.action in {"case.cancel", "document.register", "investigation.execute", "recommendation.create", "approval.decide", "reconciliation.resolve"}
+obligation["verify-segregation-of-duties"] if input.action == "approval.decide"
+obligation["verify-approval"] if input.action == "execution.request"
+obligation["verify-idempotency"] if input.action == "execution.request"
+obligation["verify-evidence"] if input.action in {"investigation.execute", "recommendation.create", "execution.request"}
+obligation["reconcile-on-ambiguous-result"] if input.action in {"execution.request", "reconciliation.resolve"}

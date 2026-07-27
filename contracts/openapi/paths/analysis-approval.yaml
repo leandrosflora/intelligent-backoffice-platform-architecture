@@ -1,0 +1,148 @@
+/v1/cases/{caseId}/investigations:
+  post:
+    tags:
+    - Investigation
+    operationId: startInvestigation
+    summary: Solicita investigação usando somente tools autorizadas
+    x-contract-id: API-INV-001
+    x-capabilities:
+    - CAP-004
+    - PLT-002
+    - PLT-005
+    - PLT-006
+    x-business-rules:
+    - BR-006
+    - BR-007
+    - BR-009
+    x-policy-action: investigation.execute
+    x-idempotent: true
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
+    - $ref: ../platform-api.yaml#/components/parameters/IfMatch
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../../schemas/canonical-models.yaml#/$defs/InvestigationRequest
+    responses:
+      '202':
+        description: Investigação aceita
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Investigation
+      '400':
+        $ref: ../platform-api.yaml#/components/responses/BadRequest
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+      '409':
+        $ref: ../platform-api.yaml#/components/responses/Conflict
+      '422':
+        $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity
+/v1/cases/{caseId}/recommendations:
+  post:
+    tags:
+    - Recommendations
+    operationId: createRecommendation
+    summary: Gera recomendação explicável ou abstention
+    x-contract-id: API-REC-001
+    x-capabilities:
+    - CAP-005
+    - PLT-002
+    - PLT-004
+    - PLT-010
+    x-business-rules:
+    - BR-008
+    - BR-009
+    - BR-010
+    x-policy-action: recommendation.create
+    x-idempotent: true
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
+    - $ref: ../platform-api.yaml#/components/parameters/IfMatch
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../../schemas/canonical-models.yaml#/$defs/CreateRecommendationRequest
+    responses:
+      '201':
+        description: Recomendação criada e versionada
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Recommendation
+      '400':
+        $ref: ../platform-api.yaml#/components/responses/BadRequest
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+      '409':
+        $ref: ../platform-api.yaml#/components/responses/Conflict
+      '422':
+        $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity
+/v1/cases/{caseId}/approvals:
+  post:
+    tags:
+    - Approvals
+    operationId: decideApproval
+    summary: Registra decisão humana conforme alçada e segregação
+    x-contract-id: API-APPROVAL-001
+    x-capabilities:
+    - CAP-006
+    - PLT-006
+    - PLT-007
+    x-business-rules:
+    - BR-011
+    - BR-012
+    - BR-013
+    - BR-014
+    - BR-015
+    x-policy-action: approval.decide
+    x-idempotent: true
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
+    - $ref: ../platform-api.yaml#/components/parameters/IfMatch
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../../schemas/canonical-models.yaml#/$defs/ApprovalDecisionRequest
+    responses:
+      '201':
+        description: Decisão humana registrada
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Approval
+      '400':
+        $ref: ../platform-api.yaml#/components/responses/BadRequest
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+      '409':
+        $ref: ../platform-api.yaml#/components/responses/Conflict
+      '422':
+        $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity

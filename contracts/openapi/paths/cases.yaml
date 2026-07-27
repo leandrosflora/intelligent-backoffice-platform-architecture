@@ -1,0 +1,147 @@
+/v1/cases:
+  post:
+    tags:
+    - Cases
+    operationId: createCase
+    summary: Registra uma contestação sem duplicidade
+    description: Usa a referência externa e a chave de idempotência para impedir criação
+      duplicada.
+    x-contract-id: API-CASE-001
+    x-capabilities:
+    - CAP-001
+    - PLT-001
+    - PLT-006
+    x-business-rules:
+    - BR-001
+    - BR-024
+    x-policy-action: case.create
+    x-idempotent: true
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../../schemas/canonical-models.yaml#/$defs/CreateCaseRequest
+    responses:
+      '201':
+        description: Caso criado
+        headers:
+          ETag:
+            $ref: ../platform-api.yaml#/components/headers/ETag
+          Location:
+            schema:
+              type: string
+              format: uri-reference
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Case
+      '200':
+        description: Repetição idempotente retorna o caso já criado
+        headers:
+          ETag:
+            $ref: ../platform-api.yaml#/components/headers/ETag
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Case
+      '400':
+        $ref: ../platform-api.yaml#/components/responses/BadRequest
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '409':
+        $ref: ../platform-api.yaml#/components/responses/Conflict
+      '422':
+        $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity
+/v1/cases/{caseId}:
+  get:
+    tags:
+    - Cases
+    operationId: getCase
+    summary: Consulta o estado canônico do caso
+    x-contract-id: API-CASE-002
+    x-capabilities:
+    - CAP-001
+    - CAP-010
+    - PLT-001
+    x-business-rules:
+    - BR-021
+    - BR-022
+    x-policy-action: case.read
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    responses:
+      '200':
+        description: Caso encontrado
+        headers:
+          ETag:
+            $ref: ../platform-api.yaml#/components/headers/ETag
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Case
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+/v1/cases/{caseId}/cancel:
+  post:
+    tags:
+    - Cases
+    operationId: cancelCase
+    summary: Cancela um caso elegível
+    x-contract-id: API-CASE-003
+    x-capabilities:
+    - CAP-001
+    - PLT-001
+    - PLT-006
+    x-business-rules:
+    - BR-021
+    - BR-024
+    - BR-025
+    x-policy-action: case.cancel
+    x-idempotent: true
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
+    - $ref: ../platform-api.yaml#/components/parameters/IfMatch
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../../schemas/canonical-models.yaml#/$defs/CancelCaseRequest
+    responses:
+      '200':
+        description: Caso cancelado
+        headers:
+          ETag:
+            $ref: ../platform-api.yaml#/components/headers/ETag
+        content:
+          application/json:
+            schema:
+              $ref: ../../schemas/canonical-models.yaml#/$defs/Case
+      '400':
+        $ref: ../platform-api.yaml#/components/responses/BadRequest
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
+      '409':
+        $ref: ../platform-api.yaml#/components/responses/Conflict
+      '422':
+        $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity

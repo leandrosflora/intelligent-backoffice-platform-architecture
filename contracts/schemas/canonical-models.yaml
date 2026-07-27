@@ -1,0 +1,53 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://leandrosflora.github.io/intelligent-backoffice-platform-architecture/contracts/schemas/canonical-models.yaml
+title: Intelligent Backoffice Canonical Models
+type: object
+$defs:
+  Case:
+    $ref: ./canonical-models-base.yaml#/$defs/Case
+  CreateCaseRequest:
+    $ref: ./canonical-models-base.yaml#/$defs/CreateCaseRequest
+  CancelCaseRequest:
+    $ref: ./canonical-models-base.yaml#/$defs/CancelCaseRequest
+  TimelineEntry:
+    $ref: ./canonical-models-base.yaml#/$defs/TimelineEntry
+  UUID:
+    $ref: ./canonical-models-base.yaml#/$defs/UUID
+  NonEmptyString:
+    $ref: ./canonical-models-base.yaml#/$defs/NonEmptyString
+  Timestamp:
+    $ref: ./canonical-models-base.yaml#/$defs/Timestamp
+  Money:
+    $ref: ./canonical-models-base.yaml#/$defs/Money
+  CaseState:
+    $ref: ./canonical-models-base.yaml#/$defs/CaseState
+  DataClassification:
+    $ref: ./canonical-models-base.yaml#/$defs/DataClassification
+  ProblemDetails:
+    $ref: ./canonical-models-base.yaml#/$defs/ProblemDetails
+  InvestigationRequest:
+    $ref: ./canonical-models-base.yaml#/$defs/InvestigationRequest
+  Investigation:
+    $ref: ./canonical-models-base.yaml#/$defs/Investigation
+  Recommendation:
+    $ref: ./canonical-models-base.yaml#/$defs/Recommendation
+  CreateRecommendationRequest:
+    $ref: ./canonical-models-base.yaml#/$defs/CreateRecommendationRequest
+  ApprovalDecisionRequest:
+    $ref: ./canonical-models-base.yaml#/$defs/ApprovalDecisionRequest
+  Approval:
+    $ref: ./canonical-models-base.yaml#/$defs/Approval
+  DocumentStatus:
+    $ref: ./canonical-models-base.yaml#/$defs/DocumentStatus
+  Document:
+    $ref: ./canonical-models-base.yaml#/$defs/Document
+  RegisterDocumentRequest:
+    $ref: ./canonical-models-base.yaml#/$defs/RegisterDocumentRequest
+  Evidence:
+    $ref: ./canonical-models-base.yaml#/$defs/Evidence
+  ExecutionRequest:
+    $ref: ./canonical-models-base.yaml#/$defs/ExecutionRequest
+  Execution:
+    $ref: ./canonical-models-base.yaml#/$defs/Execution
+  ReconciliationResolutionRequest:
+    $ref: ./canonical-models-base.yaml#/$defs/ReconciliationResolutionRequest
