@@ -52,8 +52,12 @@ def request(method: str, path: str, body=None, token=None, headers=None):
     except urllib.error.HTTPError as exc:
         raw = exc.read().decode()
         return exc.code, json.loads(raw) if raw else None
-    except urllib.error.URLError as exc:
-        return 0, {"reason": "endpoint-unavailable", "detail": str(exc.reason)}
+    except Exception as exc:  # noqa: BLE001 - E2E client must report transient socket failures
+        return 0, {
+            "reason": "endpoint-unavailable",
+            "errorType": type(exc).__name__,
+            "detail": str(exc),
+        }
 
 
 def record(step, status, payload):
