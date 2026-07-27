@@ -35,7 +35,20 @@ markdown_extensions:
 
 nav:
   - Início: index.md
-  - Arquitetura: architecture/index.md
+  - Contexto:
+      - Contexto de negócio: context/business-context.md
+  - Arquitetura funcional:
+      - Visão geral: functional/index.md
+      - Mapa de capacidades: functional/capability-map.md
+      - Mapa de domínios: functional/domain-map.md
+      - Lifecycle do caso: functional/case-lifecycle.md
+      - Regras de negócio: functional/business-rules.md
+      - Papéis e responsabilidades: functional/roles-and-responsibilities.md
+      - Outcome card: functional/outcome-card.md
+      - Classificação de risco: functional/risk-classification.md
+      - Requisitos não funcionais: functional/non-functional-requirements.md
+      - Rastreabilidade: functional/traceability-matrix.md
+  - Arquitetura técnica: architecture/index.md
   - Case aplicado: case-study/index.md
   - Governança: governance/index.md
   - Operações: operations/index.md
