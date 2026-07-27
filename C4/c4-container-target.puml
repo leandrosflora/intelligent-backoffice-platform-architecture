@@ -1,81 +1,83 @@
 @startuml
-!include _theme.iuml
+!include <C4/C4_Container>
 
 title C4 Nível 2 — Containers alvo
-left to right direction
+LAYOUT_LEFT_RIGHT()
 
-C4Person(channelUser, "Cliente / canal", "Abre caso e envia documentos.")
-C4Person(analyst, "Analista", "Investiga e complementa.")
-C4Person(approver, "Aprovador", "Decide conforme alçada.")
+Person(channelUser, "Cliente / canal", "Abre um caso e envia documentos.")
+Person(analyst, "Analista", "Investiga o caso e complementa evidências.")
+Person(approver, "Aprovador", "Decide conforme alçada e segregação de funções.")
 
-package "Intelligent Backoffice Platform\n<<System Boundary>>" {
-  package "Interaction and Workflow" {
-    C4Container(intake, "Case Intake API", "REST / Events", "Recebe casos e documentos com idempotência.")
-    C4Container(orchestrator, "Workflow Orchestrator", "Long-running workflow", "Mantém estado, timers, retries, compensações e tarefas.")
-    C4Container(human, "Human Approval Service", "REST / Task UI", "Gerencia tarefas, alçada e decisão humana.")
-    C4Container(notification, "Notification Service", "Events / Adapters", "Comunica pendências, andamento e resultado.")
+System_Boundary(platformBoundary, "Intelligent Backoffice Platform") {
+  Boundary(interactionBoundary, "Interaction and Workflow", $type="Capability Group") {
+    Container(intake, "Case Intake API", "REST / Events", "Recebe casos e documentos com idempotência.")
+    Container(orchestrator, "Workflow Orchestrator", "Long-running workflow", "Mantém estado, timers, retries, compensações e tarefas.")
+    Container(human, "Human Approval Service", "REST / Task UI", "Gerencia tarefas, alçada e decisão humana.")
+    Container(notification, "Notification Service", "Events / Adapters", "Comunica pendências, andamento e resultado.")
   }
 
-  package "Intelligence" {
-    C4Container(docai, "Document Intelligence", "Async workers", "Quarentena, validação, classificação e extração.")
-    C4Container(investigation, "Investigation Agent Runtime", "Agent runtime", "Consulta tools e consolida findings.")
-    C4Container(decision, "Decision Support Agent", "Agent runtime", "Produz recomendação explicável e abstention.")
-    C4Container(knowledge, "Knowledge Service", "RAG / Search", "Recupera regras e procedimentos autorizados.")
+  Boundary(intelligenceBoundary, "Intelligence", $type="Capability Group") {
+    Container(docai, "Document Intelligence", "Async workers", "Quarentena, validação, classificação e extração.")
+    Container(investigation, "Investigation Agent Runtime", "Agent runtime", "Consulta tools autorizadas e consolida findings.")
+    Container(decision, "Decision Support Agent", "Agent runtime", "Produz recomendação explicável e pode se abster.")
+    Container(knowledge, "Knowledge Service", "RAG / Search", "Recupera regras e procedimentos autorizados.")
   }
 
-  package "Governance and Integration" {
-    C4Container(policy, "Policy Decision Point", "OPA / Policy API", "Default deny, alçada, segregação e obrigações.")
-    C4Container(tools, "Tool Gateway", "MCP / REST", "Expõe portas funcionais governadas.")
-    C4Container(execution, "Governed Execution", "Domain service", "Executa comandos aprovados com idempotência e reconciliação.")
-    C4Container(evidence, "Evidence Service", "REST / Events", "Preserva cadeia de custódia e referências versionadas.")
-    C4Container(audit, "Audit Service", "Append-only ingestion", "Registra decisões, transições e acessos.")
+  Boundary(governanceBoundary, "Governance and Integration", $type="Capability Group") {
+    Container(policy, "Policy Decision Point", "OPA / Policy API", "Aplica default deny, alçada, segregação e obrigações.")
+    Container(tools, "Tool Gateway", "MCP / REST", "Expõe portas funcionais governadas.")
+    Container(execution, "Governed Execution", "Domain service", "Executa comandos aprovados com idempotência e reconciliação.")
+    Container(evidence, "Evidence Service", "REST / Events", "Preserva cadeia de custódia e referências versionadas.")
+    Container(audit, "Audit Service", "Append-only ingestion", "Registra decisões, transições e acessos.")
   }
 
-  C4Queue(events, "Event Backbone", "Kafka / Redpanda", "Eventos duráveis, replay, DLQ e integração assíncrona.")
-  C4ContainerDb(caseDb, "Case Store", "PostgreSQL", "Caso, estado, Inbox, Outbox e timers.")
-  C4ContainerDb(evidenceDb, "Evidence Metadata", "PostgreSQL", "Metadados, checksums e relações.")
-  C4ContainerDb(objectStore, "Document Store", "S3 compatible", "Documentos e artefatos em quarentena.")
-  C4Container(observability, "Observability Stack", "OTel / Metrics / Logs / Traces", "SLIs, alertas e investigação operacional.")
+  ContainerQueue(events, "Event Backbone", "Kafka / Redpanda", "Eventos duráveis, replay, DLQ e integração assíncrona.")
+  ContainerDb(caseDb, "Case Store", "PostgreSQL", "Caso, estado, Inbox, Outbox e timers.")
+  ContainerDb(evidenceDb, "Evidence Metadata", "PostgreSQL", "Metadados, checksums e relações.")
+  ContainerDb(objectStore, "Document Store", "S3 compatible", "Documentos e artefatos em quarentena.")
+  Container(observability, "Observability Stack", "OpenTelemetry / Metrics / Logs / Traces", "SLIs, alertas e investigação operacional.")
 }
 
-C4External(iam, "IAM / Workload Identity", "Identidade corporativa.")
-C4External(record, "Systems of Record", "Core, transações, fraude e CRM.")
-C4External(model, "Model Gateway", "Model routing e quotas.")
-C4External(channels, "Corporate Channels", "Portal, atendimento e integrações.")
+System_Ext(iam, "IAM / Workload Identity", "Identidade corporativa e credenciais de workload.")
+System_Ext(record, "Systems of Record", "Core, transações, fraude e CRM.")
+System_Ext(model, "Model Gateway", "Roteamento de modelos, quotas e políticas de consumo.")
+System_Ext(channels, "Corporate Channels", "Portal, atendimento e integrações.")
 
-channelUser --> channels
-channels --> intake : cria caso / envia documento
-analyst --> orchestrator : consulta e complementa
-approver --> human : decide
+Rel(channelUser, channels, "Abre caso e envia documentos")
+Rel(channels, intake, "Cria caso e encaminha documentos", "REST / Events")
+Rel(analyst, orchestrator, "Consulta e complementa o caso", "Task UI / API")
+Rel(approver, human, "Aprova ou rejeita", "Task UI / API")
 
-intake --> orchestrator : inicia workflow
-intake --> objectStore : grava documento
-intake --> events : publica aceite
-orchestrator --> caseDb : persiste estado e Outbox
-orchestrator --> docai : solicita processamento
-orchestrator --> investigation : solicita investigação
-orchestrator --> decision : solicita recomendação
-orchestrator --> human : cria tarefa
-orchestrator --> execution : solicita execução aprovada
-orchestrator --> notification : solicita comunicação
-orchestrator --> events : publica lifecycle
+Rel(intake, orchestrator, "Inicia o workflow", "Command / Event")
+Rel(intake, objectStore, "Armazena documento em quarentena", "S3 API")
+Rel(intake, events, "Publica aceite do caso", "Kafka")
+Rel(orchestrator, caseDb, "Persiste estado, Inbox, Outbox e timers", "SQL")
+Rel(orchestrator, docai, "Solicita processamento documental", "Command / Event")
+Rel(orchestrator, investigation, "Solicita investigação", "Command / Event")
+Rel(orchestrator, decision, "Solicita recomendação", "Command / Event")
+Rel(orchestrator, human, "Cria tarefa de aprovação", "API / Event")
+Rel(orchestrator, execution, "Solicita execução aprovada", "Command")
+Rel(orchestrator, notification, "Solicita comunicação", "Event")
+Rel(orchestrator, events, "Publica eventos do lifecycle", "Kafka")
 
-docai --> objectStore : lê conteúdo em quarentena
-docai --> evidence : registra extrações
-investigation --> tools : chama tools autorizadas
-investigation --> evidence : registra findings
-decision --> knowledge : recupera regras
-decision --> evidence : lê evidências
-decision --> model : inferência
-human --> policy : valida alçada e segregação
-execution --> policy : autoriza operação
-execution --> record : executa via adapter
-tools --> record : consultas governadas
-evidence --> evidenceDb
-audit --> events : consome eventos
-notification --> channels
-policy --> iam : valida claims
-observability ..> orchestrator
-observability ..> docai
-observability ..> execution
+Rel(docai, objectStore, "Lê documentos em quarentena", "S3 API")
+Rel(docai, evidence, "Registra extrações e validações", "API / Event")
+Rel(investigation, tools, "Invoca tools autorizadas", "MCP / REST")
+Rel(investigation, evidence, "Registra findings", "API / Event")
+Rel(decision, knowledge, "Recupera regras e procedimentos", "Search / Retrieval")
+Rel(decision, evidence, "Lê evidências versionadas", "API")
+Rel(decision, model, "Executa inferência", "Model API")
+Rel(human, policy, "Valida alçada e segregação", "Policy API")
+Rel(execution, policy, "Autoriza operação mutável", "Policy API")
+Rel(execution, record, "Executa por adapter governado", "Domain API")
+Rel(tools, record, "Realiza consultas governadas", "Domain APIs")
+Rel(evidence, evidenceDb, "Persiste metadados e checksums", "SQL")
+Rel(audit, events, "Consome eventos auditáveis", "Kafka")
+Rel(notification, channels, "Entrega pendências, status e resultado", "API / Events")
+Rel(policy, iam, "Valida claims e identidade de workload", "Identity protocols")
+Rel(orchestrator, observability, "Emite métricas, logs e traces", "OTLP")
+Rel(docai, observability, "Emite métricas, logs e traces", "OTLP")
+Rel(execution, observability, "Emite métricas, logs e traces", "OTLP")
+
+SHOW_LEGEND()
 @enduml
