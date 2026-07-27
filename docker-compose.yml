@@ -23,7 +23,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-    profiles: [runtime, observability, distributed]
+    profiles: [runtime, observability, distributed, secure]
 
   vertical-slice:
     build:
@@ -38,6 +38,7 @@ services:
       TRACING_ENABLED: "${OTEL_TRACING_ENABLED:-false}"
       OTLP_ENDPOINT: http://otel-collector:4317
       EVENTING_ENABLED: "false"
+      IDENTITY_MODE: headers
     volumes:
       - vertical-slice-data:/data
     ports:
@@ -52,6 +53,40 @@ services:
       retries: 10
     profiles: [runtime, observability]
 
+  secure-api:
+    build:
+      context: ./samples/vertical-slice
+    environment:
+      DATABASE_PATH: /data/secure-slice.db
+      POLICY_MODE: opa
+      OPA_URL: http://opa:8181
+      SERVICE_NAME: intelligent-backoffice-secure-api
+      ENVIRONMENT: local-secure
+      METRICS_ENABLED: "true"
+      TRACING_ENABLED: "false"
+      EVENTING_ENABLED: "false"
+      IDENTITY_MODE: jwt
+      IDENTITY_PUBLIC_KEY_PATH: /run/identity/identity-public.pem
+      IDENTITY_ISSUER: https://identity.local
+      IDENTITY_AUDIENCE: intelligent-backoffice-api
+      IDENTITY_ALGORITHM: EdDSA
+      IDENTITY_MAX_TTL_SECONDS: "300"
+    volumes:
+      - secure-slice-data:/data
+      - ./.local/security/identity-public.pem:/run/identity/identity-public.pem:ro
+    ports:
+      - "${SECURE_APP_PORT:-8082}:8080"
+    depends_on:
+      opa:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health/ready')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    profiles: [secure]
+
   distributed-api:
     build:
       context: ./samples/vertical-slice
@@ -64,6 +99,7 @@ services:
       METRICS_ENABLED: "true"
       TRACING_ENABLED: "false"
       EVENTING_ENABLED: "true"
+      IDENTITY_MODE: headers
       KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
       EVENTS_TOPIC: backoffice.events.v1
       DLQ_TOPIC: backoffice.dlq.v1
@@ -227,6 +263,7 @@ networks:
 
 volumes:
   vertical-slice-data:
+  secure-slice-data:
   distributed-slice-data:
   prometheus-data:
   grafana-data:

@@ -1,0 +1,42 @@
+version: 0.7.0
+status: TARGET_DEFINED
+strategy: warm-standby-cross-region
+scope:
+  api:
+    recovery: redeploy-from-digest-pinned-image
+    state: stateless
+  database:
+    recovery: managed-cross-region-replica-or-PITR
+    targetRpoMinutes: 5
+    targetRtoMinutes: 30
+  eventBackbone:
+    recovery: replicated-topics-or-approved-replay-from-outbox
+    targetRpoMinutes: 5
+    targetRtoMinutes: 45
+  evidence:
+    recovery: immutable-cross-region-copy
+    targetRpoMinutes: 15
+    targetRtoMinutes: 60
+activation:
+  approvers: [incident-commander, platform-owner, business-owner]
+  conditions:
+    - primary-region-unavailable
+    - data-integrity-risk-contained
+    - failover-decision-recorded
+drill:
+  frequency: semiannual
+  scenarios:
+    - region-loss
+    - database-corruption
+    - broker-loss
+    - identity-provider-unavailable
+  evidence:
+    - timestamps-and-decision-log
+    - measured-rto-rpo
+    - reconciliation-backlog
+    - customer-impact-assessment
+    - corrective-actions
+failback:
+  requireDataReconciliation: true
+  requireChangeApproval: true
+  prohibitAutomaticFailback: true

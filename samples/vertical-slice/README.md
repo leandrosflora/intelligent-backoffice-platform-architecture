@@ -1,6 +1,6 @@
 # Vertical slice executável
 
-Implementação modular do fluxo de contestação com três profiles independentes.
+Implementação modular do fluxo de contestação com profiles independentes.
 
 ## Runtime mínimo
 
@@ -8,7 +8,7 @@ Implementação modular do fluxo de contestação com três profiles independent
 docker compose --profile runtime up --build
 ```
 
-API em `http://localhost:8080`.
+API em `http://localhost:8080`. A identidade usa headers exclusivamente para compatibilidade da baseline P4.
 
 ## Runtime observado
 
@@ -26,41 +26,38 @@ docker compose --profile distributed up --build
 
 API em `http://localhost:8081`. O profile adiciona Redpanda, outbox publisher, workflow worker e timer worker.
 
-### Persistência assíncrona
-
-A baseline usa SQLite compartilhado para:
-
-- casos e timeline;
-- outbox;
-- inbox;
-- timers;
-- dead letters;
-- replay audit.
-
-O uso de SQLite entre processos é restrito ao ambiente local. O banco é configurado com WAL e busy timeout para a demonstração.
-
-### Prova E2E
+## Runtime seguro P7
 
 ```bash
-python scripts/run_p6_distributed_e2e.py
+python scripts/generate_dev_identity.py --force
+docker compose --profile secure up --build
 ```
 
-O teste comprova:
+API em `http://localhost:8082`. Nesse profile:
 
-1. publicação pelo outbox;
-2. consumo idempotente;
-3. expiração por timer;
-4. retry finito;
-5. dead letter;
-6. replay autorizado e auditado.
+- headers de identidade são ignorados;
+- JWT EdDSA é obrigatório;
+- TTL máximo é 300 segundos;
+- issuer, audience, tenant, roles, finalidade e assinatura são validados;
+- o OPA verifica o método de autenticação e a finalidade.
+
+Prova E2E:
+
+```bash
+python scripts/run_p7_secure_e2e.py
+```
+
+## Persistência assíncrona
+
+A baseline P6 usa SQLite compartilhado para casos, timeline, outbox, inbox, timers, dead letters e replay audit. WAL e busy timeout são escolhas locais.
 
 ## Limites
 
 - sem LLM ou OCR real;
-- sem sistema bancário real;
-- sem dados reais;
+- sem sistema bancário ou dados reais;
 - broker single-node;
 - replication factor um;
-- sem schema registry, mTLS ou ACL produtiva;
-- sem identidade criptográfica;
+- chaves P7 locais e efêmeras;
+- sem SPIFFE, OIDC corporativo, mTLS, KMS ou secret manager real;
+- sem database Multi-AZ;
 - não é produção.

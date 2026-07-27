@@ -1,0 +1,76 @@
+version: 0.7.0
+status: NOT_PRODUCTION_READY
+decisionOwner: Architecture Review Board
+reviewCadence: per-release
+gates:
+  - id: PRD-IDENTITY
+    name: Signed workload identity and purpose binding
+    status: DEMONSTRATED_LOCAL
+    owner: Security Platform
+    evidence:
+      - repo:security/workload-identity.yaml
+      - repo:samples/vertical-slice/tests/test_security_jwt.py
+      - artifact:artifacts/p7-secure-e2e.jsonl
+  - id: PRD-SECRETS-KMS
+    name: Secret inventory and managed-key policy
+    status: TARGET_DEFINED
+    owner: Security Platform
+    evidence:
+      - repo:security/secrets/inventory.yaml
+      - repo:security/kms/key-policy.yaml
+      - artifact:artifacts/backup-drill/report.json
+  - id: PRD-SUPPLY-CHAIN
+    name: SBOM and provenance
+    status: DEMONSTRATED_LOCAL
+    owner: Platform Engineering
+    evidence:
+      - repo:security/supply-chain/policy.yaml
+      - artifact:artifacts/sbom.cdx.json
+      - artifact:artifacts/provenance.json
+  - id: PRD-HIGH-AVAILABILITY
+    name: Multi-replica deployment controls
+    status: TARGET_DEFINED
+    owner: Platform Operations
+    evidence:
+      - repo:deploy/kubernetes/base/deployment.yaml
+      - repo:deploy/kubernetes/base/pdb.yaml
+      - repo:deploy/kubernetes/base/hpa.yaml
+  - id: PRD-BACKUP-RESTORE
+    name: Encrypted backup and verified restore
+    status: DEMONSTRATED_LOCAL
+    owner: Data Platform
+    evidence:
+      - repo:resilience/backup-policy.yaml
+      - artifact:artifacts/backup-drill/report.json
+  - id: PRD-DISASTER-RECOVERY
+    name: Region recovery plan and drill criteria
+    status: TARGET_DEFINED
+    owner: Platform Operations
+    evidence:
+      - repo:resilience/dr-plan.yaml
+      - repo:docs/operations/ha-dr.md
+  - id: PRD-CAPACITY
+    name: Capacity threshold gate
+    status: DEMONSTRATED_LOCAL
+    owner: Performance Engineering
+    evidence:
+      - repo:capacity/profile.yaml
+      - artifact:artifacts/capacity-report.json
+  - id: PRD-NETWORK-SECURITY
+    name: Default-deny network and hardened pod
+    status: TARGET_DEFINED
+    owner: Security Platform
+    evidence:
+      - repo:deploy/kubernetes/base/networkpolicy.yaml
+      - repo:deploy/kubernetes/base/deployment.yaml
+blockers:
+  - corporate workload identity or SPIFFE integration
+  - managed KMS and external secret manager
+  - signed provenance and admission verification
+  - managed multi-AZ database with tested point-in-time recovery
+  - multi-broker Kafka with replication and cross-region strategy
+  - mTLS, network segmentation and egress control in the real cluster
+  - representative load, soak and failure testing
+  - approved RTO/RPO and completed regional DR exercise
+  - operational ownership and 24x7 support model
+decisionRule: all mandatory gates must be PASSED_PRODUCTION with current evidence before status can change

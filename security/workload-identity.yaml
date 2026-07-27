@@ -1,0 +1,36 @@
+version: 0.7.0
+status: EXECUTABLE_BASELINE
+profile: signed-jwt
+algorithm: EdDSA
+issuer: https://identity.local
+audience: intelligent-backoffice-api
+maxTokenTtlSeconds: 300
+clockSkewSeconds: 15
+requiredClaims:
+  - iss
+  - sub
+  - aud
+  - iat
+  - exp
+  - jti
+  - tenant_id
+  - roles
+  - subject_type
+  - purpose
+trustRules:
+  - headers-are-ignored-when-jwt-mode-is-enabled
+  - public-key-is-mounted-read-only
+  - tokens-are-short-lived
+  - role-and-tenant-come-only-from-signed-claims
+  - correlation-id-is-request-scoped-or-falls-back-to-jti
+  - policy-enforces-purpose-binding
+productionTarget:
+  standard: SPIFFE-SVID-or-corporate-OIDC
+  transport: mTLS
+  revocation: issuer-managed
+  keyStorage: managed-KMS-or-HSM
+  rotation: automated
+limitations:
+  - local keys are generated on demand and never committed
+  - secure profile uses one local public key rather than federated trust
+  - no certificate revocation or mTLS is implemented locally

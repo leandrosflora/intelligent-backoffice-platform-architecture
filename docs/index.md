@@ -1,6 +1,6 @@
 # Intelligent Backoffice Platform Architecture
 
-Esta documentação descreve uma plataforma corporativa para automação de processos de backoffice regulados, documentais e de longa duração.
+Arquitetura de referência executável para processos de backoffice regulados, documentais e de longa duração.
 
 ## Estado da evolução
 
@@ -10,35 +10,27 @@ Esta documentação descreve uma plataforma corporativa para automação de proc
 | P1 | Concluído | Contexto, outcomes, lifecycle, regras, risco e NFRs |
 | P2 | Concluído | C4, trust boundaries e sequências |
 | P3 | Concluído | Contratos, schemas, catálogo e policies |
-| P4 | Concluído | Vertical slice, persistência local, OPA runtime e testes E2E |
-| P5 | Concluído | Evals, métricas, traces, SLOs, alertas e runbooks |
-| P6 | Baseline executável | Event backbone, outbox, inbox, workers, timers, retry, DLQ e replay |
+| P4 | Concluído | Vertical slice, persistência local e OPA |
+| P5 | Concluído | Evals, observabilidade, SLOs e runbooks |
+| P6 | Concluído | Event backbone, outbox, inbox, workers, timers, DLQ e replay |
+| P7 | Baseline executável | Identidade assinada, KMS policy, SBOM, proveniência, HA/DR, capacidade e readiness gates |
 
-## O que o P6 prova
+## O que o P7 prova
 
-- estado, timeline e evento são persistidos no mesmo commit local;
-- o publisher pode reenviar sem perder o evento;
-- o consumidor é idempotente;
-- timers sobrevivem ao processo da API;
-- falhas excedendo o retry budget geram dead letter durável;
-- replay exige autorização, motivo e nova identidade de evento;
-- a jornada é validada com Redpanda real em Docker Compose.
-
-## O que o P6 não prova
-
-- HA ou disaster recovery;
-- storage produtivo;
-- replicação multi-AZ;
-- ACL, mTLS ou identidade de workload;
-- schema registry e compatibility gates de broker;
-- retenção corporativa;
-- throughput de produção.
+- JWT EdDSA de curta duração é validado e headers não elevam privilégios;
+- finalidade é ligada à ação pelo OPA;
+- imagem local executa sem root;
+- backup sintético é criptografado e restaurado com integridade;
+- SBOM e proveniência são gerados na pipeline;
+- manifests de HA e segurança passam por validação estrutural;
+- regressão de capacidade possui threshold;
+- o status permanece `NOT_PRODUCTION_READY` com blockers explícitos.
 
 ## Comece por aqui
 
 1. [Contexto de negócio](context/business-context.md)
 2. [Arquitetura funcional](functional/index.md)
-3. [Arquitetura técnica](architecture/index.md)
-4. [Contratos](contracts/index.md)
-5. [Event backbone P6](operations/eventing.md)
-6. [Case aplicado](case-study/index.md)
+3. [Deployment alvo de produção](architecture/deployment-production-target.md)
+4. [Identidade de workload](security/workload-identity.md)
+5. [Alta disponibilidade e DR](operations/ha-dr.md)
+6. [Production readiness](governance/production-readiness.md)

@@ -1,0 +1,32 @@
+version: 0.7.0
+status: TARGET_POLICY
+keys:
+  - id: KEY-BACKUP-001
+    purpose: backup-envelope-encryption
+    algorithm: AES-256-GCM-data-key
+    wrappingKey: managed-kms-cmk
+    administrators: [security-platform]
+    encryptors: [backup-controller]
+    decryptors: [restore-controller]
+    prohibitedPrincipals: [application-runtime, workflow-worker]
+    rotationDays: 365
+    deletionProtection: true
+    crossRegionReplica: required
+  - id: KEY-SIGNING-001
+    purpose: artifact-signing
+    algorithm: ECDSA-P256-or-keyless
+    administrators: [security-platform]
+    signers: [release-workflow]
+    verifiers: [admission-controller, deployment-controller]
+    rotationDays: 180
+    deletionProtection: true
+controls:
+  - administrators-cannot-use-data-plane-by-default
+  - decrypt-is-restricted-to-restore-workflow
+  - key-usage-is-audited
+  - encryption-context-binds-tenant-environment-and-artifact
+  - production-keys-never-enter-compose-or-git
+localBaseline:
+  algorithm: AES-256-GCM
+  keyLocation: .local/security/backup-aes256.key
+  keyLifecycle: ephemeral-and-gitignored

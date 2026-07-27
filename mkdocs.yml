@@ -59,6 +59,7 @@ nav:
       - Deployment local alvo: architecture/deployment-local.md
       - Deployment observado P5: architecture/deployment-observed-baseline.md
       - Deployment distribuído P6: architecture/deployment-distributed-baseline.md
+      - Deployment alvo de produção P7: architecture/deployment-production-target.md
       - Trust boundaries: architecture/trust-boundaries.md
       - Sequências: architecture/sequence-diagrams.md
   - Contratos:
@@ -74,10 +75,17 @@ nav:
       - Runbook local: implementation/runbook.md
   - Evals:
       - Visão geral P5: evaluation/index.md
+  - Segurança:
+      - Visão geral: security/index.md
+      - Identidade de workload: security/workload-identity.md
+      - Segredos e KMS: security/secrets-and-kms.md
+      - Supply chain: security/supply-chain.md
   - Operações:
       - Visão geral: operations/index.md
       - Observabilidade: operations/observability.md
       - Event backbone P6: operations/eventing.md
+      - Alta disponibilidade e DR: operations/ha-dr.md
+      - Capacidade: operations/capacity.md
       - SLOs e alertas: operations/slos.md
       - Runbooks:
           - Erros e latência: operations/runbooks/high-error-rate.md
@@ -89,9 +97,10 @@ nav:
           - Backlog no outbox: operations/runbooks/outbox-backlog.md
           - DLQ e replay: operations/runbooks/dead-letter-replay.md
           - Timer parado: operations/runbooks/timer-stuck.md
+  - Governança:
+      - Visão geral: governance/index.md
+      - Production readiness: governance/production-readiness.md
   - Case aplicado: case-study/index.md
-  - Governança: governance/index.md
-  - Segurança: security/index.md
   - Serviços: services/index.md
 
 copyright: Copyright &copy; 2026 Leandro Flora

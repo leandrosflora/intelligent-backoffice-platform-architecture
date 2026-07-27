@@ -1,0 +1,14 @@
+version: 0.7.0
+status: EXECUTABLE_LOCAL_GATE
+baseUrl: http://localhost:8082
+tenant: tenant-capacity
+requests: 100
+concurrency: 8
+operation: GET /v1/cases/{caseId}
+thresholds:
+  maxErrorRatio: 0.01
+  p95Seconds: 1.5
+notes:
+  - local CI gate detects major regression only
+  - production sizing requires representative data, soak tests and dependency latency
+  - target autoscaling uses CPU and request-rate signals
