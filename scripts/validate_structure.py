@@ -62,6 +62,7 @@ REQUIRED_PATHS = (
     Path("deploy/kubernetes/overlays/production/patch-deployment.yaml"),
     Path("docs/assets/diagrams/README.md"),
     Path("docs/architecture/index.md"),
+    Path("docs/architecture/implementation-status.md"),
     Path("docs/architecture/deployment-observed-baseline.md"),
     Path("docs/architecture/deployment-distributed-baseline.md"),
     Path("docs/architecture/deployment-production-target.md"),
