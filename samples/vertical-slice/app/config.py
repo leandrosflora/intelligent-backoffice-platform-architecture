@@ -10,4 +10,11 @@ class Settings(BaseSettings):
     metrics_enabled: bool = True
     tracing_enabled: bool = False
     otlp_endpoint: str = "http://otel-collector:4317"
+    eventing_enabled: bool = False
+    kafka_bootstrap_servers: str = "redpanda:9092"
+    events_topic: str = "backoffice.events.v1"
+    dlq_topic: str = "backoffice.dlq.v1"
+    consumer_group: str = "backoffice-workflow-v1"
+    worker_poll_seconds: float = 0.5
+    worker_max_attempts: int = 3
     model_config = SettingsConfigDict(env_prefix="", case_sensitive=False)

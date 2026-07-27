@@ -1,31 +1,21 @@
 # SLOs e alertas
 
-Os SLOs do P5 estão em `observability/slos.yaml` e possuem status `BASELINE_EXECUTABLE`.
+Os targets são provisórios para a baseline executável e devem ser recalibrados com carga e operação representativas.
 
-| SLO | Target inicial | Evidência |
+| SLO | Target inicial | Runbook |
 |---|---:|---|
-| Disponibilidade HTTP | 99,9% | ratio de respostas sem 5xx |
-| Latência HTTP | p95 menor que 500 ms | histograma Prometheus |
-| Disponibilidade do PDP | 99,95% | decisões sem resultado `unavailable` |
-| Segurança de execução | zero efeito duplicado | idempotência e resultados de execução |
-| Qualidade dos evals | 100% no dataset sintético v1 | relatório versionado de evals |
+| Disponibilidade da API | 99,9% | Erros e latência |
+| Latência protegida | p95 abaixo de 500 ms | Erros e latência |
+| Disponibilidade do PDP | 99,95% | PDP indisponível |
+| Duplicidade de execução | zero | Execução ambígua |
+| Qualidade de eval | 100% no dataset v1 | Regressão de eval |
+| Entrega de eventos | 99,9% sem DLQ durável | Backlog no outbox |
+| Timers | disparo em até 60 segundos do prazo | Timer parado |
 
-## Regras
+## Alertas P6
 
-- Targets são provisórios até existir baseline com carga representativa.
-- Respostas 4xx esperadas não contam como indisponibilidade da plataforma.
-- A ausência do PDP é erro operacional e mantém o comportamento fail-closed.
-- Um resultado de execução ambíguo gera reconciliação; nunca retry cego.
-- A violação de eval impede avanço automático do change set.
+- backlog de mensagens `PENDING` ou `RETRY` no outbox;
+- dead letters abertas;
+- timers agendados ou em retry além da janela operacional.
 
-## Alertas
-
-As regras Prometheus cobrem:
-
-- aumento de 5xx;
-- latência p95 acima do target;
-- indisponibilidade do PDP;
-- entrada em reconciliação;
-- pico de conflito de idempotência.
-
-Cada alerta referencia um runbook versionado no repositório.
+Os alerts operacionais não autorizam replay automático. O replay permanece uma ação governada.

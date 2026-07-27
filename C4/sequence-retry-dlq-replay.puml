@@ -1,0 +1,32 @@
+@startuml
+!include _theme.iuml
+
+title Sequence — Retry, DLQ and controlled replay
+queue "Redpanda events" as Events
+participant "Workflow Worker" as Worker
+database "SQLite" as DB
+queue "Redpanda DLQ" as DLQ
+actor "Platform Operator" as Operator
+participant "Operational API" as API
+participant "OPA" as OPA
+participant "Outbox Publisher" as Publisher
+
+Events -> Worker : poison / transient event
+loop retry budget
+  Worker -> Worker : process
+  Worker -> Worker : exponential backoff on failure
+end
+Worker -> DB : persist dead letter and failure evidence
+Worker -> DLQ : publish diagnostic reference
+Worker -> Events : commit failed offset only after durable DLQ
+
+Operator -> API : replay deadLetterId + reason
+API -> OPA : event.replay / purpose OPERATIONS
+OPA --> API : allow + audit obligations
+API -> DB : new outbox eventId, replayOf, replayCount+1
+API -> DB : mark original REPLAYED + replay audit
+Publisher -> DB : claim replay outbox
+Publisher -> Events : republish new envelope
+Events -> Worker : replayed event
+Worker -> DB : process and record inbox/projection
+@enduml

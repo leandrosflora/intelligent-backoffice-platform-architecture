@@ -1,23 +1,25 @@
 # Operações
 
-O P5 transforma os requisitos operacionais em uma baseline executável e versionada.
+A baseline cobre diagnóstico de API, policies, inteligência determinística e processamento assíncrono.
 
-## Artefatos
+## Capacidades implementadas
 
-- [Observabilidade](observability.md): métricas, traces, dashboard e stack local;
-- [SLOs e alertas](slos.md): indicadores, targets e regras Prometheus;
-- [Evals](../evaluation/index.md): dataset, thresholds e quality gates;
-- runbooks de erro HTTP, PDP, reconciliação, workflow, telemetria e regressão de eval.
+- métricas e traces;
+- SLOs e alertas versionados;
+- transactional outbox;
+- inbox idempotente;
+- backlog e estados de publicação;
+- timers duráveis;
+- retries com backoff;
+- dead letter durável;
+- replay explícito e auditado;
+- evidência E2E publicada pelo CI.
 
 ## Princípios
 
-- correlação ponta a ponta sem usar identificadores sensíveis como labels;
-- fail-closed quando o PDP está indisponível;
-- métricas de baixa cardinalidade;
-- traces sem documento integral ou payload financeiro;
-- alertas vinculados a owner, SLO e runbook;
-- evals executados antes de promover capacidades inteligentes.
-
-## Limites
-
-A stack local demonstra instrumentação e resposta operacional. Ela não substitui observabilidade gerenciada, retenção corporativa, plantão, capacidade, testes de carga ou operação 24x7.
+- não usar identificadores de caso ou tenant como labels Prometheus;
+- não confirmar offset antes de processamento, deduplicação ou DLQ durável;
+- não apagar a dead letter após replay;
+- não reutilizar o `eventId` original;
+- não realizar replay sem causa corrigida e justificativa;
+- não corrigir timers alterando diretamente o estado do caso.

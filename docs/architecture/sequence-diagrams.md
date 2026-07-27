@@ -2,49 +2,42 @@
 
 Os fluxos abaixo conectam o lifecycle funcional a responsabilidades técnicas.
 
-## 1. Intake e processamento documental
+## Intake e processamento documental
 
 ![Intake e processamento documental](../assets/diagrams/sequence-case-intake.svg)
 
-Principais garantias:
-
-- criação idempotente;
-- ACK antes do processamento assíncrono;
-- documento em quarentena;
-- evidência versionada;
-- transição para `DOCUMENTS_VALIDATED` ou `AWAITING_DOCUMENTS`.
-
-## 2. Investigação, recomendação e aprovação
+## Investigação, recomendação e aprovação
 
 ![Investigação e aprovação](../assets/diagrams/sequence-investigation-approval.svg)
 
-Principais garantias:
-
-- tools governadas;
-- findings separados de inferências;
-- recomendação com regras e evidências;
-- abstention quando necessário;
-- alçada e segregação verificadas pelo PDP.
-
-## 3. Execução governada e reconciliação
+## Execução governada e reconciliação
 
 ![Execução governada](../assets/diagrams/sequence-governed-execution.svg)
 
-Principais garantias:
-
-- decisão `APPROVED` vigente;
-- policy proof e obrigações;
-- `Idempotency-Key` e hash do comando;
-- replay determinístico;
-- timeout ambíguo encaminhado para reconciliação.
-
-## 4. Evidência ausente e retomada
+## Evidência ausente e retomada
 
 ![Evidência ausente](../assets/diagrams/sequence-missing-evidence.svg)
 
-Principais garantias:
+## Transactional outbox e inbox idempotente
 
-- solicitação explícita de complemento;
-- retomada por checkpoint;
-- nova versão de evidência;
-- invalidação da recomendação pendente.
+![Outbox e inbox](../assets/diagrams/sequence-outbox-delivery.svg)
+
+Garantias:
+
+- mudança de estado e evento no mesmo commit;
+- entrega at least once;
+- ordenação por chave de caso dentro da partição;
+- deduplicação por consumidor e `eventId`;
+- offset confirmado apenas após resultado durável.
+
+## Retry, DLQ e replay controlado
+
+![Retry, DLQ e replay](../assets/diagrams/sequence-retry-dlq-replay.svg)
+
+Garantias:
+
+- retry budget finito;
+- dead letter preservada;
+- autorização OPA com finalidade operacional;
+- novo `eventId` e referência ao original;
+- motivo e ator registrados no replay audit.

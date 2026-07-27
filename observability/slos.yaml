@@ -1,4 +1,4 @@
-version: 1
+version: 2
 status: BASELINE_EXECUTABLE
 window: 30d
 slos:
@@ -37,3 +37,17 @@ slos:
     metric: evals/reports/latest.json
     owner: Agent Owner
     runbook: docs/operations/runbooks/eval-regression.md
+  - id: SLO-EVENT-DELIVERY
+    service: event-backbone-baseline
+    indicator: events leave the transactional outbox without durable dead letter
+    target: 0.999
+    metric: backoffice_outbox_messages
+    owner: Platform Operations
+    runbook: docs/operations/runbooks/outbox-backlog.md
+  - id: SLO-WORKFLOW-TIMERS
+    service: workflow-timer-worker
+    indicator: due timers are fired within the operational delay budget
+    target_seconds: 60
+    metric: backoffice_timers
+    owner: Backoffice Platform
+    runbook: docs/operations/runbooks/timer-stuck.md

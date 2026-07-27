@@ -1,0 +1,35 @@
+@startuml
+!include _theme.iuml
+
+title Sequence — Transactional outbox and idempotent inbox
+actor Client
+participant "Distributed API" as API
+database "SQLite" as DB
+participant "Outbox Publisher" as Publisher
+queue "Redpanda" as Kafka
+participant "Workflow Worker" as Worker
+
+Client -> API : command with tenant and correlation
+API -> DB : BEGIN
+API -> DB : update aggregate
+API -> DB : insert timeline event
+DB -> DB : trigger inserts outbox row
+API -> DB : COMMIT
+API --> Client : accepted state
+
+loop until published
+  Publisher -> DB : claim PENDING/RETRY row
+  Publisher -> Kafka : publish envelope keyed by caseId
+  Kafka --> Publisher : acknowledged
+  Publisher -> DB : mark PUBLISHED
+end
+
+Kafka -> Worker : event (at least once)
+Worker -> DB : check inbox(consumer,eventId)
+alt already processed
+  Worker -> Kafka : commit offset
+else new event
+  Worker -> DB : apply effect + projection + inbox in one transaction
+  Worker -> Kafka : commit offset
+end
+@enduml

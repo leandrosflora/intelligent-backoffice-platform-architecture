@@ -6,3 +6,4 @@ prometheus-client==0.22.1
 opentelemetry-api==1.36.0
 opentelemetry-sdk==1.36.0
 opentelemetry-exporter-otlp-proto-grpc==1.36.0
+kafka-python-ng==2.2.3

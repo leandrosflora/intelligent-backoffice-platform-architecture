@@ -11,12 +11,13 @@ Esta pasta contém as fontes PlantUML canônicas da arquitetura.
 - `c4-container-current.puml`
 - `c4-container-target.puml`
 
-### Componentes e deployment
+### Componentes e deployments
 
 - `c4-component-workflow-orchestrator.puml`
 - `c4-component-document-intelligence.puml`
-- `c4-deployment-local.puml` — deployment alvo do futuro slice distribuído;
-- `c4-deployment-observed-baseline.puml` — baseline executável confirmada no P5;
+- `c4-deployment-local.puml`
+- `c4-deployment-observed-baseline.puml`
+- `c4-deployment-distributed-baseline.puml`
 - `c4-trust-boundaries.puml`
 
 ### Sequências
@@ -25,21 +26,14 @@ Esta pasta contém as fontes PlantUML canônicas da arquitetura.
 - `sequence-investigation-approval.puml`
 - `sequence-governed-execution.puml`
 - `sequence-missing-evidence.puml`
-
-## Renderização
-
-```bash
-bash scripts/render-diagrams.sh
-python scripts/validate_diagrams.py --require-generated
-```
-
-O script gera SVG e PNG em `docs/assets/diagrams/`.
+- `sequence-outbox-delivery.puml`
+- `sequence-retry-dlq-replay.puml`
 
 ## Regra de leitura
 
 - **atual:** confirmado no repositório;
 - **alvo:** responsabilidade ou integração planejada;
-- **baseline executável:** comportamento demonstrado em CI e Docker Compose;
-- **produção:** operação e integrações reais aprovadas.
+- **baseline executável:** capacidade comprovada em CI;
+- **produção:** controles operacionais aprovados e integração real.
 
-A arquitetura não pode usar um diagrama alvo como evidência de implementação.
+A baseline distribuída P6 não implica prontidão produtiva.
