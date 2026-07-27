@@ -17,4 +17,12 @@ class Settings(BaseSettings):
     consumer_group: str = "backoffice-workflow-v1"
     worker_poll_seconds: float = 0.5
     worker_max_attempts: int = 3
+
+    identity_mode: str = "headers"
+    identity_public_key_path: str = "/run/identity/identity-public.pem"
+    identity_issuer: str = "https://identity.local"
+    identity_audience: str = "intelligent-backoffice-api"
+    identity_algorithm: str = "EdDSA"
+    identity_max_ttl_seconds: int = 300
+
     model_config = SettingsConfigDict(env_prefix="", case_sensitive=False)

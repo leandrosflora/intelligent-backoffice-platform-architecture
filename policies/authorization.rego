@@ -13,6 +13,47 @@ decision := {
 reason := "allowed" if allow
 reason := "default-deny" if not allow
 
+operation_action if input.action in {"event.read", "event.replay", "timer.schedule"}
+audit_action if input.action == "audit.read"
+approval_action if input.action == "approval.decide"
+execution_action if input.action == "execution.request"
+
+purpose_matches_action if {
+    operation_action
+    input.purpose == "OPERATIONS"
+}
+purpose_matches_action if {
+    audit_action
+    input.purpose == "AUDIT"
+}
+purpose_matches_action if {
+    approval_action
+    input.purpose in {"CASE_MANAGEMENT", "APPROVAL"}
+}
+purpose_matches_action if {
+    execution_action
+    input.purpose in {"CASE_MANAGEMENT", "EXECUTION"}
+}
+purpose_matches_action if {
+    not operation_action
+    not audit_action
+    not approval_action
+    not execution_action
+    input.purpose in {"CASE_MANAGEMENT", "CASE_PROCESSING"}
+}
+
+identity_profile_valid if {
+    not input.context.identity_mode
+}
+identity_profile_valid if {
+    input.context.identity_mode != "jwt"
+}
+identity_profile_valid if {
+    input.context.identity_mode == "jwt"
+    input.subject.authentication_method == "SIGNED_JWT"
+    input.subject.token_id != ""
+}
+
 valid_common_context if {
     input.subject.id != ""
     input.subject.type in {"HUMAN", "WORKLOAD"}
@@ -23,6 +64,8 @@ valid_common_context if {
     input.action != ""
     input.purpose != ""
     input.correlation_id != ""
+    purpose_matches_action
+    identity_profile_valid
 }
 
 has_role(role) if role in input.subject.roles
@@ -175,6 +218,8 @@ allow if {
 
 obligation["audit-decision"] if valid_common_context
 obligation["tenant-match"] if valid_common_context
+obligation["verify-signed-identity"] if input.context.identity_mode == "jwt"
+obligation["verify-purpose-binding"] if valid_common_context
 obligation["redact-sensitive-data"] if input.action in {"case.read", "document.read", "evidence.read", "execution.read", "audit.read", "event.read"}
 obligation["verify-case-version"] if input.action in {"case.cancel", "document.register", "investigation.execute", "recommendation.create", "approval.decide", "reconciliation.resolve"}
 obligation["verify-segregation-of-duties"] if input.action == "approval.decide"

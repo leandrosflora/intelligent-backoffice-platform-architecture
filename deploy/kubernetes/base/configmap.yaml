@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intelligent-backoffice-config
+  namespace: intelligent-backoffice
+data:
+  POLICY_MODE: opa
+  OPA_URL: http://opa.intelligent-backoffice.svc.cluster.local:8181
+  IDENTITY_MODE: jwt
+  IDENTITY_ISSUER: https://identity.corporate.example
+  IDENTITY_AUDIENCE: intelligent-backoffice-api
+  IDENTITY_ALGORITHM: EdDSA
+  IDENTITY_MAX_TTL_SECONDS: "300"
+  EVENTING_ENABLED: "true"
+  KAFKA_BOOTSTRAP_SERVERS: kafka.platform.svc.cluster.local:9093
+  EVENTS_TOPIC: backoffice.events.v1
+  DLQ_TOPIC: backoffice.dlq.v1

@@ -14,6 +14,7 @@ EXPECTED_SOURCES = (
     "c4-deployment-local.puml",
     "c4-deployment-observed-baseline.puml",
     "c4-deployment-distributed-baseline.puml",
+    "c4-deployment-production-target.puml",
     "c4-trust-boundaries.puml",
     "sequence-case-intake.puml",
     "sequence-investigation-approval.puml",

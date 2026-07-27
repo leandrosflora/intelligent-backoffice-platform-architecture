@@ -1,0 +1,27 @@
+version: 0.7.0
+status: EXECUTABLE_LOCAL_DRILL
+scope:
+  localBaseline: SQLite state, timeline, outbox, inbox, timers and dead letters
+  productionTarget: managed relational database plus broker configuration and evidence store
+objectives:
+  localRpoMinutes: 0
+  localRtoMinutes: 5
+  targetRpoMinutes: 5
+  targetRtoMinutes: 30
+controls:
+  - database-consistent-snapshot
+  - AES-256-GCM-encryption
+  - key-separated-from-backup
+  - SHA-256-integrity-verification
+  - SQLite-integrity-check-after-restore
+  - no-plaintext-snapshot-retained
+  - report-published-as-CI-evidence
+retentionTarget:
+  dailyDays: 35
+  monthlyMonths: 13
+  legalHold: policy-driven
+restoreTests:
+  frequency: monthly
+  requireApplicationReadiness: true
+  requireTableCountComparison: true
+  requireAuditEvidence: true

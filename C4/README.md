@@ -18,6 +18,7 @@ Esta pasta contém as fontes PlantUML canônicas da arquitetura.
 - `c4-deployment-local.puml`
 - `c4-deployment-observed-baseline.puml`
 - `c4-deployment-distributed-baseline.puml`
+- `c4-deployment-production-target.puml`
 - `c4-trust-boundaries.puml`
 
 ### Sequências
@@ -36,4 +37,4 @@ Esta pasta contém as fontes PlantUML canônicas da arquitetura.
 - **baseline executável:** capacidade comprovada em CI;
 - **produção:** controles operacionais aprovados e integração real.
 
-A baseline distribuída P6 não implica prontidão produtiva.
+O deployment P7 é um alvo validado estruturalmente. Ele não comprova cluster, banco, Kafka, identidade ou KMS produtivos.

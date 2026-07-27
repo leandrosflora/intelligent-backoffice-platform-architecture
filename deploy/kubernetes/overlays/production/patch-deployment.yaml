@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intelligent-backoffice-api
+  namespace: intelligent-backoffice
+spec:
+  template:
+    spec:
+      priorityClassName: business-critical
+      terminationGracePeriodSeconds: 60

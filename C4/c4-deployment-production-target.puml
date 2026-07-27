@@ -1,0 +1,46 @@
+@startuml
+!include _theme.iuml
+
+title C4 Deployment — Production target and recovery boundaries
+left to right direction
+
+C4Person(operator, "Platform operator", "Operates releases, incidents, backup and DR.")
+C4Person(security, "Security platform", "Owns identity, KMS, secrets and admission policy.")
+
+cloud "Primary Region" as primary {
+  node "Managed Kubernetes\n[3+ zones]" as k8s {
+    artifact "API replicas\n[3..12, non-root]" as api
+    artifact "Workflow workers\n[autoscaled]" as workers
+    artifact "OPA / policy sidecar or service" as opa
+  }
+  database "Managed relational database\n[Multi-AZ + PITR]" as db
+  queue "Managed Kafka\n[3+ brokers, RF >= 3]" as kafka
+  artifact "External Secret Manager + KMS" as secrets
+  artifact "Observability backend" as telemetry
+}
+
+cloud "Recovery Region" as recovery {
+  node "Warm standby Kubernetes" as drk8s
+  database "Cross-region database replica / backups" as drdb
+  queue "Replicated topics or governed replay" as drkafka
+  artifact "Immutable evidence copy" as drevidence
+}
+
+artifact "Corporate Identity Provider\n[OIDC or SPIFFE]" as identity
+artifact "Signed image + SBOM + provenance" as supply
+
+operator --> k8s : deploys digest-pinned release
+security --> secrets : controls keys and secret access
+identity --> api : short-lived signed identity / mTLS
+supply --> k8s : admission verifies signature and evidence
+api --> opa : default-deny decisions
+api --> db : transactional state
+workers --> kafka : consume and publish
+api --> telemetry : metrics, logs and traces
+primary ..> recovery : backup, replication and tested failover
+
+note bottom
+Target architecture only.
+P7 validates manifests and local drills but does not prove a real multi-region production environment.
+end note
+@enduml

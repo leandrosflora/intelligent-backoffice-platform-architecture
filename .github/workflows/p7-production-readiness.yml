@@ -1,0 +1,102 @@
+name: P7 Production Readiness
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: samples/vertical-slice/requirements-dev.txt
+
+      - name: Install dependencies
+        working-directory: samples/vertical-slice
+        run: python -m pip install --upgrade pip -r requirements-dev.txt
+
+      - name: Run tests with security coverage
+        working-directory: samples/vertical-slice
+        env:
+          PYTHONPATH: .
+        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=85 -q
+
+      - name: Validate P7 source controls
+        run: python scripts/validate_p7.py
+
+      - name: Test authorization policies
+        run: bash scripts/test-policies.sh
+
+      - name: Generate ephemeral identity and backup keys
+        run: |
+          python scripts/generate_dev_identity.py --force
+          python scripts/generate_dev_kms_key.py --force
+
+      - name: Validate secure Compose
+        run: docker compose --profile secure config
+
+      - name: Start secure baseline
+        run: docker compose --profile secure up -d --build
+
+      - name: Run signed-identity E2E
+        run: python scripts/run_p7_secure_e2e.py
+
+      - name: Run capacity regression gate
+        run: python scripts/run_capacity_test.py
+
+      - name: Create synthetic state for backup drill
+        run: |
+          mkdir -p artifacts
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          database = Path("artifacts/drill-source.db")
+          with sqlite3.connect(database) as conn:
+              conn.execute("CREATE TABLE cases(id TEXT PRIMARY KEY, state TEXT NOT NULL)")
+              conn.execute("CREATE TABLE evidence(id TEXT PRIMARY KEY, case_id TEXT NOT NULL)")
+              conn.executemany("INSERT INTO cases VALUES(?,?)", [("case-1", "APPROVED"), ("case-2", "EXECUTED")])
+              conn.executemany("INSERT INTO evidence VALUES(?,?)", [("ev-1", "case-1"), ("ev-2", "case-2")])
+          PY
+
+      - name: Run encrypted backup and restore drill
+        run: python scripts/backup_restore_drill.py --database artifacts/drill-source.db --key-file .local/security/backup-aes256.key
+
+      - name: Generate SBOM and provenance
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          python scripts/generate_sbom.py
+          python scripts/generate_provenance.py
+
+      - name: Validate generated production-readiness evidence
+        run: python scripts/validate_p7.py --require-evidence
+
+      - name: Upload P7 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p7-production-readiness-evidence
+          path: |
+            artifacts/sbom.cdx.json
+            artifacts/provenance.json
+            artifacts/capacity-report.json
+            artifacts/backup-drill/report.json
+            artifacts/p7-secure-e2e.jsonl
+          if-no-files-found: warn
+
+      - name: Show secure runtime logs on failure
+        if: failure()
+        run: docker compose --profile secure logs --no-color
+
+      - name: Stop secure baseline
+        if: always()
+        run: docker compose --profile secure down -v
