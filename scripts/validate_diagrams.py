@@ -13,11 +13,14 @@ EXPECTED_SOURCES = (
     "c4-component-document-intelligence.puml",
     "c4-deployment-local.puml",
     "c4-deployment-observed-baseline.puml",
+    "c4-deployment-distributed-baseline.puml",
     "c4-trust-boundaries.puml",
     "sequence-case-intake.puml",
     "sequence-investigation-approval.puml",
     "sequence-governed-execution.puml",
     "sequence-missing-evidence.puml",
+    "sequence-outbox-delivery.puml",
+    "sequence-retry-dlq-replay.puml",
 )
 
 

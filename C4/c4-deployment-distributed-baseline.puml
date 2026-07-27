@@ -1,0 +1,43 @@
+@startuml
+!include _theme.iuml
+
+title C4 Deployment — Baseline distribuída P6
+left to right direction
+
+C4Person(operator, "Platform operator", "Monitora filas, DLQ e autoriza replay.")
+
+node "Developer Workstation\n[Docker Compose]" as workstation {
+  node "API and Workflow Zone" as appzone {
+    artifact "Distributed API\n[FastAPI]" as api
+    artifact "Outbox Publisher" as outbox
+    artifact "Workflow Worker" as workflow
+    artifact "Timer Worker" as timer
+    artifact "OPA" as opa
+  }
+
+  node "Durable Baseline State" as datazone {
+    database "SQLite\nCases + Timeline + Outbox + Inbox + Timers + DLQ" as sqlite
+  }
+
+  node "Event Backbone" as eventzone {
+    queue "Redpanda / Kafka\nbackoffice.events.v1" as events
+    queue "DLQ Topic\nbackoffice.dlq.v1" as dlq
+  }
+}
+
+operator --> api : operational API / controlled replay
+api --> opa : policy decision
+api --> sqlite : case command + timeline transaction
+sqlite --> outbox : claim pending outbox
+outbox --> events : publish keyed by caseId
+workflow --> events : consume with durable group
+workflow --> sqlite : inbox + projection + state effect
+workflow --> dlq : failed after retry budget
+timer --> sqlite : claim due timers and emit timeline event
+api --> sqlite : inspect outbox, timers and dead letters
+
+note bottom of workstation
+At-least-once delivery and idempotent consumption.
+Single-node Redpanda and SQLite are local baseline choices only.
+end note
+@enduml

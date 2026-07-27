@@ -1,0 +1,96 @@
+openapi: 3.1.0
+info:
+  title: Intelligent Backoffice Eventing Operations API
+  version: 0.6.0
+  description: API operacional da baseline P6 para timers, inspeção do outbox/DLQ e replay controlado.
+servers:
+  - url: http://localhost:8081
+paths:
+  /v1/operations/cases/{caseId}/timers:
+    post:
+      operationId: scheduleWorkflowTimer
+      summary: Agenda timer durável para um caso
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimerScheduleRequest'
+      responses:
+        '200': {description: Timer agendado}
+        '403': {description: Policy negou a operação}
+        '404': {description: Caso não encontrado}
+  /v1/operations/outbox:
+    get:
+      operationId: listOutboxMessages
+      summary: Lista mensagens do outbox do tenant
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200': {description: Mensagens retornadas}
+        '403': {description: Policy negou a operação}
+  /v1/operations/dead-letters:
+    get:
+      operationId: listDeadLetters
+      summary: Lista dead letters do tenant
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200': {description: Dead letters retornadas}
+        '403': {description: Policy negou a operação}
+  /v1/operations/dead-letters/{deadLetterId}/replay:
+    post:
+      operationId: replayDeadLetter
+      summary: Reenvia uma dead letter com novo eventId e auditoria
+      parameters:
+        - name: deadLetterId
+          in: path
+          required: true
+          schema: {type: integer, minimum: 1}
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: {type: string, minLength: 10, maxLength: 500}
+      responses:
+        '200': {description: Replay registrado}
+        '403': {description: Policy negou a operação}
+        '404': {description: Dead letter não encontrada}
+        '409': {description: Dead letter já reproduzida}
+components:
+  parameters:
+    CaseId:
+      name: caseId
+      in: path
+      required: true
+      schema: {type: string}
+    TenantId:
+      name: X-Tenant-Id
+      in: header
+      required: true
+      schema: {type: string}
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: true
+      schema: {type: string}
+  schemas:
+    TimerScheduleRequest:
+      type: object
+      required: [timer_type, delay_seconds]
+      properties:
+        timer_type: {type: string, minLength: 3, maxLength: 64}
+        delay_seconds: {type: integer, minimum: 0, maximum: 86400}
+        payload: {type: object, additionalProperties: true}

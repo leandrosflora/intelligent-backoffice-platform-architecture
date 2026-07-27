@@ -1,19 +1,14 @@
 # Vertical slice executável
 
-Implementação modular do primeiro fluxo de contestação. Case API, workflow, document intelligence mock, aprovação humana e execução governada permanecem separados por responsabilidade no código, mas são empacotados em um único serviço.
+Implementação modular do fluxo de contestação com três profiles independentes.
 
 ## Runtime mínimo
-
-Na raiz do repositório:
 
 ```bash
 docker compose --profile runtime up --build
 ```
 
-- API: `http://localhost:8080`
-- OpenAPI interativo: `http://localhost:8080/docs`
-- métricas: `http://localhost:8080/metrics`
-- OPA: `http://localhost:8181`
+API em `http://localhost:8080`.
 
 ## Runtime observado
 
@@ -21,34 +16,51 @@ docker compose --profile runtime up --build
 OTEL_TRACING_ENABLED=true docker compose --profile observability up --build
 ```
 
-O profile observado adiciona Prometheus, Grafana, OpenTelemetry Collector e Jaeger.
+Adiciona Prometheus, Grafana, OpenTelemetry Collector e Jaeger.
 
-## Fluxo demonstrado
-
-1. criar caso;
-2. registrar e classificar documento sintético;
-3. validar evidência;
-4. executar investigação mock;
-5. produzir recomendação grounded;
-6. aprovar com ator diferente do recomendador;
-7. executar operação mock com idempotência;
-8. consultar timeline, métricas e traces.
-
-## Evals
+## Runtime distribuído P6
 
 ```bash
-cd ../..
-PYTHONPATH=samples/vertical-slice python scripts/run_evals.py
+docker compose --profile distributed up --build
 ```
 
-Os testes rápidos utilizam banco temporário e policy embedded equivalente ao subconjunto exercitado. O runtime Docker consulta o OPA real via HTTP.
+API em `http://localhost:8081`. O profile adiciona Redpanda, outbox publisher, workflow worker e timer worker.
+
+### Persistência assíncrona
+
+A baseline usa SQLite compartilhado para:
+
+- casos e timeline;
+- outbox;
+- inbox;
+- timers;
+- dead letters;
+- replay audit.
+
+O uso de SQLite entre processos é restrito ao ambiente local. O banco é configurado com WAL e busy timeout para a demonstração.
+
+### Prova E2E
+
+```bash
+python scripts/run_p6_distributed_e2e.py
+```
+
+O teste comprova:
+
+1. publicação pelo outbox;
+2. consumo idempotente;
+3. expiração por timer;
+4. retry finito;
+5. dead letter;
+6. replay autorizado e auditado.
 
 ## Limites
 
 - sem LLM ou OCR real;
 - sem sistema bancário real;
 - sem dados reais;
-- sem mensageria;
+- broker single-node;
+- replication factor um;
+- sem schema registry, mTLS ou ACL produtiva;
 - sem identidade criptográfica;
-- sem retenção corporativa de telemetria;
 - não é produção.

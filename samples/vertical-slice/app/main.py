@@ -1,7 +1,9 @@
 from fastapi import Depends, FastAPI, Header
 
 from .config import Settings
+from .eventing_metrics import refresh_eventing_metrics
 from .observability import install_http_observability, metrics_response
+from .operations import create_operations_router
 from .policy import PolicyClient
 from .schemas import ApprovalRequest, CreateCaseRequest, ExecutionRequest, RecommendationRequest, RegisterDocumentRequest
 from .security import RequestContext, request_context
@@ -11,9 +13,14 @@ from .store import Store
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
-    service = BackofficeService(Store(settings.database_path), PolicyClient(settings), settings.service_name)
-    app = FastAPI(title="Intelligent Backoffice Vertical Slice", version="0.2.0")
+    store = Store(settings.database_path, eventing_enabled=settings.eventing_enabled)
+    policy = PolicyClient(settings)
+    service = BackofficeService(store, policy, settings.service_name)
+    app = FastAPI(title="Intelligent Backoffice Vertical Slice", version="0.3.0")
+    app.state.store = store
+    app.state.policy = policy
     install_http_observability(app, settings)
+    app.include_router(create_operations_router(store, policy))
 
     @app.get("/health")
     def health():
@@ -22,10 +29,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "policyMode": settings.policy_mode,
             "metricsEnabled": settings.metrics_enabled,
             "tracingEnabled": settings.tracing_enabled,
+            "eventingEnabled": settings.eventing_enabled,
         }
 
     @app.get("/metrics", include_in_schema=False)
     def metrics():
+        refresh_eventing_metrics(store)
         return metrics_response()
 
     @app.post("/v1/cases")

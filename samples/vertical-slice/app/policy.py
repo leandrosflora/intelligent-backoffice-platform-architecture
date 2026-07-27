@@ -18,11 +18,12 @@ class PolicyClient:
         self.tracer = trace.get_tracer(settings.service_name)
 
     def authorize(self, ctx: RequestContext, action: str, resource: dict[str, Any], context: dict[str, Any] | None = None) -> None:
+        purpose = "AUDIT" if action == "audit.read" else "OPERATIONS" if action in {"event.read", "event.replay", "timer.schedule"} else "CASE_MANAGEMENT"
         data = {
             "subject": {"id": ctx.subject_id, "type": ctx.subject_type, "roles": ctx.roles, "tenant_id": ctx.tenant_id},
             "action": action,
             "resource": resource,
-            "purpose": "AUDIT" if action == "audit.read" else "CASE_MANAGEMENT",
+            "purpose": purpose,
             "correlation_id": ctx.correlation_id,
             "context": context or {},
         }
@@ -33,8 +34,7 @@ class PolicyClient:
                 if self.settings.policy_mode == "opa":
                     response = httpx.post(
                         f"{self.settings.opa_url}/v1/data/intelligent_backoffice/authorization/decision",
-                        json={"input": data},
-                        timeout=3.0,
+                        json={"input": data}, timeout=3.0,
                     )
                     response.raise_for_status()
                     decision = response.json().get("result", {})
@@ -74,4 +74,10 @@ def embedded_decision(i: dict[str, Any]) -> dict[str, Any]:
         allow = subject.get("type") == "HUMAN" and "approver" in roles and resource.get("state") == "AWAITING_APPROVAL" and context.get("recommendation_actor_id") != subject.get("id") and context.get("recommendation_version") == context.get("approved_recommendation_version") and context.get("authority_limit", 0) >= context.get("amount", 1)
     elif common and action == "execution.request":
         allow = subject.get("type") == "WORKLOAD" and "execution-service" in roles and resource.get("state") == "APPROVED" and context.get("approval_status") == "APPROVED" and context.get("approval_valid") is True and context.get("recommendation_version") == context.get("approved_recommendation_version") and bool(context.get("idempotency_key")) and bool(context.get("command_hash")) and bool(context.get("evidence_references"))
+    elif common and action == "event.read":
+        allow = subject.get("type") == "HUMAN" and i.get("purpose") == "OPERATIONS" and bool(roles & {"platform-operator", "auditor"})
+    elif common and action == "timer.schedule":
+        allow = subject.get("type") == "HUMAN" and i.get("purpose") == "OPERATIONS" and bool(roles & {"case-manager", "platform-operator"}) and resource.get("state") not in {"EXECUTED", "CLOSED", "REJECTED", "CANCELLED", "EXPIRED", "FAILED"}
+    elif common and action == "event.replay":
+        allow = subject.get("type") == "HUMAN" and i.get("purpose") == "OPERATIONS" and "platform-operator" in roles and resource.get("state") == "OPEN" and context.get("source") == "DEAD_LETTER" and len(context.get("reason", "")) >= 10
     return {"allow": allow, "reason": "allowed" if allow else "default-deny"}

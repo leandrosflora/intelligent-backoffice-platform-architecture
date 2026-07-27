@@ -36,6 +36,8 @@ case_version_present if input.context.case_version > 0
 
 evidence_present if count(input.context.evidence_references) > 0
 
+terminal_state(state) if state in {"EXECUTED", "CLOSED", "REJECTED", "CANCELLED", "EXPIRED", "FAILED"}
+
 allow if {
     valid_common_context
     input.action == "case.create"
@@ -143,12 +145,42 @@ allow if {
     input.purpose == "AUDIT"
 }
 
+allow if {
+    valid_common_context
+    input.action == "event.read"
+    input.subject.type == "HUMAN"
+    input.purpose == "OPERATIONS"
+    has_any_role({"platform-operator", "auditor"})
+}
+
+allow if {
+    valid_common_context
+    input.action == "timer.schedule"
+    input.subject.type == "HUMAN"
+    input.purpose == "OPERATIONS"
+    has_any_role({"case-manager", "platform-operator"})
+    not terminal_state(input.resource.state)
+}
+
+allow if {
+    valid_common_context
+    input.action == "event.replay"
+    input.subject.type == "HUMAN"
+    input.purpose == "OPERATIONS"
+    has_role("platform-operator")
+    input.resource.state == "OPEN"
+    input.context.source == "DEAD_LETTER"
+    count(input.context.reason) >= 10
+}
+
 obligation["audit-decision"] if valid_common_context
 obligation["tenant-match"] if valid_common_context
-obligation["redact-sensitive-data"] if input.action in {"case.read", "document.read", "evidence.read", "execution.read", "audit.read"}
+obligation["redact-sensitive-data"] if input.action in {"case.read", "document.read", "evidence.read", "execution.read", "audit.read", "event.read"}
 obligation["verify-case-version"] if input.action in {"case.cancel", "document.register", "investigation.execute", "recommendation.create", "approval.decide", "reconciliation.resolve"}
 obligation["verify-segregation-of-duties"] if input.action == "approval.decide"
 obligation["verify-approval"] if input.action == "execution.request"
 obligation["verify-idempotency"] if input.action == "execution.request"
 obligation["verify-evidence"] if input.action in {"investigation.execute", "recommendation.create", "execution.request"}
 obligation["reconcile-on-ambiguous-result"] if input.action in {"execution.request", "reconciliation.resolve"}
+obligation["record-replay-audit"] if input.action == "event.replay"
+obligation["preserve-original-event"] if input.action == "event.replay"

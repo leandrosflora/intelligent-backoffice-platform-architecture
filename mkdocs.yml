@@ -58,12 +58,14 @@ nav:
       - Componentes de Document Intelligence: architecture/component-document-intelligence.md
       - Deployment local alvo: architecture/deployment-local.md
       - Deployment observado P5: architecture/deployment-observed-baseline.md
+      - Deployment distribuído P6: architecture/deployment-distributed-baseline.md
       - Trust boundaries: architecture/trust-boundaries.md
       - Sequências: architecture/sequence-diagrams.md
   - Contratos:
       - Visão geral: contracts/index.md
       - HTTP APIs: contracts/http-apis.md
       - Eventos: contracts/events.md
+      - Mensageria P6: contracts/messaging.md
       - Policies: contracts/policies.md
       - Versionamento: contracts/versioning.md
   - Implementação:
@@ -75,6 +77,7 @@ nav:
   - Operações:
       - Visão geral: operations/index.md
       - Observabilidade: operations/observability.md
+      - Event backbone P6: operations/eventing.md
       - SLOs e alertas: operations/slos.md
       - Runbooks:
           - Erros e latência: operations/runbooks/high-error-rate.md
@@ -83,6 +86,9 @@ nav:
           - Workflow parado: operations/runbooks/workflow-stuck.md
           - Telemetria indisponível: operations/runbooks/telemetry-pipeline-down.md
           - Regressão de eval: operations/runbooks/eval-regression.md
+          - Backlog no outbox: operations/runbooks/outbox-backlog.md
+          - DLQ e replay: operations/runbooks/dead-letter-replay.md
+          - Timer parado: operations/runbooks/timer-stuck.md
   - Case aplicado: case-study/index.md
   - Governança: governance/index.md
   - Segurança: security/index.md

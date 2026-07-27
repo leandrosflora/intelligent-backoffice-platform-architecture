@@ -4,45 +4,56 @@ groups:
       - alert: BackofficeApiHighErrorRate
         expr: backoffice:http_error_ratio:5m > 0.01
         for: 10m
-        labels:
-          severity: critical
-          slo: SLO-API-AVAILABILITY
+        labels: {severity: critical, slo: SLO-API-AVAILABILITY}
         annotations:
           summary: High 5xx error ratio in the backoffice API
           runbook: docs/operations/runbooks/high-error-rate.md
       - alert: BackofficeApiHighLatency
         expr: backoffice:http_latency_p95_seconds:5m > 0.5
         for: 15m
-        labels:
-          severity: warning
-          slo: SLO-API-LATENCY
+        labels: {severity: warning, slo: SLO-API-LATENCY}
         annotations:
           summary: Backoffice API p95 latency above baseline target
           runbook: docs/operations/runbooks/high-error-rate.md
       - alert: BackofficePolicyUnavailable
         expr: increase(backoffice_policy_decisions_total{decision="unavailable"}[5m]) > 0
         for: 1m
-        labels:
-          severity: critical
-          slo: SLO-POLICY-AVAILABILITY
+        labels: {severity: critical, slo: SLO-POLICY-AVAILABILITY}
         annotations:
           summary: Policy decision point is unavailable
           runbook: docs/operations/runbooks/policy-decision-unavailable.md
       - alert: BackofficeReconciliationRequired
         expr: increase(backoffice_reconciliations_total[15m]) > 0
         for: 1m
-        labels:
-          severity: warning
-          slo: SLO-EXECUTION-SAFETY
+        labels: {severity: warning, slo: SLO-EXECUTION-SAFETY}
         annotations:
           summary: At least one execution has an ambiguous result
           runbook: docs/operations/runbooks/execution-ambiguous.md
       - alert: BackofficeIdempotencyConflictSpike
         expr: increase(backoffice_idempotency_total{result="conflict"}[10m]) > 2
         for: 5m
-        labels:
-          severity: warning
-          slo: SLO-EXECUTION-SAFETY
+        labels: {severity: warning, slo: SLO-EXECUTION-SAFETY}
         annotations:
           summary: Repeated idempotency conflicts detected
           runbook: docs/operations/runbooks/execution-ambiguous.md
+      - alert: BackofficeOutboxBacklog
+        expr: backoffice_outbox_messages{status=~"PENDING|RETRY"} > 0
+        for: 10m
+        labels: {severity: warning, slo: SLO-EVENT-DELIVERY}
+        annotations:
+          summary: Transactional outbox has undelivered messages
+          runbook: docs/operations/runbooks/outbox-backlog.md
+      - alert: BackofficeDeadLetterOpen
+        expr: backoffice_dead_letters{status="OPEN"} > 0
+        for: 5m
+        labels: {severity: warning, slo: SLO-EVENT-DELIVERY}
+        annotations:
+          summary: Open dead letters require investigation
+          runbook: docs/operations/runbooks/dead-letter-replay.md
+      - alert: BackofficeTimerBacklog
+        expr: backoffice_timers{status=~"SCHEDULED|RETRY"} > 0
+        for: 15m
+        labels: {severity: warning, slo: SLO-WORKFLOW-TIMERS}
+        annotations:
+          summary: Workflow timers remain pending beyond the baseline window
+          runbook: docs/operations/runbooks/timer-stuck.md

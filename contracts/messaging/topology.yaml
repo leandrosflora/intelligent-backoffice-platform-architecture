@@ -1,0 +1,52 @@
+version: 0.6.0
+status: EXECUTABLE_BASELINE
+brokerProtocol: kafka
+brokerImplementation: redpanda
+semantics:
+  delivery: at-least-once
+  ordering: aggregate-key-within-partition
+  producerAtomicity: sqlite-transactional-outbox
+  consumerIdempotency: durable-inbox
+  retry:
+    maxAttempts: 3
+    strategy: exponential-backoff
+    maxDelaySeconds: 60
+  deadLetter:
+    durableStore: sqlite-dead-letters
+    topic: backoffice.dlq.v1
+    replay: explicit-human-authorized
+    preserveOriginalEvent: true
+    createNewEventId: true
+topics:
+  - name: backoffice.events.v1
+    partitions: 3
+    key: caseId
+    classification: INTERNAL
+    producers: [outbox-publisher]
+    consumers:
+      - group: backoffice-workflow-v1
+        responsibility: workflow-projection-and-timer-effects
+  - name: backoffice.dlq.v1
+    partitions: 1
+    key: caseId
+    classification: INTERNAL
+    producers: [workflow-worker]
+    consumers: [platform-operations]
+components:
+  outboxPublisher:
+    claimTimeoutSeconds: 120
+    statuses: [PENDING, IN_FLIGHT, RETRY, PUBLISHED, DEAD_LETTER]
+  workflowWorker:
+    inboxKey: [consumerName, eventId]
+    commitOffsetAfter: [processed, duplicate, durable-dead-letter]
+  timerWorker:
+    statuses: [SCHEDULED, IN_FLIGHT, RETRY, FIRED, DEAD_LETTER]
+  controlledReplay:
+    requiredRole: platform-operator
+    requiredPurpose: OPERATIONS
+    requiredReasonMinLength: 10
+    auditFields: [deadLetterId, originalEventId, replayEventId, actorId, reason, correlationId]
+limits:
+  - SQLite is restricted to the local executable baseline.
+  - Redpanda runs as a single node with replication factor one.
+  - No production retention, encryption, ACL or schema registry is implied.

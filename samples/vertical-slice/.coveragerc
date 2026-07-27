@@ -1,0 +1,10 @@
+[run]
+omit =
+    app/outbox_worker.py
+    app/workflow_worker.py
+    app/timer_worker.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
