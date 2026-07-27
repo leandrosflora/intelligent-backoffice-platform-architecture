@@ -18,7 +18,7 @@ A plataforma organiza essa jornada como um processo governado, observável e aud
 2. **A IA investiga e recomenda.** Agentes não aprovam nem executam operações mutáveis.
 3. **Policies falham fechadas.** Alçada, segregação de funções, finalidade e autorização são verificadas antes da ação.
 4. **Toda decisão relevante produz evidência.** Eventos, versões, tool calls, aprovações e resultados permanecem rastreáveis.
-5. **Atual e alvo são separados.** A implementação local demonstra padrões; a arquitetura-alvo descreve a evolução corporativa.
+5. **Baseline e alvo são separados.** A implementação local demonstra padrões; a arquitetura-alvo descreve a evolução corporativa.
 
 ## O que funciona hoje
 
@@ -65,15 +65,18 @@ A documentação possui percursos específicos para executivos, arquitetos, dese
 
 [**Abrir o guia de leitura**](guide/how-to-read.md)
 
-## Current versus target
+## Como interpretar as visões
 
 | Visão | Pergunta respondida |
 |---|---|
-| [Contexto atual](architecture/c4-context-current.md) | O que está confirmado no repositório e no ambiente de referência? |
+| [Deployment observado](architecture/deployment-observed-baseline.md) | Qual runtime modular está confirmado com OPA, evals e observabilidade? |
+| [Deployment distribuído](architecture/deployment-distributed-baseline.md) | Quais capacidades assíncronas estão demonstradas? |
 | [Contexto alvo](architecture/c4-context-target.md) | Como a plataforma se posiciona no ecossistema corporativo? |
-| [Containers atuais](architecture/c4-container-current.md) | Quais responsabilidades e componentes estão demonstrados? |
 | [Containers alvo](architecture/c4-container-target.md) | Como as responsabilidades devem ser separadas na evolução da plataforma? |
 | [Production readiness](governance/production-readiness.md) | Quais gates impedem a classificação como produção? |
+
+!!! info "Visões C4 atuais"
+    Os diagramas C4 chamados de atuais ainda registram o estado documental inicial do repositório. Os deployments observado e distribuído são a fonte de leitura da baseline executável até a atualização semântica desses diagramas.
 
 ## Próximos pontos de entrada
 
