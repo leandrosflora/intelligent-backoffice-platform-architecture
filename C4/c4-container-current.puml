@@ -1,34 +1,38 @@
 @startuml
-!include _theme.iuml
+!include <C4/C4_Container>
 
 title C4 Nível 2 — Containers atuais
-left to right direction
+LAYOUT_LEFT_RIGHT()
 
-C4Person(author, "Mantenedor", "Versiona a referência.")
-C4Person(reader, "Leitor", "Consome a documentação.")
+Person(author, "Mantenedor", "Versiona a referência arquitetural.")
+Person(reader, "Leitor técnico", "Consome a documentação publicada.")
 
-package "Architecture Repository\n<<System Boundary>>" {
-  C4Container(docs, "Documentação", "MkDocs Material", "Contexto, arquitetura funcional, case, governança e operação.")
-  C4Container(c4, "C4 Sources", "PlantUML", "Fontes versionadas dos diagramas arquiteturais.")
-  C4Container(contracts, "Contratos iniciais", "OpenAPI / AsyncAPI / YAML", "Esqueletos de APIs, eventos e autorização.")
-  C4Container(policies, "Policies de exemplo", "OPA Rego", "Baseline default deny e obrigações.")
-  C4Container(scripts, "Validation Scripts", "Python / Bash", "Verifica estrutura, diagramas e documentação.")
-  C4Container(ci, "CI/CD", "GitHub Actions", "Valida e publica o site.")
+System_Boundary(repositoryBoundary, "Architecture Repository") {
+  Container(docs, "Documentação", "MkDocs Material", "Contexto, arquitetura funcional, case, governança e operação.")
+  Container(c4, "Fontes C4", "PlantUML", "Modelos versionados dos diagramas arquiteturais.")
+  Container(contracts, "Contratos iniciais", "OpenAPI / AsyncAPI / YAML", "Baselines de APIs, eventos e autorização.")
+  Container(policies, "Policies de exemplo", "OPA Rego", "Baseline default deny e obrigações.")
+  Container(scripts, "Toolchain de validação", "Python / Bash", "Verifica estrutura, diagramas, contratos e documentação.")
+  Container(ci, "Pipelines de CI/CD", "GitHub Actions", "Executa validações, renderiza diagramas e publica o site.")
 }
 
-C4External(pages, "GitHub Pages", "Hospeda o site estático.")
+System_Ext(pages, "GitHub Pages", "Hospeda a documentação estática.")
 
-author --> docs : edita
-author --> c4 : modela
-author --> contracts : versiona
-author --> policies : versiona
-ci --> scripts : executa
-scripts --> c4 : valida e renderiza
-ci --> docs : gera site
-ci --> pages : publica
-reader --> pages : consulta
+Rel(author, docs, "Edita conteúdo", "Markdown")
+Rel(author, c4, "Modela arquitetura", "PlantUML")
+Rel(author, contracts, "Versiona contratos", "YAML / JSON")
+Rel(author, policies, "Versiona policies", "Rego")
+Rel(ci, scripts, "Executa validações", "Python / Bash")
+Rel(scripts, c4, "Valida e renderiza diagramas", "PlantUML")
+Rel(ci, docs, "Gera o site", "MkDocs")
+Rel(ci, pages, "Publica a documentação", "GitHub Pages deployment")
+Rel(reader, pages, "Consulta a documentação", "HTTPS")
 
-note bottom
-Este diagrama representa apenas o estado já existente no repositório.
+note bottom of repositoryBoundary
+Este diagrama representa apenas os elementos
+já existentes no repositório.
+Não há runtime do domínio de contestação em operação.
 end note
+
+SHOW_LEGEND()
 @enduml
