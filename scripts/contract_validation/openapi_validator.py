@@ -55,8 +55,11 @@ def validate_openapi(
         raise ContractValidationError("OpenAPI deve usar versão 3.1.0")
 
     try:
-        from openapi_spec_validator import validate_spec
-        validate_spec(document, base_uri=path.resolve().as_uri())
+        from openapi_spec_validator import validate
+        from openapi_spec_validator.readers import read_from_filename
+
+        spec_dict, base_uri = read_from_filename(str(path))
+        validate(spec_dict, base_uri=base_uri)
     except ImportError as exc:
         if os.getenv("CI"):
             raise ContractValidationError("Dependência openapi-spec-validator não instalada") from exc
