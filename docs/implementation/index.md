@@ -1,6 +1,6 @@
-# Implementação P4
+# Implementação de referência
 
-O P4 introduz o primeiro **vertical slice executável** da plataforma.
+O repositório contém um **vertical slice executável** que demonstra a jornada principal e os controles arquiteturais com dados sintéticos e integrações mock.
 
 ## Escopo implementado
 
@@ -19,7 +19,7 @@ O P4 introduz o primeiro **vertical slice executável** da plataforma.
 
 ## Estratégia de empacotamento
 
-As responsabilidades permanecem separadas por módulo, mas são executadas em um único serviço FastAPI. Essa decisão reduz custo operacional do primeiro slice sem transformar o monólito modular em arquitetura-alvo definitiva.
+As responsabilidades permanecem separadas por módulo, mas são executadas em um único serviço FastAPI. Essa decisão reduz o custo operacional da implementação de referência sem transformar o monólito modular na arquitetura-alvo definitiva.
 
 ## Persistência
 
@@ -35,4 +35,10 @@ Em Docker Compose, toda operação sensível consulta o OPA por HTTP. A aplicaç
 - cobertura mínima de 85%;
 - imagem Docker construída no CI;
 - Compose validado;
-- policies Rego do P3 carregadas no OPA.
+- policies Rego carregadas no OPA;
+- evals, métricas e traces;
+- cenários distribuídos com outbox, inbox, timers, DLQ e replay.
+
+## Limite da baseline
+
+A implementação comprova padrões e mecanismos. Ela não comprova escala, integração corporativa, dados reais, operação multi-região ou prontidão produtiva.
