@@ -13,6 +13,8 @@ Arquitetura de referência executável para automação inteligente de backoffic
 
 > A IA produz análise e recomendação. O workflow controla o processo. Policies determinam o que pode ser feito. Pessoas aprovam decisões sensíveis. Serviços de domínio executam operações em sistemas de registro.
 
+As decisões e trade-offs que sustentam esse princípio estão registrados nos [Architecture Decision Records](docs/decisions/index.md).
+
 ## Case aplicado
 
 O primeiro case demonstra uma jornada bancária de contestação:
@@ -37,7 +39,8 @@ O primeiro case demonstra uma jornada bancária de contestação:
 - JWT EdDSA local para identidade humana e de workload;
 - backup criptografado, restore, SBOM e proveniência;
 - manifests Kubernetes alvo com HA e controles de rede;
-- matriz explícita de production readiness.
+- matriz explícita de production readiness;
+- ADRs versionados e validados pelo CI.
 
 ## Arquitetura atual
 
@@ -88,6 +91,7 @@ python scripts/run_p7_secure_e2e.py
 - [Contexto de negócio](docs/context/business-context.md)
 - [Estado de implementação](docs/architecture/implementation-status.md)
 - [Arquitetura técnica](docs/architecture/index.md)
+- [Architecture Decision Records](docs/decisions/index.md)
 - [Contratos executáveis](docs/contracts/index.md)
 - [Implementação de referência](docs/implementation/index.md)
 - [Production readiness](docs/governance/production-readiness.md)
@@ -103,6 +107,7 @@ Produção ainda exige identidade corporativa ou SPIFFE, mTLS, secret manager e 
 
 ```bash
 python scripts/validate_structure.py
+python scripts/validate_adrs.py
 python scripts/validate_contracts.py
 python scripts/validate_observability.py
 python scripts/validate_eventing.py
