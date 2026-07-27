@@ -87,7 +87,7 @@ status, case = request("POST", f"/v1/cases/{case_id}/executions", {"result_mode"
 record("execute", status, case)
 assert status == 200 and case["state"] == "EXECUTED", (status, case)
 
-status, timeline = request("GET", f"/v1/cases/{case_id}/timeline", headers("auditor", "auditor-1"))
+status, timeline = request("GET", f"/v1/cases/{case_id}/timeline", headers=headers("auditor", "auditor-1"))
 record("timeline", status, timeline)
 assert status == 200 and len(timeline) == 6, (status, timeline)
 print(f"Vertical slice E2E passed for case {case_id} with {len(timeline)} events.")
