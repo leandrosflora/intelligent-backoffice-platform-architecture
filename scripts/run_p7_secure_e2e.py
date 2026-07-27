@@ -52,6 +52,8 @@ def request(method: str, path: str, body=None, token=None, headers=None):
     except urllib.error.HTTPError as exc:
         raw = exc.read().decode()
         return exc.code, json.loads(raw) if raw else None
+    except urllib.error.URLError as exc:
+        return 0, {"reason": "endpoint-unavailable", "detail": str(exc.reason)}
 
 
 def record(step, status, payload):
@@ -64,39 +66,41 @@ def record(step, status, payload):
 
 def wait_ready():
     deadline = time.monotonic() + 60
+    last = None
     while time.monotonic() < deadline:
-        status, _ = request("GET", "/health/ready")
+        status, payload = request("GET", "/health/ready")
+        last = {"status": status, "payload": payload}
         if status == 200:
             return
         time.sleep(1)
-    raise AssertionError("secure API did not become ready")
+    raise AssertionError(f"secure API did not become ready; last={last}")
 
 
 OUTPUT.unlink(missing_ok=True)
 wait_ready()
 status, health = request("GET", "/health")
 record("health", status, health)
-assert status == 200 and health["identityMode"] == "jwt"
+assert status == 200 and health["identityMode"] == "jwt", health
 
 payload = {"external_id": "p7-secure-case", "dispute_type": "CARD_PURCHASE", "amount_cents": 15000}
 status, response = request("POST", "/v1/cases", payload)
 record("missing-token", status, response)
-assert status == 401
+assert status == 401, response
 
 status, response = request("POST", "/v1/cases", payload, mint(subject="manager", roles=["case-manager"], audience="wrong"))
 record("wrong-audience", status, response)
-assert status == 401
+assert status == 401, response
 
 manager = mint(subject="manager", roles=["case-manager"])
 status, created = request("POST", "/v1/cases", payload, manager)
 record("signed-create", status, created)
-assert status == 200
+assert status == 200, created
 case_id = created["case_id"]
 
 reader = mint(subject="reader-workload", roles=["case-reader"], subject_type="WORKLOAD")
 status, loaded = request("GET", f"/v1/cases/{case_id}", token=reader)
 record("signed-workload-read", status, loaded)
-assert status == 200 and loaded["case_id"] == case_id
+assert status == 200 and loaded["case_id"] == case_id, loaded
 
 status, response = request(
     "POST",
@@ -111,11 +115,11 @@ status, response = request(
     },
 )
 record("header-spoof-denied", status, response)
-assert status == 403
+assert status == 403, response
 
 tampered = reader[:-2] + ("aa" if reader[-2:] != "aa" else "bb")
 status, response = request("GET", f"/v1/cases/{case_id}", token=tampered)
 record("tampered-token", status, response)
-assert status == 401
+assert status == 401, response
 
 print("P7 secure identity E2E passed.")
