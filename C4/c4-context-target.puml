@@ -1,38 +1,39 @@
 @startuml
-!include _theme.iuml
+!include <C4/C4_Context>
 
 title C4 Nível 1 — Contexto alvo
-left to right direction
+LAYOUT_LEFT_RIGHT()
 
-C4Person(customer, "Cliente / canal de origem", "Abre contestação e fornece documentos.")
-C4Person(analyst, "Analista de operações", "Investiga e complementa evidências.")
-C4Person(approver, "Aprovador", "Decide conforme alçada e segregação.")
-C4Person(auditor, "Auditoria / compliance", "Consulta timeline, evidências e decisões.")
+Person(customer, "Cliente", "Abre uma contestação e fornece documentos.")
+Person(analyst, "Analista de operações", "Investiga o caso e complementa evidências.")
+Person(approver, "Aprovador", "Decide conforme alçada e segregação de funções.")
+Person(auditor, "Auditoria / compliance", "Consulta timeline, evidências e decisões.")
 
-C4System(platform, "Intelligent Backoffice Platform", "Orquestra casos, documentos, agentes, aprovação humana e execução governada.")
+System(platform, "Intelligent Backoffice Platform", "Orquestra casos, documentos, agentes, aprovação humana e execução governada.")
 
-C4External(channels, "Canais corporativos", "Portal, atendimento, CRM ou integrações de intake.")
-C4External(record, "Sistemas de registro", "Transações, cadastro, fraude, CRM e execução financeira.")
-C4External(iam, "IAM / Workload Identity", "Identidade, autenticação, tenant e credenciais.")
-C4External(knowledge, "Fontes de conhecimento", "Políticas, procedimentos e regras aprovadas.")
-C4External(notify, "Plataforma de notificações", "Comunica pendências, andamento e resultado.")
+System_Ext(channels, "Canais corporativos", "Portal, atendimento, CRM e integrações de intake.")
+System_Ext(record, "Sistemas de registro", "Transações, cadastro, fraude, CRM e execução financeira.")
+System_Ext(iam, "IAM / Workload Identity", "Identidade, autenticação, tenant e credenciais.")
+System_Ext(knowledge, "Fontes de conhecimento", "Políticas, procedimentos e regras aprovadas.")
+System_Ext(notify, "Plataforma de notificações", "Comunica pendências, andamento e resultado.")
 
-customer --> channels : solicita contestação
-channels --> platform : cria caso e envia documentos
-analyst --> platform : investiga e complementa
-approver --> platform : aprova ou rejeita
-auditor --> platform : consulta evidências e auditoria
+Rel(customer, channels, "Solicita contestação e envia documentos")
+Rel(channels, platform, "Cria caso e encaminha documentos", "APIs / Events")
+Rel(analyst, platform, "Investiga e complementa o caso", "Web / API")
+Rel(approver, platform, "Aprova ou rejeita", "Web / API")
+Rel(auditor, platform, "Consulta evidências e auditoria", "Web / API")
 
-platform --> record : consulta e executa por portas governadas
-platform --> iam : valida identidade e autorização
-platform --> knowledge : recupera conteúdo autorizado
-platform --> notify : solicita comunicação
-platform --> channels : devolve status e resultado
+Rel(platform, record, "Consulta dados e executa operações autorizadas", "APIs / Events")
+Rel(platform, iam, "Valida identidade, tenant e autorização", "Identity protocols")
+Rel(platform, knowledge, "Recupera conteúdo autorizado", "Search / Retrieval")
+Rel(platform, notify, "Solicita comunicações", "API / Events")
+Rel(platform, channels, "Devolve status e resultado", "API / Events")
 
 note bottom of platform
 Arquitetura-alvo.
-Nenhum container deste diagrama
-deve ser tratado como implementado
+Nenhum elemento deve ser tratado como implementado
 sem código, teste, evidência e operação.
 end note
+
+SHOW_LEGEND()
 @enduml
