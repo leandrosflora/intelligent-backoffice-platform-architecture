@@ -26,10 +26,18 @@ def request(method: str, path: str, body=None, headers=None):
     try:
         with urllib.request.urlopen(req, timeout=5) as response:
             raw = response.read().decode()
-            return response.status, json.loads(raw) if raw else None
+            try:
+                payload = json.loads(raw) if raw else None
+            except json.JSONDecodeError:
+                payload = raw
+            return response.status, payload
     except urllib.error.HTTPError as exc:
         raw = exc.read().decode()
-        return exc.code, json.loads(raw) if raw else None
+        try:
+            payload = json.loads(raw) if raw else None
+        except json.JSONDecodeError:
+            payload = raw
+        return exc.code, payload
 
 
 def headers(role: str, subject="case-manager-1", subject_type="HUMAN", correlation="p6-e2e"):
@@ -160,6 +168,6 @@ outbox = wait_for("outbox drain", outbox_drained, timeout=90)
 record("outbox-drained", 200, {"messages": len(outbox), "statuses": sorted({row['status'] for row in outbox})})
 
 status, metrics = request("GET", "/metrics")
-record("metrics", status, {"available": status == 200})
-assert status == 200
+record("metrics", status, {"available": status == 200, "eventingMetrics": "backoffice_outbox_messages" in metrics})
+assert status == 200 and "backoffice_outbox_messages" in metrics
 print("P6 distributed E2E passed: outbox, Kafka, inbox, timer, retry, DLQ and controlled replay.")
