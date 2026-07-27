@@ -2,16 +2,14 @@
 
 A arquitetura técnica materializa o modelo funcional em visões C4, componentes, deployments, trust boundaries e sequências. As páginas separam explicitamente o que está confirmado na implementação de referência do que representa a evolução alvo.
 
-!!! info "Fonte canônica da baseline executável"
-    As visões C4 chamadas de **atuais** ainda registram o estado documental inicial do repositório. Até a atualização semântica desses diagramas, use os deployments observado e distribuído para entender o runtime que está efetivamente demonstrado.
-
 ## Estado atual e alvo
 
 | Visão | Objetivo |
 |---|---|
-| [Contexto atual](c4-context-current.md) | Registrar o estado documental inicial do repositório |
+| [Estado de implementação](implementation-status.md) | Comparar capacidade atual, arquitetura-alvo e gaps para produção |
+| [Contexto atual](c4-context-current.md) | Mostrar pessoas, automações e limites da implementação de referência executável |
 | [Contexto alvo](c4-context-target.md) | Posicionar a plataforma no ecossistema corporativo futuro |
-| [Containers atuais](c4-container-current.md) | Inventariar os artefatos e pipelines da referência inicial |
+| [Containers atuais](c4-container-current.md) | Inventariar os containers, profiles e ferramentas executáveis hoje |
 | [Containers alvo](c4-container-target.md) | Separar responsabilidades lógicas da futura plataforma |
 
 ## Deployments executáveis e alvo
@@ -41,4 +39,4 @@ A arquitetura técnica materializa o modelo funcional em visões C4, componentes
 9. evidence, audit e observability.
 
 !!! warning "Leitura obrigatória"
-    Diagramas marcados como alvo não representam software implementado. Uma capacidade só muda de estado quando possui código, teste, evidência, owner, monitoramento e documentação.
+    Diagramas marcados como alvo não representam software implementado. Uma capacidade só muda de estado quando possui evidência compatível, owner, testes positivos e negativos, observabilidade, runbook, segurança e aprovação formal quando aplicável.
