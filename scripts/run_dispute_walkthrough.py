@@ -22,6 +22,8 @@ def record(scenario: str, step: str, status: int, payload) -> None:
 
 
 def request(method: str, path: str, body=None, headers=None, timeout=10):
+    if method == "GET" and headers is None and isinstance(body, dict):
+        headers, body = body, None
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(BASE + path, data=data, method=method)
     req.add_header("Content-Type", "application/json")
@@ -154,7 +156,7 @@ def run_happy_path(suffix: str):
     status, execution = request(
         "GET",
         f"/v1/cases/{case_id}/executions/{executed['execution_id']}",
-        headers("case-manager", "case-manager-1", correlation=correlation),
+        headers=headers("case-manager", "case-manager-1", correlation=correlation),
     )
     record(scenario, "read-execution", status, execution)
     require(status, 200, execution, "read-execution")
@@ -162,7 +164,7 @@ def run_happy_path(suffix: str):
     status, timeline = request(
         "GET",
         f"/v1/cases/{case_id}/timeline",
-        headers("auditor", "auditor-1", correlation=correlation),
+        headers=headers("auditor", "auditor-1", correlation=correlation),
     )
     record(scenario, "timeline", status, timeline)
     require(status, 200, timeline, "timeline")
@@ -187,7 +189,7 @@ def run_ambiguous_reconciliation(suffix: str):
     status, execution = request(
         "GET",
         f"/v1/cases/{case_id}/executions/{execution_id}",
-        headers("reconciler", "reconciler-1", correlation=correlation),
+        headers=headers("reconciler", "reconciler-1", correlation=correlation),
     )
     record(scenario, "read-ambiguous-execution", status, execution)
     require(status, 200, execution, "read-ambiguous-execution")
@@ -225,7 +227,7 @@ def run_ambiguous_reconciliation(suffix: str):
     status, execution = request(
         "GET",
         f"/v1/cases/{case_id}/executions/{execution_id}",
-        headers("reconciler", "reconciler-1", correlation=correlation),
+        headers=headers("reconciler", "reconciler-1", correlation=correlation),
     )
     record(scenario, "read-reconciled-execution", status, execution)
     require(status, 200, execution, "read-reconciled-execution")
@@ -235,7 +237,7 @@ def run_ambiguous_reconciliation(suffix: str):
     status, timeline = request(
         "GET",
         f"/v1/cases/{case_id}/timeline",
-        headers("auditor", "auditor-1", correlation=correlation),
+        headers=headers("auditor", "auditor-1", correlation=correlation),
     )
     record(scenario, "timeline", status, timeline)
     require(status, 200, timeline, "timeline")
