@@ -2,9 +2,23 @@
 
 Arquitetura de referência executável para processos de backoffice regulados, documentais e de longa duração. A proposta combina workflow persistente, capacidades inteligentes, aprovação humana, policies, evidências e execução governada sem transferir decisões sensíveis para agentes.
 
-[![Contexto atual da implementação de referência](assets/diagrams/c4-context-current.png)](assets/diagrams/c4-context-current.svg)
+[![Contexto atual do ecossistema](assets/diagrams/c4-context-current.png)](assets/diagrams/c4-context-current.svg)
 
 [**Abrir diagrama de contexto atual em SVG**](assets/diagrams/c4-context-current.svg)
+
+## Ecossistema atual
+
+A solução passa a ter três trilhas de entrega:
+
+| Trilha | Repositório | Estado |
+|---|---|---|
+| Arquitetura e baseline | `intelligent-backoffice-platform-architecture` | `DEMONSTRATED_LOCAL` / `CONTRACT_DEFINED` |
+| Backend de produto | `backoffice-platform-api` | `IMPLEMENTATION_STARTED` |
+| Frontend de produto | `intelligent-backoffice-frontend` | `IMPLEMENTATION_STARTED` |
+
+O backend .NET e o frontend React já possuem código inicial. A integração conjunta entre frontend, API, PostgreSQL e OPA ainda precisa de um gate E2E cross-repo para avançar a `VALIDATED_INTEGRATION`.
+
+[**Abrir o mapa dos repositórios de produto**](implementation/product-repositories.md)
 
 ## Problema que a arquitetura resolve
 
@@ -18,11 +32,11 @@ A plataforma organiza essa jornada como um processo governado, observável e aud
 2. **A IA investiga e recomenda.** Agentes não aprovam nem executam operações mutáveis.
 3. **Policies falham fechadas.** Alçada, segregação de funções, finalidade e autorização são verificadas antes da ação.
 4. **Toda decisão relevante produz evidência.** Eventos, versões, tool calls, aprovações e resultados permanecem rastreáveis.
-5. **Baseline e alvo são separados.** A implementação local demonstra padrões; a arquitetura-alvo descreve a evolução corporativa.
+5. **Baseline e produto são separados.** A implementação local demonstra padrões; os repositórios de produto materializam a evolução real.
 
 Os trade-offs e limites desses princípios estão registrados nos [Architecture Decision Records](decisions/index.md).
 
-## O que funciona hoje
+## O que funciona na baseline
 
 | Capacidade | Baseline executável | Limite declarado |
 |---|---|---|
@@ -33,10 +47,17 @@ Os trade-offs e limites desses princípios estão registrados nos [Architecture 
 | Identidade e supply chain | JWT EdDSA local, SBOM e proveniência | Sem IAM, KMS e admission corporativos |
 | Resiliência | Backup criptografado, restore e critérios de DR | Sem exercício regional real |
 
-!!! danger "Status de produção"
-    O estado oficial permanece **`NOT_PRODUCTION_READY`**. Controles demonstrados localmente não equivalem a implantação corporativa aprovada.
+## O que começou no produto
 
-## Execute a implementação de referência
+| Componente | Implementação inicial |
+|---|---|
+| Backend .NET | Casos, documentos, evidências, investigação, recomendação, aprovação, execução, reconciliação, PostgreSQL e OPA externo |
+| Frontend React | Criação e consulta de casos, jornada guiada, identidades da baseline, evidências, execuções, timeline e console HTTP |
+
+!!! danger "Status de produção"
+    O estado oficial permanece **`NOT_PRODUCTION_READY`**. Código implementado não equivale a integração validada ou implantação corporativa aprovada.
+
+## Execute a baseline de arquitetura
 
 Runtime mínimo:
 
@@ -55,15 +76,25 @@ O roteiro valida a jornada principal, uma execução ambígua, a reconciliação
 
 [**Abrir o walkthrough executável**](tutorials/dispute-walkthrough.md)
 
-Profile com identidade assinada:
+## Execute os repositórios de produto
+
+Backend:
 
 ```bash
-python scripts/generate_dev_identity.py --force
-docker compose --profile secure up --build
-python scripts/run_p7_secure_e2e.py
+cd backoffice-platform-api
+docker compose --profile runtime up -d postgres
+dotnet run --project src/Backoffice.Api
 ```
 
-Consulte o [runbook local](implementation/runbook.md) para testes, health checks e reset do ambiente.
+Frontend:
+
+```bash
+cd intelligent-backoffice-frontend/intelligent-backoffice-frontend
+npm ci
+npm run dev
+```
+
+A API utiliza `http://localhost:5260`; o frontend utiliza `http://localhost:5173`. Operações governadas dependem de um PDP OPA compatível.
 
 ## Escolha sua trilha de leitura
 
@@ -75,19 +106,18 @@ A documentação possui percursos específicos para executivos, arquitetos, dese
 
 | Visão | Pergunta respondida |
 |---|---|
-| [Walkthrough executável](tutorials/dispute-walkthrough.md) | Como a jornada e seus controles são comprovados ponta a ponta? |
-| [Estado de implementação](architecture/implementation-status.md) | O que está demonstrado, contratado, planejado ou pendente para produção? |
-| [Contexto atual](architecture/c4-context-current.md) | Quem utiliza e valida a implementação de referência hoje? |
-| [Containers atuais](architecture/c4-container-current.md) | Quais processos, stores e ferramentas são executáveis nos profiles atuais? |
+| [Repositórios de produto](implementation/product-repositories.md) | Como arquitetura, backend e frontend se relacionam e qual é o próximo gate? |
+| [Walkthrough executável](tutorials/dispute-walkthrough.md) | Como a baseline e seus controles são comprovados ponta a ponta? |
+| [Estado de implementação](architecture/implementation-status.md) | O que está contratado, iniciado, demonstrado, integrado ou pendente para produção? |
+| [Contexto atual](architecture/c4-context-current.md) | Quem utiliza e evolui o ecossistema atual? |
+| [Containers atuais](architecture/c4-container-current.md) | Quais containers pertencem ao produto em construção e à baseline? |
 | [Architecture Decision Records](decisions/index.md) | Por que as principais decisões foram tomadas e quando devem ser revistas? |
-| [Deployment observado](architecture/deployment-observed-baseline.md) | Como OPA, evals e observabilidade são executados localmente? |
-| [Deployment distribuído](architecture/deployment-distributed-baseline.md) | Como outbox, eventing, workers, timers, DLQ e replay funcionam? |
 | [Contexto alvo](architecture/c4-context-target.md) | Como a plataforma deve se posicionar no ecossistema corporativo? |
-| [Containers alvo](architecture/c4-container-target.md) | Como as responsabilidades devem ser separadas na evolução da plataforma? |
 | [Production readiness](governance/production-readiness.md) | Quais gates impedem a classificação como produção? |
 
 ## Próximos pontos de entrada
 
+- [Repositórios de implementação do produto](implementation/product-repositories.md)
 - [Walkthrough executável](tutorials/dispute-walkthrough.md)
 - [Contexto de negócio](context/business-context.md)
 - [Case aplicado](case-study/index.md)

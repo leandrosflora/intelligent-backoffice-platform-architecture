@@ -1,6 +1,10 @@
 # C4 — Contexto atual
 
-O estado atual é uma **implementação de referência local e executável** para a jornada sintética de contestação. Ela demonstra workflow persistente, capacidades inteligentes determinísticas, aprovação humana, policies, execução mock, eventing, observabilidade e geração de evidências no CI.
+O estado atual passa a combinar **uma baseline arquitetural executável** com **dois repositórios de produto em implementação inicial**.
+
+- este repositório preserva arquitetura, contratos, policies, diagramas, evidências e o runtime FastAPI de referência;
+- o `backoffice-platform-api` começa a materializar o backend de produto em .NET e PostgreSQL;
+- o `intelligent-backoffice-frontend` começa a materializar a experiência operacional em React.
 
 [![C4 contexto atual](../assets/diagrams/c4-context-current.png)](../assets/diagrams/c4-context-current.svg)
 
@@ -8,30 +12,40 @@ O estado atual é uma **implementação de referência local e executável** par
 
 ## Pessoas e interações
 
-- o **analista de operações** cria casos, registra documentos, executa investigação e consulta a timeline;
-- o **aprovador** registra decisões humanas sujeitas a alçada e segregação de funções;
-- o **operador da plataforma** executa os profiles, observa telemetria e opera reconciliação, DLQ, replay e drills;
-- o **arquiteto ou mantenedor** evolui código, contratos, policies, diagramas e evidências;
-- o **GitHub Actions** constrói e valida ambientes efêmeros e publica a documentação.
+- o **analista de operações** utiliza o frontend para criar, consultar e avançar casos;
+- o **aprovador** registra decisões humanas por meio da interface;
+- o **arquiteto ou engenheiro** evolui os três repositórios e mantém a conformidade entre contratos e implementação;
+- o **GitHub Actions** valida os repositórios por pipelines independentes;
+- o **GitHub Pages** publica arquitetura, status e runbooks.
 
-## Estado confirmado
+## Sistemas atuais
 
-A implementação possui quatro profiles:
+| Sistema | Responsabilidade | Estado |
+|---|---|---|
+| Intelligent Backoffice Frontend | Console React para operar a jornada e simular identidades da baseline | `IMPLEMENTATION_STARTED` |
+| Backoffice Platform API | Backend .NET com domínio, PostgreSQL, PDP externo e execução mock | `IMPLEMENTATION_STARTED` |
+| Architecture and Reference Environment | Contratos, ADRs, policies e baseline FastAPI executável | `DEMONSTRATED_LOCAL` / `CONTRACT_DEFINED` |
 
-| Profile | Objetivo |
-|---|---|
-| `runtime` | Jornada síncrona mínima com FastAPI, SQLite e OPA |
-| `observability` | Runtime com métricas, traces, dashboards, SLOs e alertas |
-| `distributed` | Event backbone, outbox, inbox, workers, timers, DLQ e replay |
-| `secure` | Identidade JWT EdDSA de curta duração e purpose binding |
+## Relação entre baseline e produto
+
+A baseline FastAPI não foi substituída pelo backend .NET. As duas trilhas possuem objetivos diferentes:
+
+- a **baseline** comprova padrões arquiteturais, eventing, observabilidade, evals, identidade assinada e readiness em ambiente local e CI;
+- o **backend de produto** começa a implementar o domínio e a persistência que devem evoluir para a solução real;
+- o **frontend de produto** começa a transformar os contratos em uma experiência operacional testável.
 
 ## Limites
 
-!!! danger "Não representa produção"
-    O ambiente usa dados e integrações sintéticos, execução financeira mock, bancos SQLite e broker single-node. Não há integração com IAM, sistemas de registro, banco gerenciado, Kafka Multi-AZ ou operação 24x7 corporativos.
+!!! danger "Integração ainda não validada"
+    Frontend e backend existem e possuem código funcional, mas ainda não há um gate E2E cross-repo automatizado que suba React, API .NET, PostgreSQL e OPA como uma única solução validada.
+
+Não existem integrações corporativas, efeitos financeiros reais, IAM corporativo, operação 24x7 ou classificação produtiva.
 
 O status oficial permanece **`NOT_PRODUCTION_READY`**.
 
-Consulte também a [matriz de implementação atual × alvo](implementation-status.md).
+Consulte:
+
+- [repositórios de implementação do produto](../implementation/product-repositories.md);
+- [matriz de implementação atual × alvo](implementation-status.md).
 
 **Fonte PlantUML:** `C4/c4-context-current.puml`.

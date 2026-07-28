@@ -1,5 +1,5 @@
 site_name: Intelligent Backoffice Platform Architecture
-site_description: Arquitetura de referência para backoffice inteligente com agentes, documentos, workflows, human-in-the-loop e execução governada.
+site_description: Arquitetura de referência e ecossistema de implementação para backoffice inteligente com agentes, documentos, workflows, human-in-the-loop e execução governada.
 site_url: https://leandrosflora.github.io/intelligent-backoffice-platform-architecture/
 repo_url: https://github.com/leandrosflora/intelligent-backoffice-platform-architecture
 repo_name: leandrosflora/intelligent-backoffice-platform-architecture
@@ -92,6 +92,7 @@ nav:
       - Versionamento: contracts/versioning.md
   - Implementação:
       - Visão geral: implementation/index.md
+      - Repositórios de produto: implementation/product-repositories.md
       - Cenários testados: implementation/test-scenarios.md
       - Runbook local: implementation/runbook.md
   - Avaliação:
