@@ -1,79 +1,60 @@
 @startuml
 !include <C4/C4_Container>
 
-title C4 Nível 2 — Containers atuais da implementação de referência
+title C4 Nível 2 — Containers atuais e trilhas de implementação
 LAYOUT_TOP_DOWN()
 
-Person(analyst, "Analista de operações", "Opera a jornada sintética de contestação.")
+Person(analyst, "Analista de operações", "Opera a jornada de contestação.")
 Person(approver, "Aprovador", "Registra decisões humanas conforme alçada.")
-Person(operator, "Operador da plataforma", "Observa, reconcilia e opera eventing, replay e drills.")
-Person(maintainer, "Arquiteto / mantenedor", "Evolui a implementação e suas evidências.")
+Person(engineer, "Arquiteto / engenheiro", "Evolui os repositórios e valida evidências.")
 
-System_Boundary(reference, "Intelligent Backoffice Reference Environment") {
-  Boundary(apiProfiles, "Profiles executáveis alternativos") {
-    Container(runtimeApi, "Reference API", "FastAPI / Python", "Executa lifecycle, document intelligence determinística, investigação, recomendação, aprovação, execução mock e timeline nos profiles runtime e observability.")
-    Container(secureApi, "Secure API", "FastAPI / JWT EdDSA", "Executa o mesmo domínio com identidade assinada, validação de issuer, audience, TTL, tenant, papéis e finalidade.")
-    Container(distributedApi, "Distributed API", "FastAPI / Transactional Outbox", "Executa o domínio com eventing habilitado e operações administrativas para DLQ e replay.")
-  }
-
-  Boundary(policyAndState, "Policy e estado") {
-    Container(opa, "Policy Decision Point", "OPA / Rego", "Aplica default deny, segregação de funções, alçada, purpose binding e autorização operacional.")
-    ContainerDb(sqlite, "Profile-local State Stores", "SQLite / volumes Docker", "Mantém casos, timeline, idempotência, outbox, inbox, timers e dead letters em bancos separados por profile.")
-  }
-
-  Boundary(distributedProfile, "Profile distribuído") {
-    Container(outboxPublisher, "Outbox Publisher", "Python worker", "Publica eventos pendentes e só confirma após aceite durável do broker.")
-    Container(workflowWorker, "Workflow Worker", "Python worker", "Consome eventos com inbox idempotente, retry e registro durável de falhas.")
-    Container(timerWorker, "Timer Worker", "Python worker", "Dispara timers persistidos e eventos vencidos.")
-    ContainerQueue(redpanda, "Event Backbone", "Redpanda / Kafka API", "Broker single-node para eventos de domínio e referências de dead letter.")
-  }
-
-  Boundary(observabilityProfile, "Profile de observabilidade") {
-    Container(otel, "OpenTelemetry Collector", "OTLP", "Recebe e encaminha traces da API de referência.")
-    Container(prometheus, "Prometheus", "Metrics", "Coleta métricas e avalia recording rules e alertas.")
-    Container(grafana, "Grafana", "Dashboards", "Exibe indicadores operacionais da baseline.")
-    Container(jaeger, "Jaeger", "Distributed tracing", "Armazena e consulta traces locais.")
-  }
-
-  Container(toolchain, "Evaluation and Evidence Toolchain", "Python / Bash", "Executa E2E, evals, validações, capacidade, backup/restore, SBOM e proveniência e gera evidências versionadas.")
+System_Boundary(product, "Implementação de produto iniciada") {
+  Container(spa, "Intelligent Backoffice Frontend", "React 19 / Vite", "Console operacional para casos, documentos, evidências, investigação, recomendação, aprovação, execução, reconciliação e timeline.")
+  Container(reverseProxy, "Frontend Reverse Proxy", "Nginx", "Serve a SPA e encaminha o prefixo /api ao backend configurado.")
+  Container(api, "Backoffice Platform API", ".NET 9 / ASP.NET Core", "Monólito modular com lifecycle, versionamento otimista, documentos, investigação, recomendação, aprovação, execução idempotente, reconciliação e timeline.")
+  ContainerDb(postgres, "Backoffice Database", "PostgreSQL 16", "Persiste casos, timeline, documentos, evidências, investigações, recomendações, aprovações, execuções e idempotência.")
+  Container(opaProduct, "Policy Decision Point", "OPA / Rego", "Autoriza ações com default deny, papéis, tenant, purpose, alçada, segregação e obrigações.")
 }
 
-System_Ext(actions, "GitHub Actions", "Executa a toolchain e os profiles em ambientes efêmeros de CI.")
+System_Boundary(reference, "Baseline executável de arquitetura") {
+  Container(referenceApi, "Reference Runtime", "FastAPI / Python", "Demonstra os contratos e controles com profiles runtime, secure, distributed e observability.")
+  ContainerDb(sqlite, "Reference State Stores", "SQLite", "Mantém estado local, timeline, idempotência, outbox, inbox, timers e dead letters.")
+  ContainerQueue(redpanda, "Reference Event Backbone", "Redpanda / Kafka API", "Demonstra publicação e consumo at-least-once, retry, DLQ e replay.")
+  Container(observability, "Reference Observability Stack", "OpenTelemetry / Prometheus / Grafana / Jaeger", "Demonstra métricas, traces, dashboards, SLOs e alertas.")
+  Container(toolchain, "Architecture Evidence Toolchain", "Python / Bash", "Valida contratos, policies, diagramas, E2E, evals, capacidade, backup, SBOM, proveniência e readiness.")
+}
 
-Rel(analyst, runtimeApi, "Opera casos sintéticos", "REST / Swagger")
-Rel(approver, runtimeApi, "Aprova ou rejeita", "REST / Swagger")
-Rel(operator, distributedApi, "Opera replay, DLQ e reconciliação", "REST")
-Rel(operator, grafana, "Consulta métricas e dashboards", "HTTPS")
-Rel(operator, jaeger, "Consulta traces", "HTTPS")
-Rel(maintainer, actions, "Dispara validações", "GitHub")
+System_Ext(actions, "GitHub Actions", "Executa pipelines independentes dos repositórios.")
 
-Rel(runtimeApi, opa, "Solicita decisões", "HTTP / JSON")
-Rel(runtimeApi, sqlite, "Persiste estado e evidências", "SQL")
-Rel(secureApi, opa, "Solicita decisões com claims assinadas", "HTTP / JSON")
-Rel(secureApi, sqlite, "Persiste estado seguro local", "SQL")
-Rel(distributedApi, opa, "Solicita decisões", "HTTP / JSON")
-Rel(distributedApi, sqlite, "Persiste estado e outbox", "SQL")
+Rel(analyst, spa, "Opera casos e consulta evidências", "HTTPS")
+Rel(approver, spa, "Registra decisões humanas", "HTTPS")
+Rel(spa, reverseProxy, "Usa o endpoint /api quando empacotada", "HTTP")
+Rel(reverseProxy, api, "Encaminha chamadas da SPA", "REST / JSON")
+Rel(spa, api, "Usa proxy Vite no desenvolvimento", "REST / JSON")
+Rel(api, postgres, "Persiste agregados e recursos", "SQL")
+Rel(api, opaProduct, "Solicita decisões de autorização", "HTTP / JSON")
 
-Rel(outboxPublisher, sqlite, "Lê e confirma outbox", "SQL")
-Rel(outboxPublisher, redpanda, "Publica eventos", "Kafka protocol")
-Rel(workflowWorker, redpanda, "Consome eventos", "Kafka protocol")
-Rel(workflowWorker, sqlite, "Mantém inbox, estado e DLQ", "SQL")
-Rel(timerWorker, sqlite, "Consulta e atualiza timers", "SQL")
-Rel(timerWorker, redpanda, "Publica eventos de timer", "Kafka protocol")
+Rel(engineer, actions, "Dispara validações", "GitHub")
+Rel(actions, spa, "Executa lint, testes, build e imagem", "Node.js / Docker")
+Rel(actions, toolchain, "Executa a baseline e gera evidências", "Python / Bash / Docker")
+Rel(toolchain, referenceApi, "Executa E2E, evals e drills", "HTTP")
+Rel(referenceApi, sqlite, "Persiste estado da baseline", "SQL")
+Rel(referenceApi, redpanda, "Publica e consome eventos nos profiles distribuídos", "Kafka protocol")
+Rel(referenceApi, observability, "Exporta métricas e traces", "OTLP / HTTP")
 
-Rel(runtimeApi, otel, "Exporta traces", "OTLP")
-Rel(prometheus, runtimeApi, "Coleta métricas", "HTTP")
-Rel(otel, jaeger, "Encaminha traces", "OTLP")
-Rel(grafana, prometheus, "Consulta séries temporais", "PromQL")
+Rel(api, referenceApi, "Segue lifecycle e contratos equivalentes, sem dependência de runtime", "Conformance")
 
-Rel(actions, toolchain, "Executa validações e gera evidências", "Python / Bash")
-Rel(toolchain, runtimeApi, "Executa E2E e evals", "HTTP")
-Rel(toolchain, secureApi, "Valida identidade assinada", "HTTP")
-Rel(toolchain, distributedApi, "Valida eventing e operações", "HTTP")
+note bottom of product
+Estado atual: IMPLEMENTATION_STARTED
+- frontend e backend estão em repositórios separados;
+- persistência de produto usa PostgreSQL;
+- execução e documentos ainda são mocks de desenvolvimento;
+- integração E2E cross-repo ainda não é gate automatizado.
+end note
 
-note bottom of apiProfiles
-Os três containers representam profiles alternativos do mesmo código-base.
-Não são uma topologia produtiva simultânea.
+note bottom of reference
+Estado da baseline: DEMONSTRATED_LOCAL
+A baseline não é a topologia produtiva definitiva.
 end note
 
 SHOW_LEGEND()
