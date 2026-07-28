@@ -1,53 +1,59 @@
 # C4 — Containers atuais
 
-O nível de containers atual representa os processos, stores e ferramentas que podem ser executados hoje no ambiente de referência. Os profiles compartilham o mesmo código-base, mas ativam topologias diferentes para demonstrar capacidades específicas.
+O nível de containers atual separa duas trilhas:
+
+1. **implementação de produto iniciada**, formada pelo frontend React e pelo backend .NET;
+2. **baseline executável de arquitetura**, mantida neste repositório para demonstrar padrões e controles.
 
 [![C4 containers atuais](../assets/diagrams/c4-container-current.png)](../assets/diagrams/c4-container-current.svg)
 
 [**Abrir diagrama em SVG**](../assets/diagrams/c4-container-current.svg)
 
-## Profiles de API
+## Implementação de produto iniciada
 
-| Container | Profile | Responsabilidade |
-|---|---|---|
-| Reference API | `runtime`, `observability` | Lifecycle, documentos determinísticos, investigação, recomendação, aprovação, execução mock e timeline |
-| Secure API | `secure` | Mesmo domínio com identidade JWT EdDSA e validação de claims |
-| Distributed API | `distributed` | Mesmo domínio com transactional outbox, eventing e operações de DLQ e replay |
+| Container | Tecnologia | Responsabilidade | Estado |
+|---|---|---|---|
+| Intelligent Backoffice Frontend | React 19 / Vite | Jornada de casos, documentos, evidências, investigação, aprovação, execução e reconciliação | `IMPLEMENTATION_STARTED` |
+| Frontend Reverse Proxy | Nginx | Serve a SPA e encaminha `/api` ao backend | `IMPLEMENTATION_STARTED` |
+| Backoffice Platform API | .NET 9 / ASP.NET Core | Domínio, lifecycle, versionamento otimista, execução idempotente e timeline | `IMPLEMENTATION_STARTED` |
+| Backoffice Database | PostgreSQL 16 | Persistência dos agregados e recursos da jornada | `IMPLEMENTATION_STARTED` |
+| Policy Decision Point | OPA / Rego | Autorização, alçada, segregação, tenant, purpose e obrigações | `IMPLEMENTATION_STARTED` |
 
-Os três containers são alternativas de execução do mesmo código-base. Eles não representam três serviços produtivos independentes.
+### Fluxo atual
 
-## Policy e persistência
+- o navegador executa a SPA React;
+- em desenvolvimento, o Vite encaminha `/api` para a API .NET;
+- no empacotamento Docker, o Nginx atua como reverse proxy;
+- a API persiste dados no PostgreSQL;
+- operações governadas consultam o OPA por HTTP;
+- o gateway de execução permanece mock.
 
-| Container | Estado atual |
+## Baseline executável de arquitetura
+
+| Container | Responsabilidade |
 |---|---|
-| Policy Decision Point | OPA externo com `default deny`, alçada, segregação, purpose binding e testes negativos |
-| Profile-local State Stores | SQLite persistido em volumes separados para os profiles runtime, secure e distributed |
+| Reference Runtime | Profiles FastAPI para runtime, identidade assinada, eventing e observabilidade |
+| Reference State Stores | SQLite para estado, outbox, inbox, timers e dead letters |
+| Reference Event Backbone | Redpanda single-node para demonstração de eventos |
+| Reference Observability Stack | OpenTelemetry, Prometheus, Grafana e Jaeger |
+| Architecture Evidence Toolchain | E2E, evals, contratos, policies, diagramas, backup, SBOM, proveniência e readiness |
 
-## Eventing distribuído
+A baseline permanece `DEMONSTRATED_LOCAL`. Ela não é uma dependência de runtime do backend .NET; é uma fonte de padrões, contratos e evidências.
 
-- Redpanda single-node compatível com Kafka;
-- Outbox Publisher;
-- Workflow Worker com inbox idempotente;
-- Timer Worker;
-- retries com backoff;
-- dead letter durável;
-- replay autorizado e auditado.
+## Gaps de integração
 
-## Observabilidade
-
-- OpenTelemetry Collector;
-- Prometheus;
-- Grafana;
-- Jaeger;
-- SLOs, recording rules e alertas versionados.
-
-## Toolchain e evidências
-
-A toolchain Python/Bash executa testes E2E, evals, validações de contratos e policies, teste de capacidade, backup/restore, geração de SBOM e proveniência. O GitHub Actions executa essa toolchain em ambientes efêmeros e publica os artefatos resultantes.
+- não existe Compose único para frontend, API, PostgreSQL e OPA;
+- não existe E2E automatizado cross-repo;
+- recomendações e aprovações ainda não possuem endpoints de recuperação por caso;
+- identidade corporativa e workload identity ainda não foram incorporadas aos repositórios de produto;
+- eventing e observabilidade da baseline ainda não foram migrados para o backend de produto.
 
 !!! warning "Limite arquitetural"
-    A baseline comprova padrões em ambiente local e CI. Ela não comprova HA, operação multi-AZ, integração corporativa, segurança de rede real, retenção operacional ou suporte 24x7.
+    Código implementado e pipelines independentes não equivalem a uma integração validada. A classificação `VALIDATED_INTEGRATION` exige execução conjunta, evidências reproduzíveis e critérios operacionais aprovados.
 
-Consulte também a [matriz de implementação atual × alvo](implementation-status.md).
+Consulte:
+
+- [repositórios de implementação do produto](../implementation/product-repositories.md);
+- [matriz de implementação atual × alvo](implementation-status.md).
 
 **Fonte PlantUML:** `C4/c4-container-current.puml`.
