@@ -1,16 +1,25 @@
 # Arquitetura técnica
 
-A arquitetura técnica materializa o modelo funcional em visões C4, componentes, deployments, trust boundaries, sequências e decisões arquiteturais. As páginas separam explicitamente o que está confirmado na implementação de referência do que representa a evolução alvo.
+A arquitetura técnica materializa o modelo funcional em visões C4, componentes, deployments, trust boundaries, sequências e decisões arquiteturais. As páginas separam explicitamente a baseline de referência, a implementação de produto iniciada, a integração validada e o target corporativo.
 
 ## Estado atual e alvo
 
 | Visão | Objetivo |
 |---|---|
-| [Estado de implementação](implementation-status.md) | Comparar capacidade atual, arquitetura-alvo e gaps para produção |
-| [Contexto atual](c4-context-current.md) | Mostrar pessoas, automações e limites da implementação de referência executável |
+| [Estado de implementação](implementation-status.md) | Comparar contratos, baseline, produto em construção, integração e gaps para produção |
+| [Repositórios de produto](../implementation/product-repositories.md) | Explicar como arquitetura, backend .NET e frontend React se relacionam |
+| [Contexto atual](c4-context-current.md) | Mostrar pessoas, sistemas e limites do ecossistema atual |
 | [Contexto alvo](c4-context-target.md) | Posicionar a plataforma no ecossistema corporativo futuro |
-| [Containers atuais](c4-container-current.md) | Inventariar os containers, profiles e ferramentas executáveis hoje |
+| [Containers atuais](c4-container-current.md) | Separar containers de produto em construção dos containers da baseline |
 | [Containers alvo](c4-container-target.md) | Separar responsabilidades lógicas da futura plataforma |
+
+## Três trilhas complementares
+
+1. **Arquitetura e contratos:** este repositório define decisões, contratos, policies, diagramas e readiness.
+2. **Baseline executável:** o vertical slice FastAPI comprova padrões e controles com dados sintéticos.
+3. **Implementação de produto:** backend .NET e frontend React começam a materializar a solução em repositórios separados.
+
+A existência das três trilhas não significa integração concluída. O próximo marco é um E2E cross-repo que suba frontend, API, PostgreSQL e OPA e produza evidência reproduzível.
 
 ## Decisões arquiteturais
 
@@ -27,8 +36,9 @@ As decisões cobrem:
 
 ## Deployments executáveis e alvo
 
-- [Deployment observado](deployment-observed-baseline.md): runtime modular, OPA, observabilidade e evals.
-- [Deployment distribuído](deployment-distributed-baseline.md): event backbone, workers, timers, DLQ e replay.
+- [Deployment observado](deployment-observed-baseline.md): runtime modular, OPA, observabilidade e evals da baseline.
+- [Deployment distribuído](deployment-distributed-baseline.md): event backbone, workers, timers, DLQ e replay da baseline.
+- [Repositórios de produto](../implementation/product-repositories.md): topologia local em construção com React, .NET, PostgreSQL e OPA.
 - [Deployment alvo de produção](deployment-production-target.md): topologia corporativa com HA, identidade, segurança e recuperação.
 
 ## Detalhamento
@@ -52,4 +62,4 @@ As decisões cobrem:
 9. evidence, audit e observability.
 
 !!! warning "Leitura obrigatória"
-    Diagramas marcados como alvo não representam software implementado. Uma capacidade só muda de estado quando possui evidência compatível, owner, testes positivos e negativos, observabilidade, runbook, segurança e aprovação formal quando aplicável.
+    Código em um repositório de produto recebe o estado `IMPLEMENTATION_STARTED`. Apenas uma execução integrada, reproduzível e observável permite avançar para `VALIDATED_INTEGRATION`. Diagramas alvo continuam não representando software implementado.
