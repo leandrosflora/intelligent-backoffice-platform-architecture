@@ -96,6 +96,9 @@ nav:
   - Implementação:
       - Visão geral: implementation/index.md
       - Repositórios de produto: implementation/product-repositories.md
+      - Backend de produto: implementation/backend-product.md
+      - Frontend operacional: implementation/frontend-console.md
+      - Runtime integrado: implementation/product-runtime.md
       - Cenários testados: implementation/test-scenarios.md
       - Runbook local: implementation/runbook.md
   - Avaliação:
