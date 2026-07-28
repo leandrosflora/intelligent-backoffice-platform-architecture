@@ -70,6 +70,7 @@ REQUIRED_PATHS = (
     Path("docs/decisions/template.md"),
     Path("docs/contracts/index.md"),
     Path("docs/implementation/index.md"),
+    Path("docs/implementation/product-repositories.md"),
     Path("docs/implementation/test-scenarios.md"),
     Path("docs/implementation/runbook.md"),
     Path("docs/tutorials/dispute-walkthrough.md"),
