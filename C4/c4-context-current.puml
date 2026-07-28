@@ -1,34 +1,51 @@
 @startuml
 !include <C4/C4_Context>
 
-title C4 Nível 1 — Contexto atual da implementação de referência
+title C4 Nível 1 — Contexto atual do ecossistema de implementação
 LAYOUT_LEFT_RIGHT()
 
-Person(analyst, "Analista de operações", "Cria, investiga e acompanha casos sintéticos.")
-Person(approver, "Aprovador", "Aprova ou rejeita recomendações conforme alçada demonstrada.")
-Person(operator, "Operador da plataforma", "Executa profiles, observa telemetria e opera replay, reconciliação e drills.")
-Person(maintainer, "Arquiteto / mantenedor", "Evolui código, contratos, policies, diagramas e evidências.")
+Person(analyst, "Analista de operações", "Cria, investiga e acompanha casos pela interface em construção.")
+Person(approver, "Aprovador", "Registra decisões humanas conforme alçada e segregação de funções.")
+Person(engineer, "Arquiteto / engenheiro", "Evolui arquitetura, contratos, backend, frontend e evidências.")
 
-System(platform, "Intelligent Backoffice Reference Environment", "Implementação local executável da jornada de contestação com workflow persistente, capacidades inteligentes determinísticas, aprovação humana, OPA, execução mock, eventing e observabilidade.")
+System(frontend, "Intelligent Backoffice Frontend", "Console React em implementação inicial para operar a jornada, simular identidades e consumir a API de produto.")
+System(api, "Backoffice Platform API", "Backend .NET em implementação inicial com domínio de casos, PostgreSQL, PDP externo e execução mock.")
+System(reference, "Architecture and Reference Environment", "Arquitetura, contratos, policies e baseline FastAPI executável usada para validar padrões, eventing, observabilidade, evals e readiness.")
 
-System_Ext(actions, "GitHub Actions", "Constrói, testa e valida os profiles, contratos, policies, diagramas, evals e controles de readiness.")
+System_Ext(actions, "GitHub Actions", "Valida os repositórios de forma independente por meio de pipelines específicos.")
 System_Ext(pages, "GitHub Pages", "Publica a documentação arquitetural e os runbooks.")
 
-Rel(analyst, platform, "Cria casos, registra documentos, investiga e consulta timeline", "REST / Swagger")
-Rel(approver, platform, "Registra aprovação ou rejeição", "REST / Swagger")
-Rel(operator, platform, "Executa e opera a baseline local", "Docker Compose / REST")
-Rel(maintainer, platform, "Versiona implementação e artefatos", "Git")
-Rel(maintainer, actions, "Envia commits e pull requests", "GitHub")
-Rel(actions, platform, "Constrói e valida ambientes efêmeros", "Docker Compose / Python")
-Rel(actions, pages, "Publica o site após validação", "GitHub Pages deployment")
-Rel(operator, pages, "Consulta arquitetura, status e runbooks", "HTTPS")
+Rel(analyst, frontend, "Opera casos e consulta evidências", "HTTPS")
+Rel(approver, frontend, "Aprova ou rejeita recomendações", "HTTPS")
+Rel(frontend, api, "Consome APIs de casos, documentos, investigação, aprovação, execução e auditoria", "REST / JSON")
+Rel(api, reference, "Implementa contratos, lifecycle, policies e decisões arquiteturais", "Architecture as Code")
+Rel(engineer, frontend, "Evolui a experiência operacional", "Git")
+Rel(engineer, api, "Evolui domínio e integrações", "Git")
+Rel(engineer, reference, "Evolui arquitetura e baseline", "Git")
+Rel(engineer, actions, "Envia commits e pull requests", "GitHub")
+Rel(actions, frontend, "Executa lint, testes, build e imagem", "CI")
+Rel(actions, reference, "Executa contratos, policies, E2E, evals e readiness", "CI")
+Rel(actions, pages, "Publica documentação validada", "GitHub Pages deployment")
 
-note bottom of platform
-Estado atual confirmado:
-- ambiente local com dados e integrações sintéticos;
-- profiles runtime, observability, distributed e secure;
-- nenhuma operação financeira ou integração corporativa real;
-- status oficial NOT_PRODUCTION_READY.
+note bottom of frontend
+Estado: IMPLEMENTATION_STARTED
+- React 19, Vite e Nginx;
+- integração contratual com a API .NET;
+- sem autenticação corporativa;
+- sem E2E cross-repo automatizado.
+end note
+
+note bottom of api
+Estado: IMPLEMENTATION_STARTED
+- .NET 9 e PostgreSQL;
+- OPA externo e headers de identidade da baseline;
+- execução mock;
+- sem integrações corporativas reais.
+end note
+
+note bottom of reference
+Estado da baseline: DEMONSTRATED_LOCAL
+Status agregado: NOT_PRODUCTION_READY
 end note
 
 SHOW_LEGEND()
