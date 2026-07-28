@@ -15,6 +15,20 @@ Arquitetura de referência executável para automação inteligente de backoffic
 
 As decisões e trade-offs que sustentam esse princípio estão registrados nos [Architecture Decision Records](docs/decisions/index.md).
 
+## Ecossistema de implementação
+
+A solução começa a sair da baseline arquitetural e a se materializar em repositórios de produto separados.
+
+| Repositório | Papel | Estado |
+|---|---|---|
+| [intelligent-backoffice-platform-architecture](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture) | Arquitetura, contratos, policies, baseline FastAPI, evals e readiness | `DEMONSTRATED_LOCAL` / `CONTRACT_DEFINED` |
+| [backoffice-platform-api](https://github.com/leandrosflora/backoffice-platform-api) | Backend de produto em .NET 9, PostgreSQL e OPA | `IMPLEMENTATION_STARTED` |
+| [intelligent-backoffice-frontend](https://github.com/leandrosflora/intelligent-backoffice-frontend) | Console React para consumir e testar a API | `IMPLEMENTATION_STARTED` |
+
+Frontend e backend possuem código inicial, mas ainda não existe gate E2E cross-repo automatizado. O estado de integração de produto ainda não é `VALIDATED_INTEGRATION`.
+
+[**Abrir o mapa dos repositórios de produto**](docs/implementation/product-repositories.md)
+
 ## Case aplicado
 
 O primeiro case demonstra uma jornada bancária de contestação:
@@ -27,7 +41,7 @@ O primeiro case demonstra uma jornada bancária de contestação:
 6. execução governada e idempotente;
 7. reconciliação, auditoria e encerramento.
 
-## O que o repositório demonstra
+## O que a baseline demonstra
 
 - vertical slice FastAPI com lifecycle persistido;
 - OPA em runtime com `default deny`, alçada e purpose binding;
@@ -43,20 +57,28 @@ O primeiro case demonstra uma jornada bancária de contestação:
 - ADRs versionados e validados pelo CI;
 - walkthrough end-to-end com artifacts JSONL e JSON.
 
+## O que começou a ser implementado no produto
+
+- backend ASP.NET Core com casos, documentos, evidências, investigação, recomendação, aprovação, execução e reconciliação;
+- persistência PostgreSQL e enforcement por OPA externo;
+- frontend React com jornada guiada, identidades da baseline, timeline, evidências e console HTTP;
+- reverse proxy Nginx e pipeline de qualidade do frontend.
+
 ## Arquitetura atual
 
 [![C4 contexto atual](docs/assets/diagrams/c4-context-current.png)](docs/assets/diagrams/c4-context-current.svg)
 
-A documentação separa quatro conceitos:
+A documentação separa cinco conceitos:
 
-- **atual:** capacidade confirmada por código, configuração, teste ou evidência;
-- **baseline executável:** controle demonstrado localmente ou no CI;
-- **alvo:** responsabilidade ou topologia planejada;
+- **contrato definido:** API, evento, schema ou policy versionada;
+- **implementação iniciada:** código existe em um repositório de produto, sem E2E integrado comprovado;
+- **baseline demonstrada:** controle executado localmente ou no CI;
+- **integração validada:** componentes de produto executados ponta a ponta com evidência;
 - **produção:** integração real, operação e governança aprovadas.
 
 Consulte a [matriz atual × alvo](docs/architecture/implementation-status.md) para os gaps de cada capacidade.
 
-## Executar localmente
+## Executar a baseline deste repositório
 
 Runtime mínimo:
 
@@ -85,9 +107,30 @@ docker compose --profile secure up --build
 python scripts/run_p7_secure_e2e.py
 ```
 
+## Executar os repositórios de produto
+
+Backend:
+
+```bash
+cd backoffice-platform-api
+docker compose --profile runtime up -d postgres
+dotnet run --project src/Backoffice.Api
+```
+
+Frontend:
+
+```bash
+cd intelligent-backoffice-frontend/intelligent-backoffice-frontend
+npm ci
+npm run dev
+```
+
+A API utiliza `http://localhost:5260`; o frontend de desenvolvimento utiliza `http://localhost:5173`. Operações governadas dependem de um PDP OPA compatível.
+
 ## Documentação
 
 - [Documentação publicada](https://leandrosflora.github.io/intelligent-backoffice-platform-architecture/)
+- [Mapa dos repositórios de produto](docs/implementation/product-repositories.md)
 - [Walkthrough executável](docs/tutorials/dispute-walkthrough.md)
 - [Como ler esta arquitetura](docs/guide/how-to-read.md)
 - [Contexto de negócio](docs/context/business-context.md)
@@ -101,9 +144,7 @@ python scripts/run_p7_secure_e2e.py
 
 ## Production readiness
 
-O status oficial permanece **`NOT_PRODUCTION_READY`**. Os controles locais comprovam padrões, não uma implantação corporativa multi-região.
-
-Produção ainda exige identidade corporativa ou SPIFFE, mTLS, secret manager e KMS gerenciados, assinatura com admission control, database e Kafka Multi-AZ, testes representativos, DR real e operação 24x7.
+O status oficial permanece **`NOT_PRODUCTION_READY`**. Código em frontend e backend não substitui integração E2E, identidade corporativa, sistemas de registro, observabilidade operacional, DR real e operação 24x7.
 
 ## Validação completa
 
