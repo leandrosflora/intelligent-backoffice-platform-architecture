@@ -23,6 +23,8 @@ Aprovação humana
     ↓
 Execução governada
     ↓
+Reconciliação quando necessária
+    ↓
 Auditoria e encerramento
 ```
 
@@ -33,7 +35,8 @@ Auditoria e encerramento
 - aprovação humana obrigatória;
 - execução somente contra sistemas mock;
 - trilha completa de eventos e evidências;
-- operações mutáveis com idempotência.
+- operações mutáveis com idempotência;
+- resultado ambíguo bloqueia nova execução até reconciliação.
 
 ## Especificação funcional
 
@@ -54,11 +57,15 @@ O case é detalhado pelos seguintes artefatos:
 
 A jornada é representada por:
 
+- [walkthrough executável](../tutorials/dispute-walkthrough.md);
 - [diagramas C4](../architecture/index.md);
 - [diagramas de sequência](../architecture/sequence-diagrams.md);
+- [Architecture Decision Records](../decisions/index.md);
 - [contratos executáveis](../contracts/index.md);
 - [implementação de referência](../implementation/index.md);
 - [avaliações versionadas](../evaluation/index.md);
 - [controles de produção](../governance/production-readiness.md).
+
+O walkthrough executa tanto o caminho de sucesso quanto uma execução ambígua seguida de reconciliação, além de verificar timeline, outbox, projeções e métricas.
 
 A implementação local comprova o fluxo e os controles com dados sintéticos. Ela não representa uma operação bancária produtiva.

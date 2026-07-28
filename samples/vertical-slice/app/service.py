@@ -17,7 +17,14 @@ from .observability import (
     record_transition,
 )
 from .policy import PolicyClient
-from .schemas import ApprovalRequest, CreateCaseRequest, ExecutionRequest, RecommendationRequest, RegisterDocumentRequest
+from .schemas import (
+    ApprovalRequest,
+    CreateCaseRequest,
+    ExecutionRequest,
+    RecommendationRequest,
+    ReconciliationResolutionRequest,
+    RegisterDocumentRequest,
+)
 from .security import RequestContext
 from .store import Store
 
@@ -179,7 +186,7 @@ class BackofficeService:
                 return case
 
     def execute(self, ctx, case_id, key, req: ExecutionRequest):
-        request_hash = hashlib.sha256(json.dumps(req.model_dump(), sort_keys=True).encode()).hexdigest()
+        request_hash = hashlib.sha256(json.dumps({"case_id": case_id, **req.model_dump()}, sort_keys=True).encode()).hexdigest()
         with operation_span(self.tracer, "backoffice.execution.request", correlation_id=ctx.correlation_id):
             with self.store.connection() as conn:
                 previous = conn.execute(
@@ -206,11 +213,20 @@ class BackofficeService:
                     "evidence_references": case["evidence_references"],
                 }
                 self.policy.authorize(ctx, "execution.request", self.resource(case), policy_context)
+                execution_id = str(uuid4())
                 state = "RECONCILIATION_REQUIRED" if req.result_mode == "AMBIGUOUS" else "EXECUTED"
+                execution_status = "RECONCILIATION_REQUIRED" if req.result_mode == "AMBIGUOUS" else "SUCCEEDED"
                 conn.execute("UPDATE cases SET state=?,version=version+1 WHERE id=?", (state, case_id))
+                conn.execute(
+                    "INSERT INTO executions(id,case_id,tenant_id,status,idempotency_key,request_hash,result_mode,completed_at) "
+                    "VALUES(?,?,?,?,?,?,?,CASE WHEN ?='SUCCEEDED' THEN CURRENT_TIMESTAMP ELSE NULL END)",
+                    (execution_id, case_id, ctx.tenant_id, execution_status, key, request_hash, req.result_mode, execution_status),
+                )
                 case = self.load(conn, case_id, ctx.tenant_id)
+                case["execution_id"] = execution_id
+                case["execution_status"] = execution_status
                 event = "backoffice.execution.ambiguous.v1" if state == "RECONCILIATION_REQUIRED" else "backoffice.execution.completed.v1"
-                self.timeline(conn, case, event, ctx, {"mock": True})
+                self.timeline(conn, case, event, ctx, {"executionId": execution_id, "status": execution_status, "mock": True})
                 conn.execute(
                     "INSERT INTO idempotency(key,tenant_id,action,request_hash,response_json) VALUES(?,?,?,?,?)",
                     (key, ctx.tenant_id, "execution.request", request_hash, json.dumps(case)),
@@ -221,6 +237,88 @@ class BackofficeService:
                 if state == "RECONCILIATION_REQUIRED":
                     RECONCILIATIONS.inc()
                 record_transition("execution.request", before, case["state"])
+                return case
+
+    def get_execution(self, ctx, case_id, execution_id):
+        with operation_span(self.tracer, "backoffice.execution.read", correlation_id=ctx.correlation_id):
+            with self.store.connection() as conn:
+                case = self.load(conn, case_id, ctx.tenant_id)
+                self.policy.authorize(ctx, "execution.read", self.resource(case))
+                row = conn.execute(
+                    "SELECT * FROM executions WHERE id=? AND case_id=? AND tenant_id=?",
+                    (execution_id, case_id, ctx.tenant_id),
+                ).fetchone()
+                execution = self.store.execution(row)
+                if not execution:
+                    raise HTTPException(404, "Execution not found")
+                return execution
+
+    def reconcile(self, ctx, case_id, execution_id, key, expected, req: ReconciliationResolutionRequest):
+        request_hash = hashlib.sha256(
+            json.dumps({"case_id": case_id, "execution_id": execution_id, **req.model_dump()}, sort_keys=True).encode()
+        ).hexdigest()
+        with operation_span(self.tracer, "backoffice.reconciliation.resolve", correlation_id=ctx.correlation_id):
+            with self.store.connection() as conn:
+                previous = conn.execute(
+                    "SELECT * FROM idempotency WHERE key=? AND tenant_id=? AND action='reconciliation.resolve'",
+                    (key, ctx.tenant_id),
+                ).fetchone()
+                if previous:
+                    if previous["request_hash"] != request_hash:
+                        IDEMPOTENCY.labels("reconciliation.resolve", "conflict").inc()
+                        raise HTTPException(409, "Idempotency key reused with different payload")
+                    IDEMPOTENCY.labels("reconciliation.resolve", "replay").inc()
+                    return json.loads(previous["response_json"])
+
+                case = self.load(conn, case_id, ctx.tenant_id)
+                before = case["state"]
+                self.version(case, expected)
+                execution_row = conn.execute(
+                    "SELECT * FROM executions WHERE id=? AND case_id=? AND tenant_id=?",
+                    (execution_id, case_id, ctx.tenant_id),
+                ).fetchone()
+                execution = self.store.execution(execution_row)
+                if not execution:
+                    raise HTTPException(404, "Execution not found")
+                if execution["status"] != "RECONCILIATION_REQUIRED":
+                    raise HTTPException(409, detail={"reason": "execution-not-awaiting-reconciliation", "status": execution["status"]})
+
+                self.policy.authorize(
+                    ctx,
+                    "reconciliation.resolve",
+                    self.resource(case),
+                    {"case_version": case["version"]},
+                )
+
+                outcomes = {
+                    "CONFIRMED_SUCCEEDED": ("EXECUTED", "RECONCILED", "backoffice.reconciliation.succeeded.v1"),
+                    "CONFIRMED_FAILED": ("FAILED", "RECONCILED", "backoffice.reconciliation.failed.v1"),
+                    "ESCALATED": ("RECONCILIATION_REQUIRED", "RECONCILIATION_REQUIRED", "backoffice.reconciliation.escalated.v1"),
+                }
+                state, execution_status, event = outcomes[req.resolution]
+                conn.execute("UPDATE cases SET state=?,version=version+1 WHERE id=?", (state, case_id))
+                conn.execute(
+                    "UPDATE executions SET status=?,resolution=?,external_reference=?,"
+                    "completed_at=CASE WHEN ?='RECONCILED' THEN CURRENT_TIMESTAMP ELSE completed_at END WHERE id=?",
+                    (execution_status, req.resolution, f"reconciliation:{req.resolution.lower()}", execution_status, execution_id),
+                )
+                case = self.load(conn, case_id, ctx.tenant_id)
+                case["execution_id"] = execution_id
+                case["execution_status"] = execution_status
+                case["reconciliation_resolution"] = req.resolution
+                self.timeline(
+                    conn,
+                    case,
+                    event,
+                    ctx,
+                    {"executionId": execution_id, "resolution": req.resolution, "reason": req.reason},
+                )
+                conn.execute(
+                    "INSERT INTO idempotency(key,tenant_id,action,request_hash,response_json) VALUES(?,?,?,?,?)",
+                    (key, ctx.tenant_id, "reconciliation.resolve", request_hash, json.dumps(case)),
+                )
+                IDEMPOTENCY.labels("reconciliation.resolve", "stored").inc()
+                record_transition("reconciliation.resolve", before, case["state"])
                 return case
 
     def get_timeline(self, ctx, case_id):

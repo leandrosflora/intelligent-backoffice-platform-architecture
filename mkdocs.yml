@@ -36,6 +36,7 @@ markdown_extensions:
 nav:
   - Início: index.md
   - Como ler: guide/how-to-read.md
+  - Tutorial executável: tutorials/dispute-walkthrough.md
   - Contexto:
       - Contexto de negócio: context/business-context.md
       - Case aplicado: case-study/index.md

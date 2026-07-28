@@ -4,22 +4,74 @@
 
 - `BackofficeReconciliationRequired`;
 - `BackofficeIdempotencyConflictSpike`;
-- estado `RECONCILIATION_REQUIRED`.
+- estado `RECONCILIATION_REQUIRED`;
+- execução com status `RECONCILIATION_REQUIRED`.
 
 ## Diagnóstico
 
-1. Localize o caso e a chave de idempotência na evidência de auditoria.
+1. Localize o caso, o `executionId` e a chave de idempotência na timeline.
 2. Compare o hash do comando com tentativas anteriores.
-3. Consulte o sistema de registro ou mock de execução.
-4. Confirme se existe efeito aplicado, não aplicado ou inconclusivo.
+3. Consulte a execução:
+
+   ```text
+   GET /v1/cases/{caseId}/executions/{executionId}
+   ```
+
+4. Consulte o sistema de registro ou mock de execução.
+5. Classifique o efeito como aplicado, não aplicado ou ainda inconclusivo.
 
 ## Mitigação
 
 - bloqueie retry automático enquanto o resultado for inconclusivo;
-- direcione o caso para reconciliação humana;
-- mantenha a mesma chave somente para replay do mesmo comando;
-- use nova chave apenas após decisão explícita de compensação ou novo comando.
+- não envie um novo comando financeiro para “testar” o resultado;
+- mantenha a chave original somente para replay idempotente da mesma execução;
+- direcione o caso ao papel `reconciler`;
+- preserve as evidências usadas para determinar o resultado.
+
+## Resolver a reconciliação
+
+Use:
+
+```text
+POST /v1/cases/{caseId}/reconciliations/{executionId}/resolve
+```
+
+Headers obrigatórios:
+
+```text
+If-Match: <versão atual do caso>
+Idempotency-Key: <chave específica da reconciliação>
+X-Roles: reconciler
+```
+
+Corpo:
+
+```json
+{
+  "case_version": 6,
+  "resolution": "CONFIRMED_SUCCEEDED",
+  "reason": "system of record confirms the operation completed successfully"
+}
+```
+
+Resoluções permitidas:
+
+| Resolução | Caso | Execução |
+|---|---|---|
+| `CONFIRMED_SUCCEEDED` | `EXECUTED` | `RECONCILED` |
+| `CONFIRMED_FAILED` | `FAILED` | `RECONCILED` |
+| `ESCALATED` | `RECONCILIATION_REQUIRED` | `RECONCILIATION_REQUIRED` |
+
+A repetição da mesma resolução com a mesma chave retorna o resultado anterior. A reutilização da chave com conteúdo diferente retorna `409 Conflict`.
 
 ## Encerramento
 
-Registre decisão, evidência consultada, ator responsável e resultado reconciliado na timeline.
+Confirme que:
+
+- a timeline contém o evento de reconciliação;
+- a execução contém o status e a resolução finais;
+- o outbox publicou o evento;
+- a projeção do consumer processou o evento;
+- ator, motivo e correlação estão registrados.
+
+O [walkthrough executável](../../tutorials/dispute-walkthrough.md) demonstra esse fluxo ponta a ponta com dados sintéticos.

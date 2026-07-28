@@ -31,7 +31,7 @@ O primeiro case demonstra uma jornada bancária de contestação:
 
 - vertical slice FastAPI com lifecycle persistido;
 - OPA em runtime com `default deny`, alçada e purpose binding;
-- aprovação humana e execução mock idempotente;
+- aprovação humana, execução mock idempotente e reconciliação rastreável;
 - OpenAPI, AsyncAPI, JSON Schemas e catálogo de policies;
 - outbox, inbox, workers, timers, DLQ e replay;
 - evals versionados com gates de abstention e grounding;
@@ -40,7 +40,8 @@ O primeiro case demonstra uma jornada bancária de contestação:
 - backup criptografado, restore, SBOM e proveniência;
 - manifests Kubernetes alvo com HA e controles de rede;
 - matriz explícita de production readiness;
-- ADRs versionados e validados pelo CI.
+- ADRs versionados e validados pelo CI;
+- walkthrough end-to-end com artifacts JSONL e JSON.
 
 ## Arquitetura atual
 
@@ -69,11 +70,11 @@ Observabilidade:
 OTEL_TRACING_ENABLED=true docker compose --profile observability up --build
 ```
 
-Workflow distribuído:
+Workflow distribuído e walkthrough completo:
 
 ```bash
-docker compose --profile distributed up --build
-python scripts/run_p6_distributed_e2e.py
+docker compose --profile distributed up -d --build
+python scripts/run_dispute_walkthrough.py
 ```
 
 Profile com identidade assinada:
@@ -87,6 +88,7 @@ python scripts/run_p7_secure_e2e.py
 ## Documentação
 
 - [Documentação publicada](https://leandrosflora.github.io/intelligent-backoffice-platform-architecture/)
+- [Walkthrough executável](docs/tutorials/dispute-walkthrough.md)
 - [Como ler esta arquitetura](docs/guide/how-to-read.md)
 - [Contexto de negócio](docs/context/business-context.md)
 - [Estado de implementação](docs/architecture/implementation-status.md)

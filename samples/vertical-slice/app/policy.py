@@ -101,6 +101,10 @@ def embedded_decision(i: dict[str, Any]) -> dict[str, Any]:
         allow = subject.get("type") == "HUMAN" and "approver" in roles and resource.get("state") == "AWAITING_APPROVAL" and context.get("recommendation_actor_id") != subject.get("id") and context.get("recommendation_version") == context.get("approved_recommendation_version") and context.get("authority_limit", 0) >= context.get("amount", 1)
     elif common and action == "execution.request":
         allow = subject.get("type") == "WORKLOAD" and "execution-service" in roles and resource.get("state") == "APPROVED" and context.get("approval_status") == "APPROVED" and context.get("approval_valid") is True and context.get("recommendation_version") == context.get("approved_recommendation_version") and bool(context.get("idempotency_key")) and bool(context.get("command_hash")) and bool(context.get("evidence_references"))
+    elif common and action == "execution.read":
+        allow = bool(roles & {"execution-service", "reconciler", "case-manager", "auditor"})
+    elif common and action == "reconciliation.resolve":
+        allow = "reconciler" in roles and resource.get("state") == "RECONCILIATION_REQUIRED" and context.get("case_version", 0) > 0
     elif common and action == "event.read":
         allow = subject.get("type") == "HUMAN" and bool(roles & {"platform-operator", "auditor"})
     elif common and action == "timer.schedule":

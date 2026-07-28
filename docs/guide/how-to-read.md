@@ -19,11 +19,11 @@ Este repositório combina especificação arquitetural, contratos executáveis, 
 | Público | Comece por | Continue por | Decisão apoiada |
 |---|---|---|---|
 | Executivo ou gestor | [Contexto de negócio](../context/business-context.md) | [Outcome card](../functional/outcome-card.md) e [Production readiness](../governance/production-readiness.md) | Valor, risco e condições para evolução |
-| Arquiteto | [Arquitetura funcional](../functional/index.md) | [Arquitetura técnica](../architecture/index.md), [ADRs](../decisions/index.md), [NFRs](../functional/non-functional-requirements.md) e [rastreabilidade](../functional/traceability-matrix.md) | Limites, responsabilidades e trade-offs |
-| Desenvolvedor | [Implementação de referência](../implementation/index.md) | [Contratos](../contracts/index.md), [ADRs](../decisions/index.md), [cenários testados](../implementation/test-scenarios.md) e [runbook local](../implementation/runbook.md) | Como executar, alterar e validar o slice |
+| Arquiteto | [Arquitetura funcional](../functional/index.md) | [Arquitetura técnica](../architecture/index.md), [ADRs](../decisions/index.md), [walkthrough](../tutorials/dispute-walkthrough.md), [NFRs](../functional/non-functional-requirements.md) e [rastreabilidade](../functional/traceability-matrix.md) | Limites, responsabilidades, trade-offs e evidências |
+| Desenvolvedor | [Walkthrough executável](../tutorials/dispute-walkthrough.md) | [Implementação](../implementation/index.md), [contratos](../contracts/index.md), [ADRs](../decisions/index.md), [cenários testados](../implementation/test-scenarios.md) e [runbook](../implementation/runbook.md) | Como executar, alterar e validar o slice |
 | Segurança | [Trust boundaries](../architecture/trust-boundaries.md) | [ADRs de controle](../decisions/index.md), [Identidade de workload](../security/workload-identity.md), [policies](../contracts/policies.md) e [supply chain](../security/supply-chain.md) | Controles, confiança e riscos residuais |
-| Operações ou SRE | [Deployment observado](../architecture/deployment-observed-baseline.md) | [Observabilidade](../operations/observability.md), [SLOs](../operations/slos.md), [event backbone](../operations/eventing.md) e [runbooks](../operations/index.md) | Operação, diagnóstico e recuperação |
-| Auditoria ou compliance | [Lifecycle](../functional/case-lifecycle.md) | [Papéis](../functional/roles-and-responsibilities.md), [ADRs](../decisions/index.md), [rastreabilidade](../functional/traceability-matrix.md) e [evidências](../governance/production-readiness.md) | Segregação, decisões e cadeia de evidências |
+| Operações ou SRE | [Walkthrough executável](../tutorials/dispute-walkthrough.md) | [Deployment distribuído](../architecture/deployment-distributed-baseline.md), [observabilidade](../operations/observability.md), [SLOs](../operations/slos.md), [event backbone](../operations/eventing.md) e [runbooks](../operations/index.md) | Operação, diagnóstico e recuperação |
+| Auditoria ou compliance | [Lifecycle](../functional/case-lifecycle.md) | [Walkthrough](../tutorials/dispute-walkthrough.md), [papéis](../functional/roles-and-responsibilities.md), [ADRs](../decisions/index.md), [rastreabilidade](../functional/traceability-matrix.md) e [evidências](../governance/production-readiness.md) | Segregação, decisões e cadeia de evidências |
 
 ## Sequência recomendada para leitura completa
 
@@ -35,9 +35,10 @@ Este repositório combina especificação arquitetural, contratos executáveis, 
 6. [Arquitetura técnica](../architecture/index.md)
 7. [Architecture Decision Records](../decisions/index.md)
 8. [Contratos executáveis](../contracts/index.md)
-9. [Implementação de referência](../implementation/index.md)
-10. [Segurança e operações](../security/index.md)
-11. [Production readiness](../governance/production-readiness.md)
+9. [Walkthrough executável](../tutorials/dispute-walkthrough.md)
+10. [Implementação de referência](../implementation/index.md)
+11. [Segurança e operações](../security/index.md)
+12. [Production readiness](../governance/production-readiness.md)
 
 ## Como interpretar evidências
 
@@ -47,6 +48,7 @@ Uma afirmação arquitetural deve apontar para pelo menos um dos seguintes eleme
 - contrato OpenAPI, AsyncAPI, JSON Schema ou policy;
 - ADR vigente;
 - teste positivo e negativo;
+- walkthrough executável;
 - relatório ou artifact produzido pelo CI;
 - métrica, SLO ou runbook;
 - owner técnico e funcional.
