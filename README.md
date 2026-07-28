@@ -13,21 +13,22 @@ Arquitetura de referência executável para automação inteligente de backoffic
 
 > A IA produz análise e recomendação. O workflow controla o processo. Policies determinam o que pode ser feito. Pessoas aprovam decisões sensíveis. Serviços de domínio executam operações em sistemas de registro.
 
-As decisões e trade-offs que sustentam esse princípio estão registrados nos [Architecture Decision Records](docs/decisions/index.md).
+As decisões e trade-offs estão registrados nos [Architecture Decision Records](docs/decisions/index.md).
 
 ## Ecossistema de implementação
 
-A solução começa a sair da baseline arquitetural e a se materializar em repositórios de produto separados.
-
-| Repositório | Papel | Estado |
+| Repositório | Papel | Estado agregado |
 |---|---|---|
 | [intelligent-backoffice-platform-architecture](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture) | Arquitetura, contratos, policies, baseline FastAPI, evals e readiness | `DEMONSTRATED_LOCAL` / `CONTRACT_DEFINED` |
-| [backoffice-platform-api](https://github.com/leandrosflora/backoffice-platform-api) | Backend de produto em .NET 9, PostgreSQL e OPA | `IMPLEMENTATION_STARTED` |
-| [intelligent-backoffice-frontend](https://github.com/leandrosflora/intelligent-backoffice-frontend) | Console React para consumir e testar a API | `IMPLEMENTATION_STARTED` |
+| [backoffice-platform-api](https://github.com/leandrosflora/backoffice-platform-api) | Backend .NET 9, PostgreSQL, OPA, JWT, eventing, workers e observabilidade | `IMPLEMENTATION_STARTED` |
+| [intelligent-backoffice-frontend](https://github.com/leandrosflora/intelligent-backoffice-frontend) | Console React para operar e testar a API | `IMPLEMENTATION_STARTED` |
 
-Frontend e backend possuem código inicial, mas ainda não existe gate E2E cross-repo automatizado. O estado de integração de produto ainda não é `VALIDATED_INTEGRATION`.
+Backend e frontend já são componentes executáveis. A integração conjunta permanece sem gate E2E browser-based cross-repo, portanto o ecossistema ainda não é `VALIDATED_INTEGRATION`.
 
-[**Abrir o mapa dos repositórios de produto**](docs/implementation/product-repositories.md)
+- [Mapa dos repositórios](docs/implementation/product-repositories.md)
+- [Backend de produto](docs/implementation/backend-product.md)
+- [Frontend operacional](docs/implementation/frontend-console.md)
+- [Runtime integrado](docs/implementation/product-runtime.md)
 
 ## Case aplicado
 
@@ -41,11 +42,13 @@ O primeiro case demonstra uma jornada bancária de contestação:
 6. execução governada e idempotente;
 7. reconciliação, auditoria e encerramento.
 
-## O que a baseline demonstra
+## Baseline arquitetural
+
+Este repositório demonstra:
 
 - vertical slice FastAPI com lifecycle persistido;
 - OPA em runtime com `default deny`, alçada e purpose binding;
-- aprovação humana, execução mock idempotente e reconciliação rastreável;
+- aprovação humana, execução mock idempotente e reconciliação;
 - OpenAPI, AsyncAPI, JSON Schemas e catálogo de policies;
 - outbox, inbox, workers, timers, DLQ e replay;
 - evals versionados com gates de abstention e grounding;
@@ -57,28 +60,53 @@ O primeiro case demonstra uma jornada bancária de contestação:
 - ADRs versionados e validados pelo CI;
 - walkthrough end-to-end com artifacts JSONL e JSON.
 
-## O que começou a ser implementado no produto
+## Backend de produto implementado
 
-- backend ASP.NET Core com casos, documentos, evidências, investigação, recomendação, aprovação, execução e reconciliação;
-- persistência PostgreSQL e enforcement por OPA externo;
-- frontend React com jornada guiada, identidades da baseline, timeline, evidências e console HTTP;
-- reverse proxy Nginx e pipeline de qualidade do frontend.
+O `backoffice-platform-api` já possui:
+
+- monólito modular ASP.NET Core / .NET 9;
+- casos, documentos, evidências, investigação e recomendação;
+- aprovação humana, execução idempotente e reconciliação;
+- PostgreSQL com migrations EF Core;
+- OPA externo e policy enforcement fail-closed;
+- identidade por headers ou JWT EdDSA;
+- outbox, Redpanda, workers, timers, DLQ e replay;
+- endpoints operacionais;
+- OpenTelemetry, Prometheus, Grafana e Jaeger;
+- health e readiness;
+- profiles Docker `runtime`, `distributed`, `observability` e `secure`;
+- manifests Kubernetes com HPA, PDB e NetworkPolicies;
+- testes de API, domínio, contratos, OPA, Kafka e evals.
+
+## Frontend de produto implementado
+
+O `intelligent-backoffice-frontend` já possui:
+
+- jornada guiada pelo estado retornado pela API;
+- criação, listagem e consulta de casos;
+- documentos, evidências, investigação e recomendação;
+- aprovação humana, execução e reconciliação;
+- modos guiado e manual de identidade;
+- tratamento de Problem Details, correlation ID e conflito de versão;
+- console HTTP local;
+- Vite para desenvolvimento e Nginx para empacotamento;
+- lint, testes, build e imagem Docker.
 
 ## Arquitetura atual
 
-[![C4 contexto atual](docs/assets/diagrams/c4-context-current.png)](docs/assets/diagrams/c4-context-current.svg)
+[![C4 containers atuais](docs/assets/diagrams/c4-container-current.png)](docs/assets/diagrams/c4-container-current.svg)
 
-A documentação separa cinco conceitos:
+A documentação distingue:
 
-- **contrato definido:** API, evento, schema ou policy versionada;
-- **implementação iniciada:** código existe em um repositório de produto, sem E2E integrado comprovado;
-- **baseline demonstrada:** controle executado localmente ou no CI;
-- **integração validada:** componentes de produto executados ponta a ponta com evidência;
-- **produção:** integração real, operação e governança aprovadas.
+- `CONTRACT_DEFINED` — contrato versionado;
+- `IMPLEMENTATION_STARTED` — código existente sem todos os gates;
+- `DEMONSTRATED_LOCAL` — capacidade executada localmente ou no CI com dependências sintéticas;
+- `VALIDATED_INTEGRATION` — componentes de produto validados ponta a ponta;
+- `PASSED_PRODUCTION` — operação produtiva aprovada.
 
-Consulte a [matriz atual × alvo](docs/architecture/implementation-status.md) para os gaps de cada capacidade.
+Consulte a [matriz atual × alvo](docs/architecture/implementation-status.md).
 
-## Executar a baseline deste repositório
+## Executar a baseline
 
 Runtime mínimo:
 
@@ -86,65 +114,66 @@ Runtime mínimo:
 docker compose --profile runtime up --build
 ```
 
-Observabilidade:
-
-```bash
-OTEL_TRACING_ENABLED=true docker compose --profile observability up --build
-```
-
-Workflow distribuído e walkthrough completo:
+Workflow distribuído e walkthrough:
 
 ```bash
 docker compose --profile distributed up -d --build
 python scripts/run_dispute_walkthrough.py
 ```
 
-Profile com identidade assinada:
+## Executar o produto
 
-```bash
-python scripts/generate_dev_identity.py --force
-docker compose --profile secure up --build
-python scripts/run_p7_secure_e2e.py
-```
-
-## Executar os repositórios de produto
+Mantenha os três repositórios como diretórios irmãos.
 
 Backend:
 
 ```bash
 cd backoffice-platform-api
-docker compose --profile runtime up -d postgres
-dotnet run --project src/Backoffice.Api
+docker compose --profile runtime up -d --build
 ```
 
 Frontend:
 
 ```bash
-cd intelligent-backoffice-frontend/intelligent-backoffice-frontend
-npm ci
-npm run dev
+cd intelligent-backoffice-frontend
+BACKEND_URL=http://host.docker.internal:8080 docker compose up -d --build
 ```
 
-A API utiliza `http://localhost:5260`; o frontend de desenvolvimento utiliza `http://localhost:5173`. Operações governadas dependem de um PDP OPA compatível.
+A API fica em `http://localhost:8080`; o frontend em `http://localhost:3000`.
+
+Para eventing:
+
+```bash
+cd backoffice-platform-api
+docker compose --profile distributed up -d --build
+```
+
+Para observabilidade:
+
+```bash
+cd backoffice-platform-api
+docker compose --profile observability up -d --build
+```
+
+Consulte o [runbook do runtime integrado](docs/implementation/product-runtime.md).
 
 ## Documentação
 
 - [Documentação publicada](https://leandrosflora.github.io/intelligent-backoffice-platform-architecture/)
-- [Mapa dos repositórios de produto](docs/implementation/product-repositories.md)
+- [Repositórios de produto](docs/implementation/product-repositories.md)
+- [Backend de produto](docs/implementation/backend-product.md)
+- [Frontend operacional](docs/implementation/frontend-console.md)
+- [Runtime integrado](docs/implementation/product-runtime.md)
 - [Walkthrough executável](docs/tutorials/dispute-walkthrough.md)
-- [Como ler esta arquitetura](docs/guide/how-to-read.md)
-- [Contexto de negócio](docs/context/business-context.md)
 - [Estado de implementação](docs/architecture/implementation-status.md)
 - [Arquitetura técnica](docs/architecture/index.md)
 - [Architecture Decision Records](docs/decisions/index.md)
 - [Contratos executáveis](docs/contracts/index.md)
-- [Implementação de referência](docs/implementation/index.md)
 - [Production readiness](docs/governance/production-readiness.md)
-- [Roadmap e histórico](docs/roadmap.md)
 
 ## Production readiness
 
-O status oficial permanece **`NOT_PRODUCTION_READY`**. Código em frontend e backend não substitui integração E2E, identidade corporativa, sistemas de registro, observabilidade operacional, DR real e operação 24x7.
+O status oficial permanece **`NOT_PRODUCTION_READY`**. Código e profiles locais não substituem integração E2E, identidade corporativa, sistemas de registro, observabilidade operacional, DR real e operação 24x7.
 
 ## Validação completa
 
