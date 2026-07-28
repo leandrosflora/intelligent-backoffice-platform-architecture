@@ -1,67 +1,78 @@
 # Repositórios de implementação do produto
 
-A plataforma passa a possuir três trilhas complementares de entrega. Este repositório continua sendo a fonte de arquitetura, contratos e evidências da baseline; backend e frontend começam a materializar o produto em repositórios próprios.
+A plataforma é evoluída em três repositórios complementares. Este repositório permanece como fonte de arquitetura, contratos, policies e evidências; backend e frontend materializam o produto.
 
 ## Visão do ecossistema
 
-| Repositório | Responsabilidade | Estado atual |
+| Repositório | Responsabilidade | Estado agregado |
 |---|---|---|
-| [intelligent-backoffice-platform-architecture](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture) | Arquitetura, ADRs, contratos, policies, diagramas, baseline FastAPI executável, evals e readiness | `DEMONSTRATED_LOCAL` para a baseline e `CONTRACT_DEFINED` para os contratos |
-| [backoffice-platform-api](https://github.com/leandrosflora/backoffice-platform-api) | Backend de produto em .NET, domínio, persistência PostgreSQL, enforcement via OPA e APIs da jornada | `IMPLEMENTATION_STARTED` |
-| [intelligent-backoffice-frontend](https://github.com/leandrosflora/intelligent-backoffice-frontend) | Console React para operar casos, simular identidades e consumir as APIs do backend | `IMPLEMENTATION_STARTED` |
+| [intelligent-backoffice-platform-architecture](https://github.com/leandrosflora/intelligent-backoffice-platform-architecture) | Arquitetura, ADRs, contratos, policies, diagramas, baseline FastAPI, evals e readiness | `DEMONSTRATED_LOCAL` / `CONTRACT_DEFINED` |
+| [backoffice-platform-api](https://github.com/leandrosflora/backoffice-platform-api) | Backend .NET 9, PostgreSQL, OPA, JWT, eventing, workers, telemetria e deployment | `IMPLEMENTATION_STARTED` |
+| [intelligent-backoffice-frontend](https://github.com/leandrosflora/intelligent-backoffice-frontend) | Console React para operar e testar a jornada do backend | `IMPLEMENTATION_STARTED` |
+
+O estado agregado dos repositórios de produto permanece `IMPLEMENTATION_STARTED` porque ainda não há gate E2E cross-repo. Isso não impede que capacidades isoladas estejam `DEMONSTRATED_LOCAL`.
 
 ## Backend de produto
 
-O `backoffice-platform-api` inicia a implementação do domínio como um monólito modular em .NET 9.
+O `backoffice-platform-api` implementa um monólito modular em .NET 9.
 
-### Capacidades já materializadas em código
+### Capacidades materializadas
 
-- criação, listagem, consulta e cancelamento de casos;
-- versionamento otimista com `If-Match`;
-- timeline mantida pelo aggregate de caso;
-- registro e consulta de documentos e evidências;
-- investigação determinística;
-- recomendação grounded;
+- casos, documentos, evidências, investigação e recomendação;
 - aprovação humana com alçada e segregação de funções;
-- execução idempotente;
-- resultado ambíguo e reconciliação explícita;
-- persistência PostgreSQL;
-- chamada a PDP OPA externo;
-- gateway de execução mock para desenvolvimento e testes.
+- execução idempotente, consulta e reconciliação;
+- versionamento otimista com `If-Match`;
+- persistência PostgreSQL e migrations EF Core;
+- OPA externo com default deny, tenant, papéis e purpose binding;
+- identidade por headers ou JWT EdDSA;
+- outbox, inbox, Redpanda, workers, timers, DLQ e replay;
+- endpoints operacionais para outbox, timers e dead letters;
+- OpenTelemetry, métricas Prometheus, health e readiness;
+- profiles Docker `runtime`, `distributed`, `observability` e `secure`;
+- manifests Kubernetes com HPA, PDB e NetworkPolicies;
+- testes de domínio, API, contratos, OPA e eventing;
+- harness determinístico de evals.
 
-### Limites atuais
+[**Abrir a implementação detalhada do backend**](backend-product.md)
 
-- identidade ainda extraída de headers de desenvolvimento;
+### Limites
+
 - execução permanece mock;
-- não há integração corporativa ou efeito financeiro real;
-- o Compose do backend inicia PostgreSQL, mas a API e o PDP ainda precisam ser coordenados no ambiente local;
-- não há evidência cross-repo suficiente para classificar a integração como `VALIDATED_INTEGRATION`.
+- documentos usam metadados e referências sintéticas;
+- sem integração corporativa ou efeito financeiro real;
+- sem IAM corporativo, KMS ou mTLS;
+- o empacotamento ainda reutiliza policies e observabilidade deste repositório por filesystem;
+- sem E2E automatizado com o frontend.
 
 ## Frontend de produto
 
 O `intelligent-backoffice-frontend` implementa um console operacional em React 19 e Vite.
 
-### Capacidades já materializadas em código
+### Capacidades materializadas
 
-- criação, listagem e consulta de casos;
-- jornada guiada pelo estado retornado pelo backend;
-- registro documental sintético;
-- consulta de evidências, execuções e timeline;
-- investigação, recomendação, aprovação, execução e reconciliação;
+- criação, listagem, consulta e cancelamento de casos;
+- jornada guiada pelo estado do backend;
+- registro documental sintético e consulta de evidências;
+- investigação, recomendação e aprovação;
+- execução com sucesso, falha ou resultado ambíguo;
+- reconciliação, consulta de execuções e timeline;
 - modo guiado e modo manual de identidades;
 - envio de tenant, papéis, alçada, correlation ID, `If-Match` e `Idempotency-Key`;
-- tratamento de Problem Details e conflitos de versão;
-- Nginx como reverse proxy para `/api`;
-- lint, testes unitários, build Vite, validação do Compose e build da imagem no CI.
+- console de chamadas HTTP, latência e Problem Details;
+- Vite em desenvolvimento e Nginx em produção local;
+- lint, testes unitários, build Vite, Compose e imagem Docker no pipeline.
 
-### Limites atuais
+[**Abrir a implementação detalhada do frontend**](frontend-console.md)
 
-- não há autenticação JWT ou login corporativo;
-- documentos são representados por metadados, não upload binário;
-- IDs de recomendação e aprovação precisam permanecer no `localStorage`, pois o backend ainda não oferece consultas desses recursos por caso;
-- não há teste E2E automatizado envolvendo os dois repositórios.
+### Limites
 
-## Topologia local em construção
+- sem autenticação OIDC/JWT no navegador;
+- documentos sem upload binário;
+- IDs de recomendação e aprovação mantidos no `localStorage`;
+- sem telemetria distribuída iniciada no browser;
+- sem E2E automatizado cross-repo.
+
+## Topologia local
 
 ```text
 Navegador
@@ -69,40 +80,45 @@ Navegador
    v
 React SPA / Vite ou Nginx
    |
-   | REST / JSON + headers de identidade da baseline
    v
 Backoffice Platform API (.NET 9)
-   |                       |
-   | SQL                   | HTTP / JSON
-   v                       v
-PostgreSQL 16           OPA / Rego
+   |             |                  |
+   v             v                  v
+PostgreSQL 16    OPA / Rego         Redpanda
+                                       |
+                                       v
+                              Workers de eventing
+
+API e workers → OTel Collector → Prometheus / Grafana / Jaeger
 ```
 
-A baseline FastAPI deste repositório permanece separada. Ela continua validando padrões, eventing, observabilidade, identidade assinada, evals e readiness enquanto esses controles são progressivamente incorporados aos repositórios de produto.
+[**Abrir o runtime integrado do produto**](product-runtime.md)
 
 ## Estado de integração
-
-O início dos dois repositórios não altera automaticamente o status agregado da solução.
 
 | Gate | Estado |
 |---|---|
 | Contratos arquiteturais versionados | `CONTRACT_DEFINED` |
 | Baseline executável deste repositório | `DEMONSTRATED_LOCAL` |
-| Backend de produto | `IMPLEMENTATION_STARTED` |
-| Frontend de produto | `IMPLEMENTATION_STARTED` |
-| Frontend + backend + PostgreSQL + OPA em E2E automatizado | Pendente |
+| Backend síncrono com PostgreSQL e OPA | `DEMONSTRATED_LOCAL` |
+| Backend distribuído com broker e workers | `DEMONSTRATED_LOCAL` |
+| Backend com observabilidade | `DEMONSTRATED_LOCAL` |
+| Backend com JWT EdDSA local | `DEMONSTRATED_LOCAL` |
+| Frontend isolado, build e testes | `DEMONSTRATED_LOCAL` |
+| Frontend consumindo backend localmente | `DEMONSTRATED_LOCAL` manual |
+| E2E browser-based cross-repo automatizado | Pendente |
 | Integrações corporativas reais | Pendente |
 | Production readiness | `NOT_PRODUCTION_READY` |
 
 ## Próximos gates
 
-1. criar pipeline de CI do backend com build, testes, migrations e policy tests;
-2. disponibilizar um Compose integrado para PostgreSQL, OPA, API e frontend;
-3. criar E2E cross-repo cobrindo a jornada principal e o resultado ambíguo;
-4. adicionar endpoints de consulta para recomendações e aprovações;
-5. substituir headers de desenvolvimento por identidade assinada;
-6. publicar OpenAPI do backend e validar compatibilidade contra os contratos deste repositório;
-7. incorporar observabilidade, eventing e evidências operacionais ao backend de produto.
+1. criar pipeline E2E para frontend, API, PostgreSQL e OPA;
+2. publicar o OpenAPI gerado pelo backend e validar compatibilidade;
+3. adicionar recuperação de recomendações e aprovações por caso;
+4. desacoplar policies e configurações de observabilidade do checkout irmão;
+5. incorporar upload documental e object storage reais;
+6. integrar IAM corporativo e workload identity;
+7. comprovar carga, backup, restore, DR e operação.
 
 !!! warning "Classificação correta"
-    Código existente em repositórios separados comprova que a implementação começou. Não comprova integração validada, operação corporativa ou prontidão produtiva.
+    Código executável e profiles locais comprovam implementação e demonstração controlada. Não comprovam escala, integração corporativa ou prontidão produtiva.
