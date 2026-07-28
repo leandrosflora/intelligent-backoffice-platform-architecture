@@ -1,79 +1,93 @@
 # Implementação
 
-Este domínio de documentação passa a distinguir dois artefatos diferentes:
+A plataforma possui três artefatos complementares:
 
-1. a **implementação de referência** mantida neste repositório;
-2. os **repositórios de produto** que começam a materializar backend e frontend.
+1. a **baseline arquitetural executável** deste repositório;
+2. o **backend de produto** em .NET 9;
+3. o **frontend operacional** em React 19.
 
 [**Abrir o mapa dos repositórios de produto**](product-repositories.md)
 
+## Estado resumido
+
+| Trilha | Estado agregado | Capacidades já demonstradas |
+|---|---|---|
+| Arquitetura e baseline | `DEMONSTRATED_LOCAL` / `CONTRACT_DEFINED` | Contratos, policies, FastAPI, eventing, observabilidade, evals e readiness |
+| Backend de produto | `IMPLEMENTATION_STARTED` | Jornada .NET, PostgreSQL, OPA, JWT EdDSA, eventing, workers, métricas e profiles Docker |
+| Frontend de produto | `IMPLEMENTATION_STARTED` | Jornada React, modos de identidade, diagnóstico HTTP, build, testes e imagem Nginx |
+| Integração cross-repo | Pendente | Execução manual é possível, mas não existe gate E2E automatizado |
+
+!!! danger "Status de produção"
+    O status oficial permanece **`NOT_PRODUCTION_READY`**. A existência de componentes executáveis não comprova integração corporativa, operação 24x7 ou aprovação para produção.
+
 ## Implementação de referência
 
-O repositório contém um **vertical slice executável** que demonstra a jornada principal e os controles arquiteturais com dados sintéticos e integrações mock.
+Este repositório contém um vertical slice FastAPI que demonstra a jornada principal e os controles arquiteturais com dados sintéticos e integrações mock.
 
-### Escopo implementado
+### Escopo demonstrado
 
-- Case API;
-- workflow persistido;
-- document intelligence mock;
-- investigação mock;
-- recomendação;
+- Case API e workflow persistido;
+- document intelligence e investigação sintéticas;
+- recomendação e abstention;
 - aprovação humana;
-- execução governada mock com identificador e status persistidos;
-- consulta de execução;
-- resolução idempotente de resultado ambíguo;
+- execução governada mock e reconciliação;
 - OPA em runtime;
-- idempotência;
-- versionamento otimista;
+- idempotência e versionamento otimista;
 - timeline auditável;
-- outbox, inbox, workers, timers, DLQ e replay.
+- outbox, inbox, workers, timers, DLQ e replay;
+- OpenTelemetry, Prometheus, Grafana e Jaeger;
+- JWT EdDSA local;
+- evals, backup, restore, SBOM e proveniência.
 
-### Estratégia de empacotamento
+A baseline continua sendo a fonte de contratos, policies, decisões e critérios de readiness.
 
-As responsabilidades permanecem separadas por módulo, mas são executadas em um único serviço FastAPI. Essa decisão reduz o custo operacional da implementação de referência sem transformar o monólito modular na arquitetura-alvo definitiva.
+## Backend de produto
 
-### Persistência
+O [`backoffice-platform-api`](backend-product.md) absorveu uma parte relevante da baseline:
 
-O slice usa SQLite persistido em volume para casos, timeline, idempotência, execuções, outbox, inbox, timers e dead letters. A escolha é restrita ao ambiente de referência.
+- monólito modular .NET 9;
+- EF Core e PostgreSQL;
+- enforcement por OPA externo;
+- identidade por headers ou JWT EdDSA;
+- outbox, Redpanda, workers, timers, DLQ e replay;
+- endpoints operacionais;
+- métricas, traces, health e readiness;
+- manifests Kubernetes;
+- testes de domínio, API, contratos, OPA e eventing;
+- harness determinístico de evals.
 
-### Policy enforcement
+O gateway de execução e o armazenamento documental ainda são mocks de desenvolvimento.
 
-Em Docker Compose, toda operação sensível consulta o OPA por HTTP. A aplicação falha fechada quando o PDP está indisponível.
+[**Abrir a implementação do backend**](backend-product.md)
 
-A reconciliação exige:
+## Frontend de produto
 
-- papel `reconciler`;
-- tenant correspondente;
-- caso em `RECONCILIATION_REQUIRED`;
-- versão esperada;
-- chave idempotente;
-- justificativa registrada.
+O [`intelligent-backoffice-frontend`](frontend-console.md) oferece:
 
-### Evidência de implementação
+- jornada guiada pelo estado da API;
+- criação e consulta de casos;
+- documentos, evidências, investigação e recomendação;
+- aprovação, execução e reconciliação;
+- identidades guiadas ou manuais;
+- tratamento de Problem Details, correlation ID e conflito de versão;
+- Vite para desenvolvimento e Nginx para empacotamento;
+- lint, testes, build e imagem Docker.
 
-- testes ponta a ponta;
-- cobertura mínima de 85%;
-- imagem Docker construída no CI;
-- Compose validado;
-- policies Rego carregadas no OPA;
-- evals, métricas e traces;
-- cenários distribuídos com outbox, inbox, timers, DLQ e replay;
-- [walkthrough executável da contestação](../tutorials/dispute-walkthrough.md);
-- artifacts JSONL e JSON publicados pelo workflow distribuído.
+[**Abrir a implementação do frontend**](frontend-console.md)
 
-## Implementação de produto iniciada
+## Runtime local do produto
 
-Dois repositórios externos começam a transformar os contratos em produto:
+O backend já possui profiles `runtime`, `distributed`, `observability` e `secure`. O frontend é iniciado em Compose separado e aponta `/api` para a porta publicada pela API.
 
-| Repositório | Foco | Estado |
-|---|---|---|
-| `backoffice-platform-api` | Backend .NET 9, PostgreSQL, OPA e APIs da jornada | `IMPLEMENTATION_STARTED` |
-| `intelligent-backoffice-frontend` | Console React, Nginx e integração HTTP | `IMPLEMENTATION_STARTED` |
+[**Abrir o runtime integrado**](product-runtime.md)
 
-Esses repositórios não substituem a baseline. Eles devem absorver progressivamente os padrões comprovados aqui.
+## Próximo gate
 
-## Limite atual
+A integração avança para `VALIDATED_INTEGRATION` somente quando um pipeline reproduzível:
 
-A baseline comprova padrões e mecanismos. Os repositórios de produto comprovam que a implementação começou. Nenhum desses fatos, isoladamente, comprova escala, integração corporativa, dados reais, operação multi-região ou prontidão produtiva.
-
-O próximo gate é a integração automatizada entre frontend, API, PostgreSQL e OPA.
+1. sobe frontend, API, PostgreSQL e OPA;
+2. executa a jornada principal no navegador;
+3. valida negações de policy e concorrência;
+4. cobre resultado ambíguo e reconciliação;
+5. coleta métricas, traces e artifacts;
+6. vincula as evidências ao commit avaliado.
