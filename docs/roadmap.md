@@ -41,7 +41,7 @@ Itens 1–5 estão evidenciados e reproduzíveis. Os itens 6 e 7 são o trabalho
 | Fase | Objetivo |
 |---|---|
 | P9 | ~~Integração cross-repo, Compose unificado e contract testing~~ — concluído como parte do P8 (itens 1–5 do critério de conclusão) |
-| P10 | Observabilidade ponta a ponta no ambiente integrado (correlation ID/traces visíveis através do E2E), evidências consolidadas por execução, e eventing no backend de produto |
+| P10 | ~~Eventing no backend de produto~~ — concluído: Redpanda e os três workers (`outbox-dispatcher`, `workflow-worker`, `timer-worker`) rodam no ambiente de E2E cross-repo e o `Cross-repository E2E` prova que outbox de um caso real vai de `PENDING` a `PUBLISHED`. Restam: observabilidade ponta a ponta no ambiente integrado (correlation ID/traces visíveis através do E2E) e evidências consolidadas por execução |
 | P11 | Integrações reais, dados representativos e validação operacional |
 
 ## Estado canônico
