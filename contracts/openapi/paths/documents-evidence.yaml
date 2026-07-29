@@ -16,11 +16,12 @@
     - BR-004
     - BR-005
     x-policy-action: document.register
-    x-idempotent: false
+    x-idempotent: true
     parameters:
     - $ref: ../platform-api.yaml#/components/parameters/CaseId
     - $ref: ../platform-api.yaml#/components/parameters/TenantId
     - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
     - $ref: ../platform-api.yaml#/components/parameters/IfMatch
     requestBody:
       required: true
