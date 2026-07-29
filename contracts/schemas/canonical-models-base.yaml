@@ -440,6 +440,7 @@ $defs:
     - VALIDATING
     - VALIDATED
     - REJECTED
+    - REVIEW_REQUIRED
   Document:
     type: object
     additionalProperties: false
@@ -472,9 +473,11 @@ $defs:
       mediaType:
         type: string
         enum:
-        - application/pdf
-        - image/png
-        - image/jpeg
+        - APPLICATION_PDF
+        - IMAGE_PNG
+        - IMAGE_JPEG
+        - APPLICATION_DOCX
+        - APPLICATION_XLSX
       checksum:
         type: string
         pattern: ^[a-fA-F0-9]{64}$
@@ -497,8 +500,7 @@ $defs:
     required:
     - documentType
     - mediaType
-    - checksum
-    - storageReference
+    - file
     properties:
       documentType:
         type: string
@@ -511,16 +513,15 @@ $defs:
       mediaType:
         type: string
         enum:
-        - application/pdf
-        - image/png
-        - image/jpeg
-      checksum:
+        - APPLICATION_PDF
+        - IMAGE_PNG
+        - IMAGE_JPEG
+        - APPLICATION_DOCX
+        - APPLICATION_XLSX
+      file:
         type: string
-        pattern: ^[a-fA-F0-9]{64}$
-      storageReference:
-        type: string
-        minLength: 1
-        maxLength: 1024
+        format: binary
+        description: Conteúdo binário; o servidor calcula checksum e storageReference.
   Evidence:
     type: object
     additionalProperties: false
