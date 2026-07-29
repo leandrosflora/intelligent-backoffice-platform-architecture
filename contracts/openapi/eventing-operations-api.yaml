@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Intelligent Backoffice Eventing Operations API
-  version: 0.6.0
+  version: 0.7.0
   description: API operacional da baseline P6 para timers, inspeção do outbox/DLQ e replay controlado.
 servers:
   - url: http://localhost:8081
@@ -24,6 +24,17 @@ paths:
         '200': {description: Timer agendado}
         '403': {description: Policy negou a operação}
         '404': {description: Caso não encontrado}
+  /v1/operations/timers:
+    get:
+      operationId: listWorkflowTimers
+      summary: Lista timers duráveis do tenant
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': {description: Timers retornados}
+        '403': {description: Policy negou a operação}
   /v1/operations/outbox:
     get:
       operationId: listOutboxMessages
@@ -31,6 +42,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/TenantId'
         - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200': {description: Mensagens retornadas}
         '403': {description: Policy negou a operação}
@@ -41,6 +53,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/TenantId'
         - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200': {description: Dead letters retornadas}
         '403': {description: Policy negou a operação}
@@ -86,11 +99,16 @@ components:
       in: header
       required: true
       schema: {type: string}
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema: {type: integer, default: 100}
   schemas:
     TimerScheduleRequest:
       type: object
-      required: [timer_type, delay_seconds]
+      required: [timerType, delaySeconds]
       properties:
-        timer_type: {type: string, minLength: 3, maxLength: 64}
-        delay_seconds: {type: integer, minimum: 0, maximum: 86400}
+        timerType: {type: string, minLength: 3, maxLength: 64}
+        delaySeconds: {type: integer, minimum: 0, maximum: 86400}
         payload: {type: object, additionalProperties: true}
