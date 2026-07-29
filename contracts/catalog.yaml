@@ -7,6 +7,7 @@ sources:
 contracts:
   httpOperations:
   - API-APPROVAL-001
+  - API-APPROVAL-002
   - API-AUDIT-001
   - API-CASE-001
   - API-CASE-002
@@ -19,6 +20,7 @@ contracts:
   - API-INV-001
   - API-PLATFORM-001
   - API-REC-001
+  - API-REC-002
   - API-RECON-001
   domainEvents:
   - EVT-APPROVAL-001
