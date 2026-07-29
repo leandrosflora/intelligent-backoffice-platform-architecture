@@ -15,7 +15,9 @@ O contrato OpenAPI 3.1 cobre o lifecycle planejado do primeiro vertical slice.
 | `API-EVIDENCE-001` | `GET /v1/cases/{caseId}/evidence` | `evidence.read` | Consultar evidências minimizadas |
 | `API-INV-001` | `POST /v1/cases/{caseId}/investigations` | `investigation.execute` | Iniciar investigação |
 | `API-REC-001` | `POST /v1/cases/{caseId}/recommendations` | `recommendation.create` | Criar recomendação versionada |
+| `API-REC-002` | `GET /v1/cases/{caseId}/recommendations` | `case.read` | Consultar histórico de recomendações |
 | `API-APPROVAL-001` | `POST /v1/cases/{caseId}/approvals` | `approval.decide` | Registrar decisão humana |
+| `API-APPROVAL-002` | `GET /v1/cases/{caseId}/approvals` | `case.read` | Consultar histórico de decisões |
 | `API-EXEC-001` | `POST /v1/cases/{caseId}/executions` | `execution.request` | Solicitar execução governada |
 | `API-EXEC-002` | `GET /v1/cases/{caseId}/executions/{executionId}` | `execution.read` | Consultar execução |
 | `API-RECON-001` | `POST /v1/cases/{caseId}/reconciliations/{executionId}/resolve` | `reconciliation.resolve` | Resolver resultado ambíguo |
