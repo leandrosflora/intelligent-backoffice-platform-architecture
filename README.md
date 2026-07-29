@@ -53,7 +53,7 @@ A solução está organizada em três repositórios complementares:
 | **[backoffice-platform-api](https://github.com/leandrosflora/backoffice-platform-api)** | Backend de produto, domínio, APIs, workers e operação | .NET 9, PostgreSQL, OPA, Kafka-compatible | `IMPLEMENTATION_STARTED` |
 | **[intelligent-backoffice-frontend](https://github.com/leandrosflora/intelligent-backoffice-frontend)** | Console operacional da jornada | React 19, TypeScript, Vite, Nginx | `IMPLEMENTATION_STARTED` |
 
-Backend e frontend já são executáveis isoladamente. A integração entre os três repositórios ainda não possui um gate E2E automatizado com navegador; portanto, o ecossistema **ainda não** atingiu `VALIDATED_INTEGRATION`.
+Backend e frontend já são executáveis isoladamente e a integração entre frontend, API, PostgreSQL e OPA já possui um gate E2E automatizado com navegador real ([`Cross-repository E2E`](https://github.com/leandrosflora/intelligent-backoffice-frontend/actions/workflows/e2e.yml), executado a cada PR do frontend): a jornada principal até `EXECUTED` e o caminho de execução ambígua até a reconciliação são exercitados pela UI real, atravessando o proxy Nginx, a API .NET, o OPA e o PostgreSQL. Essa capacidade específica de integração está `VALIDATED_INTEGRATION`; o ecossistema como um todo permanece `NOT_PRODUCTION_READY` — faltam integrações reais, IAM corporativo, DR e operação 24x7.
 
 Consulte o [mapa dos repositórios](docs/implementation/product-repositories.md) e o [runtime integrado](docs/implementation/product-runtime.md).
 
@@ -193,7 +193,7 @@ Veja o [runbook completo](docs/implementation/runbook.md) para portas, verifica�
 | Baseline FastAPI | `DEMONSTRATED_LOCAL` | Runtime e testes com dados e integrações sintéticos |
 | Backend .NET | `IMPLEMENTATION_STARTED` | Capacidades isoladas executáveis, sem gate integrado completo |
 | Frontend React | `IMPLEMENTATION_STARTED` | Build, testes e integração manual demonstrados |
-| E2E cross-repo no navegador | Pendente | Próximo gate para `VALIDATED_INTEGRATION` |
+| E2E cross-repo no navegador | `VALIDATED_INTEGRATION` | [`Cross-repository E2E`](https://github.com/leandrosflora/intelligent-backoffice-frontend/actions/workflows/e2e.yml) verde a cada PR: jornada principal até `EXECUTED` e execução ambígua até reconciliação, pela UI real |
 | Produção | **`NOT_PRODUCTION_READY`** | Faltam integrações reais, IAM corporativo, DR, operação 24x7 e aprovação formal |
 
 Os estados significam:
@@ -241,13 +241,15 @@ Os workflows do GitHub Actions executam os gates de qualidade, vertical slice, e
 
 ## Próximo marco
 
-O próximo salto relevante não é adicionar mais diagramas. É comprovar a integração do produto:
+A integração do produto já está comprovada nos pontos que motivaram esta seção:
 
-1. subir frontend, API, PostgreSQL e OPA por um único comando ou pipeline;
-2. executar a jornada principal e a reconciliação no navegador;
-3. validar negações de policy, versionamento e idempotência;
-4. comparar a OpenAPI implementada com os contratos arquiteturais;
-5. propagar correlation ID e traces entre frontend, API e workers;
-6. publicar evidências reproduzíveis vinculadas ao commit.
+1. ✅ frontend, API, PostgreSQL e OPA sobem por um único comando (`docker compose -f e2e/docker-compose.yml up`), documentado no [README do frontend](https://github.com/leandrosflora/intelligent-backoffice-frontend#e2e-cross-repo);
+2. ✅ a jornada principal até `EXECUTED` e a reconciliação são executadas no navegador real, automatizadas no workflow [`Cross-repository E2E`](https://github.com/leandrosflora/intelligent-backoffice-frontend/actions/workflows/e2e.yml);
+3. parcial — negações de policy, versionamento otimista e idempotência foram validadas manualmente (mudança `validate-frontend-backend-integration`) e são cobertas pelos testes de integração do backend, mas ainda não têm um cenário equivalente automatizado no navegador;
+4. ✅ a OpenAPI implementada é comparada com os contratos arquiteturais em CI (`Backoffice.Contracts.Tests`, backend);
+5. parcial — o correlation ID já atravessa frontend e API (`X-Correlation-Id`) e o backend já instrumenta OpenTelemetry (API e workers), mas a propagação ainda não foi observada ponta a ponta dentro do próprio ambiente de E2E (o coletor OTel não está conectado a essa stack);
+6. parcial — o relatório do Playwright é publicado como artifact do GitHub Actions em toda execução (já vinculado a commit/run), mas ainda não existe um resumo único e legível equivalente ao `run_dispute_walkthrough.py` da baseline.
+
+Os itens 3, 5 e 6 são o próximo trabalho relevante — não mais adicionar diagramas nem reconstruir o que já existe.
 
 Consulte o [roadmap](docs/roadmap.md) e os [production-readiness gates](docs/governance/production-readiness.md).
