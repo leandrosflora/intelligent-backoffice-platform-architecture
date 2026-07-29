@@ -3,7 +3,7 @@
     tags:
     - Documents
     operationId: registerDocument
-    summary: Registra um documento previamente armazenado em área de quarentena
+    summary: Recebe um arquivo, verifica segurança e classifica o documento
     x-contract-id: API-DOC-001
     x-capabilities:
     - CAP-002
@@ -16,22 +16,21 @@
     - BR-004
     - BR-005
     x-policy-action: document.register
-    x-idempotent: true
+    x-idempotent: false
     parameters:
     - $ref: ../platform-api.yaml#/components/parameters/CaseId
     - $ref: ../platform-api.yaml#/components/parameters/TenantId
     - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
-    - $ref: ../platform-api.yaml#/components/parameters/IdempotencyKey
     - $ref: ../platform-api.yaml#/components/parameters/IfMatch
     requestBody:
       required: true
       content:
-        application/json:
+        multipart/form-data:
           schema:
             $ref: ../../schemas/canonical-models.yaml#/$defs/RegisterDocumentRequest
     responses:
       '202':
-        description: Documento aceito para processamento assíncrono
+        description: Documento recebido; o status informa validação, rejeição ou revisão humana
         content:
           application/json:
             schema:
