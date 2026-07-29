@@ -48,6 +48,40 @@
       '422':
         $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity
 /v1/cases/{caseId}/recommendations:
+  get:
+    tags:
+    - Recommendations
+    operationId: listRecommendations
+    summary: Lista o histórico persistido de recomendações do caso
+    x-contract-id: API-REC-002
+    x-capabilities:
+    - CAP-005
+    - PLT-002
+    - PLT-010
+    x-business-rules:
+    - BR-008
+    - BR-009
+    - BR-010
+    x-policy-action: case.read
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    responses:
+      '200':
+        description: Histórico de recomendações em ordem crescente de versão
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: ../../schemas/canonical-models.yaml#/$defs/Recommendation
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
   post:
     tags:
     - Recommendations
@@ -97,6 +131,42 @@
       '422':
         $ref: ../platform-api.yaml#/components/responses/UnprocessableEntity
 /v1/cases/{caseId}/approvals:
+  get:
+    tags:
+    - Approvals
+    operationId: listApprovals
+    summary: Lista o histórico persistido de decisões humanas do caso
+    x-contract-id: API-APPROVAL-002
+    x-capabilities:
+    - CAP-006
+    - PLT-006
+    - PLT-007
+    x-business-rules:
+    - BR-011
+    - BR-012
+    - BR-013
+    - BR-014
+    - BR-015
+    x-policy-action: case.read
+    parameters:
+    - $ref: ../platform-api.yaml#/components/parameters/CaseId
+    - $ref: ../platform-api.yaml#/components/parameters/TenantId
+    - $ref: ../platform-api.yaml#/components/parameters/CorrelationId
+    responses:
+      '200':
+        description: Histórico de decisões humanas em ordem cronológica
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: ../../schemas/canonical-models.yaml#/$defs/Approval
+      '401':
+        $ref: ../platform-api.yaml#/components/responses/Unauthorized
+      '403':
+        $ref: ../platform-api.yaml#/components/responses/Forbidden
+      '404':
+        $ref: ../platform-api.yaml#/components/responses/NotFound
   post:
     tags:
     - Approvals
