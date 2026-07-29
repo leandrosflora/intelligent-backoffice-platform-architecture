@@ -3,7 +3,7 @@
     tags:
     - Documents
     operationId: registerDocument
-    summary: Registra um documento previamente armazenado em área de quarentena
+    summary: Recebe um arquivo, verifica segurança e classifica o documento
     x-contract-id: API-DOC-001
     x-capabilities:
     - CAP-002
@@ -26,12 +26,12 @@
     requestBody:
       required: true
       content:
-        application/json:
+        multipart/form-data:
           schema:
             $ref: ../../schemas/canonical-models.yaml#/$defs/RegisterDocumentRequest
     responses:
       '202':
-        description: Documento aceito para processamento assíncrono
+        description: Documento recebido; o status informa validação, rejeição ou revisão humana
         content:
           application/json:
             schema:
